@@ -2,22 +2,17 @@
 import {User} from '../models/user';
 import {Request, Response, NextFunction} from 'express';
 const {validationResult} = require('express-validator');
-const userService = require('../service/userService')
+const userService = require('../service/userService');
+const ApiError = require('../exceptions/apiError');
 
 class authController {
     async registration(req: Request, res: Response, next: NextFunction) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
-                res.status(400).json({error: errors})
-                return;
-            }
-
-            // check if user with such login exists
-            if (await User.findOneUser({login: req.body.login}))
-            {
-                res.status(404).json("user exists");
-                return;
+                return next(ApiError.BadRequest("Validation error", errors.array()))
+                //res.status(400).json({error: errors})
+                //return;
             }
     
             const {login, password} = req.body;
@@ -26,7 +21,7 @@ class authController {
             res.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true});
             return res.status(200).json(userData);
         } catch (e) {
-            res.status(500).json({error: e});
+            //res.status(500).json({error: e});
             next(e);
         }
     }
@@ -50,7 +45,7 @@ class authController {
             // const token = generateAccessToken(user._id, user.login);
             // res.status(200).json({token}) 
         } catch (e) {
-            res.status(500).json({error: e});
+            //res.status(500).json({error: e});
             next(e);
         }
     }
@@ -65,7 +60,7 @@ class authController {
 
     async activate(req: Request, res: Response, next: NextFunction) {
         try {
-            res.json(['123', '456'])
+
         } catch (e) {
             next(e);
         }
@@ -73,7 +68,7 @@ class authController {
 
     async refresh(req: Request, res: Response, next: NextFunction) {
         try {
-            res.json(['123', '456'])
+
         } catch (e) {
             next(e);
         }

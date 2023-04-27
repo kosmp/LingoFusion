@@ -4,6 +4,7 @@ const cors = require('cors');
 const cookieparser = require('cookie-parser');
 const authRouter = require('./routes/authRoutes');
 const userRouter = require('./routes/userRoutes');
+const errorMiddleware = require('./middlewares/errorMiddleware');
 
 require('dotenv').config();
 const port = process.env.PORT;
@@ -15,6 +16,7 @@ app.use("/api/auth", authRouter);
 app.use("/api", userRouter);
 app.use(cookieparser());
 app.use(cors());
+app.use(errorMiddleware);
 
 const start = async () => {
     try {
