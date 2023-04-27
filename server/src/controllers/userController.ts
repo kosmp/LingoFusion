@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {User} from '../models/user';
+import {Request, Response} from 'express';
 const bcrypt = require("bcrypt");
 
 class userController {
-    async getUser(req: any, res: any) {
+    async getUser(req: Request, res: Response) {
         try {
             const user = await User.findOneUserById(req.params.userId);
     
@@ -18,7 +19,7 @@ class userController {
         }
     }    
     
-    async putUser(req: any, res: any) {
+    async putUser(req: Request, res: Response) {
         if (req.body._id === req.params.userId) {
             if (req.body.password) {
                 try {
@@ -40,7 +41,7 @@ class userController {
         }
     }
 
-    async deleteUser(req: any, res: any) {
+    async deleteUser(req: Request, res: Response) {
         if (req.body._id === req.params.userId) {
             try {
                 await User.deleteUserById(req.params.userId);
@@ -50,6 +51,14 @@ class userController {
             }
         } else {
             return res.status(403).json("You can delete only your account!");
+        }
+    }
+
+    async getUsers(req: Request, res: Response) {
+        try {
+            
+        } catch (e) {
+
         }
     }
 }

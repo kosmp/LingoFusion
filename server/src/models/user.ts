@@ -27,8 +27,8 @@ export class User {
         return this.id;
     }
 
-    async get_profile_id() {
-        return (await this.db.findOne({_id: this.id}))?.profile_id;
+    async get_id_async() {
+        return (await this.db.findOne({_id: this.id}))?._id;
     }
 
     async get_login() {
@@ -39,16 +39,20 @@ export class User {
         return (await this.db.findOne({_id: this.id}))?.password;
     }
 
+    async get_profile_id() {
+        return (await this.db.findOne({_id: this.id}))?.profile_id;
+    }
+
+    async set_login(login: string) {
+        await this.db.updateOneField({_id: this.id}, 'login', login)
+    }
+
     static async findOneUser(query: object) {
         return await User.usersDb.findOne(query);
     }
 
     static async findOneUserById(user_id: string) {
         return await User.usersDb.findOne({_id: user_id});
-    }
-
-    async set_login(login: string) {
-        await this.db.updateOneField({_id: this.id}, 'login', login)
     }
 
     static async findUserByIdAndUpdate(id: string, newObject: object) {

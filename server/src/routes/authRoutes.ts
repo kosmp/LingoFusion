@@ -10,4 +10,10 @@ auth_router.post("/register", [
 
 auth_router.post("/login", authController.login);
 
+auth_router.get("/logout", authController.logout);
+
+auth_router.get("/activate/:link", authController.activate);
+
+auth_router.get("/refresh", authController.refresh);
+
 module.exports = auth_router;
