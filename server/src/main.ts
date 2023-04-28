@@ -12,10 +12,13 @@ const port = process.env.PORT;
 const app = express();
 
 app.use(express.json());
+app.use(cookieparser());
 app.use("/api/auth", authRouter);
 app.use("/api", userRouter);
-app.use(cookieparser());
-app.use(cors());
+app.use(cors({
+    credentials: true,
+    origin: 'http://localhost:3000'
+}));
 app.use(errorMiddleware);
 
 const start = async () => {

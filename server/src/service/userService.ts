@@ -19,7 +19,7 @@ class UserService {
         await user.initialize(login, hashedPassword)
         
         const userDto = new UserDto();
-        await userDto.initializeAsync(user); // login, id, profile_id
+        await userDto.initializeAsync({"id": await user.get_id_async(), "login": await user.get_login(), "profile_id": await user.get_profile_id()});
         const tokens = tokenService.generateTokens({...userDto}); 
         await tokenService.saveToken(userDto.id, tokens.refreshToken)
     
@@ -27,6 +27,35 @@ class UserService {
             ...tokens,
             user: userDto
         }
+    }
+
+    async login(login: string, password: string) {
+        const user = await User.findOneUser({login});
+        
+        if (!user) {
+            throw ApiError.BadRequest(`User with login ${login} doesn't exist`);
+        }
+
+        const isPassEqual = await bcrypt.compare(password, await user.password);
+        
+        if (!isPassEqual) {
+            throw ApiError.BadRequest('Incorrect password');
+        }
+
+        const userDto = new UserDto();
+        await userDto.initializeAsync(user);
+        const tokens = tokenService.generateTokens({...userDto}); 
+        await tokenService.saveToken(userDto.id, tokens.refreshToken)
+
+        return {
+            ...tokens,
+            user: userDto
+        }
+    }
+
+    async logout(refreshToken: string) {
+        const token = await tokenService.removeToken(refreshToken);
+        return token;
     }
 }
 

@@ -54,7 +54,8 @@ export class DB {
 
     async deleteOne(query: object) {
         const result = await this.collection.deleteOne(query);
-        return result.deletedCount;
+        return result;
+        //return result.deletedCount;
     }
 
     async deleteMany(query: object) {

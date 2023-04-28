@@ -26,6 +26,11 @@ class TokenService {
         token.Initialize(userId, newRefreshToken);
         return token; 
     }
+
+    async removeToken(refreshToken: string) {
+        const tokenData = await TokenModel.deleteToken(refreshToken);
+        return tokenData;
+    }
 }
 
 module.exports = new TokenService();
