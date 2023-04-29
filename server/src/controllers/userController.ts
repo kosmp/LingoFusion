@@ -3,7 +3,7 @@ import {User} from '../models/user';
 import {Request, Response} from 'express';
 const bcrypt = require("bcrypt");
 
-class userController {
+class UserController {
     async getUser(req: Request, res: Response) {
         try {
             const user = await User.findOneUserById(req.params.userId);
@@ -63,4 +63,4 @@ class userController {
     }
 }
 
-module.exports = new userController()
+module.exports = new UserController()

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {Request, Response, NextFunction} from 'express';
 const ApiError = require('../exceptions/api-error');
-const tokenService = require('../service/token-service');
+const tokenService = require('../services/token-service');
 
 interface RequestWithUser extends Request {
-    user: any;  // any - temp type
+    user: object;
   }
 
 module.exports = function (req: RequestWithUser, res: Response, next: NextFunction) {

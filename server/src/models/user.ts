@@ -1,21 +1,17 @@
-import {DB, courses} from '../utils/database';
+import {DB} from '../utils/database';
 import {Profile} from "./profile";
 import {ObjectId} from 'mongodb';
 
-export class User {
-    static readonly usersDb: DB = new DB('users');
-    readonly db!: DB;
-    private id!: ObjectId;
+export const usersDb = new DB('users');
 
-    constructor() {
-        this.db = User.usersDb;
-    }
+export class User {
+    private id!: ObjectId;
 
     async initialize(login: string, password: string) {
         const user_profile = new Profile()
         const profile_id = await user_profile.initialize()
         
-        this.id = await this.db.insertOne({
+        this.id = await usersDb.insertOne({
             login: login,
             password: password,
             profile_id: profile_id
@@ -23,43 +19,39 @@ export class User {
         return this.id;
     }
 
-    get_id() {
+    async get_id() {
         return this.id;
     }
 
-    async get_id_async() {
-        return (await this.db.findOne({_id: this.id}))?._id;
-    }
-
     async get_login() {
-        return (await this.db.findOne({_id: this.id}))?.login;
+        return (await usersDb.findOne({_id: this.id}))?.login;
     }
 
     async get_password() {
-        return (await this.db.findOne({_id: this.id}))?.password;
+        return (await usersDb.findOne({_id: this.id}))?.password;
     }
 
     async get_profile_id() {
-        return (await this.db.findOne({_id: this.id}))?.profile_id;
+        return (await usersDb.findOne({_id: this.id}))?.profile_id;
     }
 
     async set_login(login: string) {
-        await this.db.updateOneField({_id: this.id}, 'login', login)
+        await usersDb.updateOneField({_id: this.id}, 'login', login)
     }
 
     static async findOneUser(query: object) {
-        return await User.usersDb.findOne(query);
+        return await usersDb.findOne(query);
     }
 
-    static async findOneUserById(user_id: string) {
-        return await User.usersDb.findOne({_id: new ObjectId(user_id)});
+    static async findOneUserById(id: string) {
+        return await usersDb.findOne({_id: new ObjectId(id)});
     }
 
     static async findUserByIdAndUpdate(id: string, newObject: object) {
-        return await User.usersDb.findAndUpdateById(new ObjectId(id), newObject);
+        return await usersDb.findAndUpdateById(new ObjectId(id), newObject);
     }
 
     static async deleteUserById(id: string) {
-        return await User.usersDb.findAndDeleteById(new ObjectId(id));
+        return await usersDb.findAndDeleteById(new ObjectId(id));
     }
 }

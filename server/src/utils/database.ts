@@ -74,5 +74,3 @@ export class DB {
         return res[0];
     }
 }
-
-export const courses = new DB('courses');

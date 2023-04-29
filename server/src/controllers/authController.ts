@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {Request, Response, NextFunction} from 'express';
 const {validationResult} = require('express-validator');
-const authService = require('../service/authService');
+const authService = require('../services/authService');
 const ApiError = require('../exceptions/apiError');
 
-class authController {
+class AuthController {
     async registration(req: Request, res: Response, next: NextFunction) {
         try {
             const errors = validationResult(req);
@@ -58,4 +58,4 @@ class authController {
     }
 }
 
-module.exports = new authController()
+module.exports = new AuthController()
