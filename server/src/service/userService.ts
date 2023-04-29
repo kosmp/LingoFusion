@@ -17,9 +17,9 @@ class UserService {
 
         const user = new User();
         await user.initialize(login, hashedPassword)
-        
+
         const userDto = new UserDto();
-        await userDto.initializeAsync({"id": await user.get_id_async(), "login": await user.get_login(), "profile_id": await user.get_profile_id()});
+        await userDto.initializeAsync({"_id": await user.get_id_async(), "login": await user.get_login(), "profile_id": await user.get_profile_id()});
         const tokens = tokenService.generateTokens({...userDto}); 
         await tokenService.saveToken(userDto.id, tokens.refreshToken)
     
@@ -56,6 +56,27 @@ class UserService {
     async logout(refreshToken: string) {
         const token = await tokenService.removeToken(refreshToken);
         return token;
+    }
+
+    async refresh(refreshToken: string) {
+        if (!refreshToken) {
+            throw ApiError.UnauthorizedError();
+        }
+
+        const userData = tokenService.validateRefreshToken(refreshToken);
+        const tokenFromDb = await tokenService.findToken(refreshToken);
+
+        if (!userData || !tokenFromDb) {
+            throw ApiError.UnauthorizedError();
+        }
+
+        const user = await User.findOneUserById(userData.id);
+        const userDto = new UserDto();
+        await userDto.initializeAsync(user);
+        const tokens = tokenService.generateTokens({...userDto}); 
+        await tokenService.saveToken(userDto.id, tokens.refreshToken)
+
+        return {...tokens, user: userDto}
     }
 }
 

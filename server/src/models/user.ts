@@ -52,7 +52,7 @@ export class User {
     }
 
     static async findOneUserById(user_id: string) {
-        return await User.usersDb.findOne({_id: user_id});
+        return await User.usersDb.findOne({_id: new ObjectId(user_id)});
     }
 
     static async findUserByIdAndUpdate(id: string, newObject: object) {

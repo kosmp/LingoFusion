@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
-import {User} from '../models/user';
 import {Request, Response, NextFunction} from 'express';
 const {validationResult} = require('express-validator');
 const userService = require('../service/userService');
@@ -41,7 +40,7 @@ class authController {
             const {refreshToken} = req.cookies;
             const token = await userService.logout(refreshToken);
             res.clearCookie('refreshToken');
-            return res.json(token);
+            return res.json(`Logged out from ${token} account`);
         } catch (e) {
             next(e);
         }
@@ -49,7 +48,10 @@ class authController {
 
     async refresh(req: Request, res: Response, next: NextFunction) {
         try {
-
+            const {refreshToken} = req.cookies;
+            const userData = await userService.refresh(refreshToken);
+            res.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true});
+            return res.status(200).json(userData);
         } catch (e) {
             next(e);
         }

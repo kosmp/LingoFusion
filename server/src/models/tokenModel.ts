@@ -37,4 +37,8 @@ export class Token {
     static async deleteToken(refresh_token: string) {
         return await Token.tokensDb.deleteOne({refreshToken: refresh_token});
     }
+
+    static async findToken(refresh_token: string) {
+        return await Token.tokensDb.findOne({refreshToken: refresh_token});
+    }
 }

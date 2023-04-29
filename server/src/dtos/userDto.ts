@@ -2,10 +2,10 @@ import {ObjectId} from 'mongodb';
 import { User } from '../models/user';
 
 type ModelType = {
-    id: Promise<number>;
+    _id: Promise<ObjectId>;
     login: Promise<string>;
-    profile_id: Promise<number>;
-  }
+    profile_id: Promise<ObjectId>;
+}
 
 export class UserDto {
     public login!: string;
@@ -13,8 +13,8 @@ export class UserDto {
     public profile_id!: ObjectId;
 
     async initializeAsync(model: ModelType) {
-        this.id = new ObjectId(await model.id);
+        this.id = await model._id;
         this.login = await model.login;
-        this.profile_id = new ObjectId(await model.profile_id);
+        this.profile_id = await model.profile_id;
     }
 }
