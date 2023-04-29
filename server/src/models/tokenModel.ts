@@ -1,4 +1,4 @@
-import { DB } from '../database';
+import { DB } from '../utils/database';
 import { ObjectId } from "mongodb";
 
 export class Token {

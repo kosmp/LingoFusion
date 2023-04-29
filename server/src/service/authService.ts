@@ -5,7 +5,7 @@ const tokenService = require('./tokenService');
 const UserDto = require('../dtos/userDto').UserDto;
 const ApiError = require('../exceptions/apiError');
 
-class UserService {
+class AuthService {
     async registration(login: string, password: string) {
         const candidate = await User.findOneUser({login});
         if (candidate) {
@@ -80,4 +80,4 @@ class UserService {
     }
 }
 
-module.exports = new UserService();
+module.exports = new AuthService();

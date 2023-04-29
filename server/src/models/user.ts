@@ -1,4 +1,4 @@
-import {DB, courses} from '../database';
+import {DB, courses} from '../utils/database';
 import {Profile} from "./profile";
 import {ObjectId} from 'mongodb';
 

@@ -1,5 +1,4 @@
 import {ObjectId} from 'mongodb';
-import { User } from '../models/user';
 
 type ModelType = {
     _id: Promise<ObjectId>;
