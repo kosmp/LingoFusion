@@ -136,8 +136,40 @@ export class Course {
         return (await courses.findOne({_id: id}))?.tasks;
     }
 
+    static async get_tagsById(id: ObjectId) {
+        return (await courses.findOne({_id: id}))?.tags;
+    }
+
+    static async get_authorIdById(id: ObjectId) {
+        return (await courses.findOne({_id: id}))?.authorId;
+    }
+
+    static async set_titleById(id: ObjectId, title: string) {
+        return await courses.findAndUpdateById(id, {title: title});
+    }
+
+    static async set_descriotionById(id: ObjectId, description: string) {
+        return await courses.findAndUpdateById(id, {description: description});
+    }
+
+    static async set_englishLvlById(id: ObjectId, englishLvl: EnglishLvl) {
+        return await courses.findAndUpdateById(id, {englishLvl: englishLvl});
+    }
+
+    static async set_imageUrlById(id: ObjectId, imageUrl: string) {
+        return await courses.findAndUpdateById(id, {imageUrl: imageUrl});
+    }
+
+    static async set_ratingById(id: ObjectId, rating: number) {
+        return await courses.findAndUpdateById(id, {rating: rating});
+    }
+
     static async set_tasksById(id: ObjectId, tasks: Set<ObjectId>) {
         return await courses.findAndUpdateById(id, {tasks: tasks});
+    }
+
+    static async set_tagsById(id: ObjectId, tags: Set<string>) {
+        return await courses.findAndUpdateById(id, {tags: tags});
     }
 
     static async findCourseById(id: ObjectId) {
@@ -146,5 +178,9 @@ export class Course {
 
     static async deleteCourseById(id : ObjectId) {
         return await courses.findAndDeleteById(id);
+    }
+
+    static async getAllCourses() {
+        return await courses.findAll();
     }
 }

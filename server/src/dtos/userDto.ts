@@ -1,12 +1,12 @@
 import {ObjectId} from 'mongodb';
-import {UserDtoModelType} from '../utils/types';
+import {UserDtoInitType} from '../utils/types';
 
 export class UserDto {
     public login!: string;
     public id!: ObjectId;
     public profile_id!: ObjectId;
 
-    async initializeAsync(model: UserDtoModelType) {
+    async initializeAsync(model: UserDtoInitType) {
         this.id = await model._id;
         this.login = await model.login;
         this.profile_id = await model.profile_id;

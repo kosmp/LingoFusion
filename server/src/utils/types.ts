@@ -1,6 +1,7 @@
 import {ObjectId} from 'mongodb';
+import {Request} from 'express';
 
-export type UserDtoModelType = {
+export type UserDtoInitType = {
     _id: Promise<ObjectId>;
     login: Promise<string>;
     profile_id: Promise<ObjectId>;
@@ -17,6 +18,7 @@ export enum EnglishLvl {
 }
 
 export interface CourseModelType {
+    _id?: ObjectId;
     title: string;
     description: string;
     englishLvl: EnglishLvl;
@@ -34,6 +36,7 @@ export enum TaskType {
 }
 
 export interface TaskModelType {
+    _id?: ObjectId;
     title: string;
     description: string;
 }
@@ -57,4 +60,14 @@ export interface FillInGapsModelType extends TaskModelType {
     options: Array<string>;
     correctAnswers: Array<string>;
     expForTrueAnswers: Array<number>;
+}
+
+export type UserDtoModelType = {
+    _id: ObjectId;
+    login: string;
+    profile_id: ObjectId;
+}
+
+export interface RequestWithUser extends Request {
+    user: UserDtoModelType;
 }

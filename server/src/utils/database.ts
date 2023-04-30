@@ -62,7 +62,7 @@ export class DB {
     }
 
     async findAndDeleteById(id: ObjectId) {
-        await this.collection.findOneAndDelete({"_id": id})
+        return await this.collection.findOneAndDelete({"_id": id})
     }
 
     async findAndUpdateById(id: ObjectId, newObject: object) {
