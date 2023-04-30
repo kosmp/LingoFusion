@@ -14,7 +14,9 @@ export class Course {
             englishLvl: model.englishLvl,
             imageUrl: model.imageUrl,
             rating: model.rating,
-            tasks: model.tasks
+            tasks: model.tasks,
+            tags: model.tags,
+            authorId: model.authorId
         })
 
         return this._id;
@@ -47,6 +49,18 @@ export class Course {
     async get_tasks() {
         return (await courses.findOne({_id: this._id}))?.tasks;
     }
+
+    async get_tags() {
+        return (await courses.findOne({_id: this._id}))?.tags;
+    }
+
+    async get_authorId() {
+        return (await courses.findOne({_id: this._id}))?.authorId;
+    }
+
+    async set_tags(tags: Set<string>) : Promise<void> {
+        await courses.findAndUpdateById(this._id, {tags: tags});
+    } 
 
     async set_title(title: string) : Promise<void> {
         await courses.findAndUpdateById(this._id, {title: title});
@@ -82,6 +96,19 @@ export class Course {
         const tasks : Set<ObjectId> = (await courses.findOne({_id: this._id}))?.tasks;
         const deleteRes = tasks.delete(taskId);
         await courses.findAndUpdateById(this._id, {tasks: tasks});
+        return deleteRes;
+    }
+
+    async addTag(tag: string) : Promise<void> {
+        const tags : Set<string> = (await courses.findOne({_id: this._id}))?.tags;
+        tags.add(tag);
+        await courses.findAndUpdateById(this._id, {tags: tags});
+    }
+
+    async deleteTag(tag: string) : Promise<boolean> {
+        const tags : Set<string> = (await courses.findOne({_id: this._id}))?.tags;
+        const deleteRes = tags.delete(tag);
+        await courses.findAndUpdateById(this._id, {tags: tags});
         return deleteRes;
     }
 

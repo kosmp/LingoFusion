@@ -23,6 +23,8 @@ export interface CourseModelType {
     imageUrl: string;
     rating: number;
     tasks: Set<ObjectId>;
+    tags: Set<string>;
+    authorId: ObjectId;
 }
 
 export enum TaskType {

@@ -1,12 +1,13 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {User} from '../models/user';
+import {ObjectId} from 'mongodb';
 import {Request, Response} from 'express';
 const bcrypt = require("bcrypt");
 
 class UserController {
     async getUser(req: Request, res: Response) {
         try {
-            const user = await User.findOneUserById(req.params.userId);
+            const user = await User.findOneUserById(new ObjectId(req.params.userId));
     
             if (!user) {
                 res.status(404).json("user doesn`t exists");
@@ -31,7 +32,7 @@ class UserController {
             }
             try {
                 delete req.body._id;
-                await User.findUserByIdAndUpdate(req.params.userId, req.body);
+                await User.findUserByIdAndUpdate(new ObjectId(req.params.userId), req.body);
                 res.status(200).json("Account has been updated");
             } catch (err) {
                 res.status(500).json({error: err});
@@ -44,7 +45,7 @@ class UserController {
     async deleteUser(req: Request, res: Response) {
         if (req.body._id === req.params.userId) {
             try {
-                await User.deleteUserById(req.params.userId);
+                await User.deleteUserById(new ObjectId(req.params.userId));
                 res.status(200).json("Account has been deleted");
             } catch (err) {
                 res.status(500).json({error: err});
