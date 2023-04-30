@@ -19,7 +19,7 @@ class AuthService {
         await user.initialize(login, hashedPassword)
 
         const userDto = new UserDto();
-        await userDto.initializeAsync({"_id": await user.get_id_async(), "login": await user.get_login(), "profile_id": await user.get_profile_id()});
+        await userDto.initializeAsync({"_id": await user.get_id(), "login": await user.get_login(), "profile_id": await user.get_profile_id()});
         const tokens = tokenService.generateTokens({...userDto}); 
         await tokenService.saveToken(userDto.id, tokens.refreshToken)
     

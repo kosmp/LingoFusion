@@ -1,17 +1,12 @@
 import {ObjectId} from 'mongodb';
-
-type ModelType = {
-    _id: Promise<ObjectId>;
-    login: Promise<string>;
-    profile_id: Promise<ObjectId>;
-}
+import {UserDtoModelType} from '../utils/types';
 
 export class UserDto {
     public login!: string;
     public id!: ObjectId;
     public profile_id!: ObjectId;
 
-    async initializeAsync(model: ModelType) {
+    async initializeAsync(model: UserDtoModelType) {
         this.id = await model._id;
         this.login = await model.login;
         this.profile_id = await model.profile_id;

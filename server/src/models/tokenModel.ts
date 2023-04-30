@@ -1,44 +1,41 @@
-import { DB } from '../utils/database';
-import { ObjectId } from "mongodb";
+import {DB} from '../utils/database';
+import {ObjectId} from "mongodb";
+
+export const tokens = new DB('user-tokens');
 
 export class Token {
-    static readonly tokensDb: DB = new DB('user-tokens');
-    readonly db!: DB;
-    private id!: ObjectId;
+    private _id!: ObjectId;
 
-    constructor() {
-        this.db = Token.tokensDb;
-    }
-
-    async Initialize(user_id: string, refreshTokenn: string) {
-        this.id = await this.db.insertOne({
-            user: new ObjectId(user_id),
+    async initialize(userId: ObjectId, refreshTokenn: string) {
+        this._id = await tokens.insertOne({
+            user: userId,
             refreshToken: refreshTokenn
         })
-        return this.id;
+
+        return this._id;
     }
 
     async get_refreshToken() {
-        return (await this.db.findOne({_id: this.id}))?.refreshToken;
+        return (await tokens.findOne({_id: this._id}))?.refreshToken;
     }
 
     async update_refreshToken(refreshToken: string) {
-        await this.db.updateOneField({_id: this.id}, 'refreshToken', refreshToken)
+        await tokens.updateOneField({_id: this._id}, 'refreshToken', refreshToken)
     }
 
     static async updateToken(token: object, field: string, value: string) {
-        return await Token.tokensDb.updateOneField(token, field, value);
+        return await tokens.updateOneField(token, field, value);
     }
 
-    static async getTokenByUserId(user_id: string) {
-        return await Token.tokensDb.findOne({user: user_id});
+    static async getTokenByUserId(user_id: ObjectId) {
+        return await tokens.findOne({user: user_id});
     }
 
     static async deleteToken(refresh_token: string) {
-        return await Token.tokensDb.deleteOne({refreshToken: refresh_token});
+        return await tokens.deleteOne({refreshToken: refresh_token});
     }
 
     static async findToken(refresh_token: string) {
-        return await Token.tokensDb.findOne({refreshToken: refresh_token});
+        return await tokens.findOne({refreshToken: refresh_token});
     }
 }

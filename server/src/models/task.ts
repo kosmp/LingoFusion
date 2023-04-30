@@ -1,14 +1,55 @@
 import {DB} from '../utils/database';
 import {ObjectId} from 'mongodb';
-import {TaskTypes, TaskModelType} from '../utils/types';
+import {TaskType, TaskModelType} from '../utils/types';
 
-export const tasksDb = new DB('tasks');
+export const tasks = new DB('tasks');
 
-export interface Task {
-    initialize(model: TaskModelType): Promise<ObjectId>;
-    get_id(): Promise<ObjectId>;
-    get_title(): Promise<string>;
-    get_description(): Promise<string>;
-    get_taskType(): Promise<TaskTypes>;
-    get_expForTrueAnswer(): Promise<number>;
+export abstract class Task {
+    protected _id!: ObjectId;
+
+    public async initialize(model: TaskModelType): Promise<ObjectId> {
+        this._id = await tasks.insertOne({
+            title: model.title,
+            description: model.description,
+            taskType: undefined
+        })
+
+        return this._id;
+    }
+
+    public async get_id(): Promise<ObjectId> {
+        return this._id;
+    }
+
+    public async get_title(): Promise<string> {
+        return (await tasks.findOne({_id: this._id}))?.title;
+    }
+
+    public async get_description(): Promise<string> {
+        return (await tasks.findOne({_id: this._id}))?.description;
+    }
+
+    public async get_taskType(): Promise<TaskType> {
+        return (await tasks.findOne({_id: this._id}))?.taskType;
+    }
+
+    public async set_title(title: string) : Promise<void> {
+        await tasks.findAndUpdateById(new ObjectId(this._id), {title: title});
+    } 
+
+    public async set_description(description: string) : Promise<void> {
+        await tasks.findAndUpdateById(new ObjectId(this._id), {description: description});
+    } 
+
+    public static async get_titleById(id: ObjectId): Promise<string> {
+        return (await tasks.findOne({_id: id}))?.title;
+    }
+
+    public static async get_descriptionById(id: ObjectId): Promise<string> {
+        return (await tasks.findOne({_id: id}))?.description;
+    }
+
+    public static async get_taskTypeById(id: ObjectId): Promise<TaskType> {
+        return (await tasks.findOne({_id: id}))?.taskType;
+    }
 }

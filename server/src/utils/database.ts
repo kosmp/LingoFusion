@@ -43,7 +43,7 @@ export class DB {
         return result.modifiedCount;
     }
 
-    async updateAllFields(query: object, update: object) {
+    async updateOne(query: object, update: object) {
         const result = await this.collection.updateOne(query, { $set: update });
         return result.modifiedCount;
     }

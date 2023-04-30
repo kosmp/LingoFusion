@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
+import {ObjectId} from "mongodb";
 const jwt = require('jsonwebtoken');
 const TokenModel = require('../models/tokenModel').Token;
 
@@ -33,7 +34,7 @@ class TokenService {
     }
 
     async saveToken(userId: string, newRefreshToken: string) {
-        const tokenData = await TokenModel?.getTokenByUserId(userId);
+        const tokenData = await TokenModel?.getTokenByUserId(new ObjectId(userId));
         
         if (tokenData) {
             TokenModel.updateToken(tokenData, "refreshToken", newRefreshToken)
@@ -41,7 +42,7 @@ class TokenService {
         }
 
         const token = new TokenModel();
-        token.Initialize(userId, newRefreshToken);
+        token.initialize(new ObjectId(userId), newRefreshToken);
         return token; 
     }
 
