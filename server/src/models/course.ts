@@ -25,15 +25,7 @@ export class Course {
     static async updateCourse(model: CourseModelType) {
         await courses.updateOne(
             {_id: model._id},
-            { $set: {
-                title: model.title,
-                description: model.description,
-                englishLvl: model.englishLvl,
-                imageUrl: model.imageUrl,
-                rating: model.rating,
-                tasks: model.tasks,
-                tags: model.tags,
-            }}
+            {...model}
         )
     }
 

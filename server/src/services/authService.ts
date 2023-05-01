@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const tokenService = require('./tokenService');
 const UserDto = require('../dtos/userDto').UserDto;
 const ApiError = require('../exceptions/apiError');
+import {ObjectId} from 'mongodb';
 
 class AuthService {
     async registration(login: string, password: string) {
@@ -70,7 +71,7 @@ class AuthService {
             throw ApiError.UnauthorizedError();
         }
 
-        const user = await User.findOneUserById(userData.id);
+        const user = await User.findOneUserById(new ObjectId(userData._id));
         const userDto = new UserDto();
         await userDto.initializeAsync(user);
         const tokens = tokenService.generateTokens({...userDto}); 

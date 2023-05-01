@@ -20,7 +20,6 @@ module.exports = function (req: RequestWithUserFromMiddleware, res: Response, ne
         if (!userData) {
             return next(ApiError.UnauthorizedError());
         }
-
         req.user = userData;
         next();
     } catch (e) {

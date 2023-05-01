@@ -77,10 +77,15 @@ export interface CourseCreateModelType {
 }
 
 export interface RequestForCreateCourse extends Request {
-    user?: UserDtoModelType;
+    user: UserDtoModelType;
     course: CourseCreateModelType;
 }
 
 export interface RequestWithUserFromMiddleware extends Request {
     user: UserDtoModelType;
+}
+
+export interface RequestForUpdateCourse extends Request {
+    user: UserDtoModelType;
+    course: CourseModelType;
 }

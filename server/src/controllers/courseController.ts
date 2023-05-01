@@ -1,13 +1,20 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const ApiError = require('../exceptions/apiError');
+const {validationResult} = require('express-validator');
 import {Request, Response, NextFunction} from 'express';
 import {Course} from '../models/course';
-import {RequestForCreateCourse, RequestWithUserFromMiddleware} from '../utils/types';
+import {RequestForCreateCourse, RequestForUpdateCourse, RequestWithUserFromMiddleware} from '../utils/types';
 import {ObjectId} from 'mongodb';
 
 class CourseController {
     async createCourse(req: RequestForCreateCourse, res: Response, next: NextFunction) {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                return next(ApiError.BadRequest("Validation error", errors.array()))
+            }
+
             const course = new Course();
 
             await course.initialize({
@@ -40,6 +47,10 @@ class CourseController {
     async getCourse(req: Request, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
+
+            if (!ObjectId.isValid(courseId)) {
+                return next(ApiError.BadRequest("Incorrect courseId"));
+            }
 
             const course = await Course.findCourseById(new ObjectId(courseId));
             
@@ -79,12 +90,18 @@ class CourseController {
         }
     }
 
-    async updateCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+    async updateCourse(req: RequestForUpdateCourse, res: Response, next: NextFunction) {
         try {
+            const errors = validationResult(req);
+
+            if (!errors.isEmpty()) {
+                return next(ApiError.BadRequest("Validation error", errors.array()))
+            }
+
             const courseId = req.params.courseId;
 
             const course = await Course.findCourseById(new ObjectId(courseId));
-            
+
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
             }
@@ -94,6 +111,7 @@ class CourseController {
             }
 
             Course.updateCourse({
+                _id: course._id,
                 title: req.body.title,
                 description: req.body.description,
                 englishLvl: req.body.englishLvl,
