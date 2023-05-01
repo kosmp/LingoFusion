@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const ApiError = require('../exceptions/apiError');
-import {Response, NextFunction} from 'express';
+import {Request, Response, NextFunction} from 'express';
 import {Course} from '../models/course';
-import {RequestWithUser} from '../utils/types';
+import {RequestForCreateCourse, RequestWithUserFromMiddleware} from '../utils/types';
 import {ObjectId} from 'mongodb';
 
 class CourseController {
-    async createCourse(req: RequestWithUser, res: Response, next: NextFunction) {
+    async createCourse(req: RequestForCreateCourse, res: Response, next: NextFunction) {
         try {
             const course = new Course();
 
@@ -18,7 +18,7 @@ class CourseController {
                 tags: req.body.tags,
                 tasks: new Set<ObjectId>(),
                 rating: 0,
-                authorId: req.user._id
+                authorId: req.user?._id
             })
 
             return res.status(200).json(course);
@@ -27,7 +27,7 @@ class CourseController {
         }
     }
 
-    async getAllCourses(req: RequestWithUser, res: Response, next: NextFunction) {
+    async getAllCourses(req: Request, res: Response, next: NextFunction) {
         try {
             const courses = await Course.getAllCourses();
 
@@ -37,7 +37,7 @@ class CourseController {
         }
     }
 
-    async getCourse(req: RequestWithUser, res: Response, next: NextFunction) {
+    async getCourse(req: Request, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
 
@@ -53,7 +53,7 @@ class CourseController {
         }
     }
 
-    async removeCourse(req: RequestWithUser, res: Response, next: NextFunction) {
+    async removeCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
 
@@ -79,7 +79,7 @@ class CourseController {
         }
     }
 
-    async updateCourse(req: RequestWithUser, res: Response, next: NextFunction) {
+    async updateCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
 
@@ -93,9 +93,17 @@ class CourseController {
                 return next(ApiError.AccessForbidden(`User with id: ${courseId} can't delete course he didn't create`));
             }
 
-            
+            Course.updateCourse({
+                title: req.body.title,
+                description: req.body.description,
+                englishLvl: req.body.englishLvl,
+                imageUrl: req.body.imageUrl,
+                rating: req.body.rating,
+                tasks: req.body.tasks,
+                tags: req.body.tags
+            })
 
-            
+            return res.status(200).json({success: true});            
         } catch (e) {
             next(e);
         }

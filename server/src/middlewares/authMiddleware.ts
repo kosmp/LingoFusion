@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {Response, NextFunction} from 'express';
-import {RequestWithUser} from '../utils/types';
-const ApiError = require('../exceptions/api-error');
-const tokenService = require('../services/token-service');
+import {RequestWithUserFromMiddleware} from '../utils/types';
+const ApiError = require('../exceptions/apiError');
+const tokenService = require('../services/tokenService');
 
-module.exports = function (req: RequestWithUser, res: Response, next: NextFunction) {
+module.exports = function (req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
     try {
         const authorizationHeader = req.headers.authorization;
         if (!authorizationHeader) {

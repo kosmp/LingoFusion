@@ -17,18 +17,6 @@ export enum EnglishLvl {
     C2 = 'C2'
 }
 
-export interface CourseModelType {
-    _id?: ObjectId;
-    title: string;
-    description: string;
-    englishLvl: EnglishLvl;
-    imageUrl: string;
-    rating: number;
-    tasks: Set<ObjectId>;
-    tags: Set<string>;
-    authorId: ObjectId;
-}
-
 export enum TaskType {
     Theory = 0,
     Test = 1,
@@ -68,6 +56,31 @@ export type UserDtoModelType = {
     profile_id: ObjectId;
 }
 
-export interface RequestWithUser extends Request {
+export interface CourseModelType {
+    _id?: ObjectId;
+    title: string;
+    description: string;
+    englishLvl: EnglishLvl;
+    imageUrl: string;
+    rating: number;
+    tasks: Set<ObjectId>;
+    tags: Set<string>;
+    authorId?: ObjectId;
+}
+
+export interface CourseCreateModelType {
+    title: string;
+    description: string;
+    englishLvl: EnglishLvl;
+    imageUrl: string;
+    tags: Set<string>;
+}
+
+export interface RequestForCreateCourse extends Request {
+    user?: UserDtoModelType;
+    course: CourseCreateModelType;
+}
+
+export interface RequestWithUserFromMiddleware extends Request {
     user: UserDtoModelType;
 }

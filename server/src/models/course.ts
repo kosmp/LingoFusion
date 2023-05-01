@@ -22,6 +22,21 @@ export class Course {
         return this._id;
     }
 
+    static async updateCourse(model: CourseModelType) {
+        await courses.updateOne(
+            {_id: model._id},
+            { $set: {
+                title: model.title,
+                description: model.description,
+                englishLvl: model.englishLvl,
+                imageUrl: model.imageUrl,
+                rating: model.rating,
+                tasks: model.tasks,
+                tags: model.tags,
+            }}
+        )
+    }
+
     async get_id() {
         return this._id;
     }
