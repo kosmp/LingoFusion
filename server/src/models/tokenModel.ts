@@ -27,15 +27,19 @@ export class Token {
         return await tokens.updateOneField(token, field, value);
     }
 
-    static async getTokenByUserId(user_id: ObjectId) {
-        return await tokens.findOne({user: user_id});
+    static async getTokenByUserId(userId: ObjectId) {
+        return await tokens.findOne({user: userId});
     }
 
     static async deleteToken(refresh_token: string) {
         return await tokens.deleteOne({refreshToken: refresh_token});
     }
 
-    static async findToken(refresh_token: string) {
-        return await tokens.findOne({refreshToken: refresh_token});
+    static async findTokenByUserID(userId: ObjectId) {
+        return await tokens.findOne({user: userId});
+    }
+
+    static async findTokenByIdAndDelete(userId: ObjectId) {
+        return await tokens.findAndDeleteById(userId);
     }
 }

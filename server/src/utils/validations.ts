@@ -7,8 +7,8 @@ const validTags = new Set(['tag1', 'tag2', 'tag3']);
 
 export const authValidation = [
     body('login', "Login can't be empty.").notEmpty(),
-    body('login', "Login must be bigger than 4 and less than 12").isLength({min: 5, max: 20}),
-    body('password', "Password must be bigger than 4 symbols and less than 10").isLength({min: 5, max: 20})
+    body('login', "Login must be bigger than 5 and less than 20").isLength({min: 5, max: 20}),
+    body('password', "Password must be bigger than 5 symbols and less than 20").isLength({min: 5, max: 20})
 ];
 
 export const courseCreateValidation = [
@@ -73,4 +73,10 @@ export const courseUpdateValidation = [
       return true;
     })
     .withMessage('Tags are invalid. Must be list of non-duplicated values from validTags')
+];
+
+export const userUpdateValidation = [
+  body('login', "Login can't be empty.").notEmpty(),
+  body('login', "Login must be bigger than 5 and less than 20").isLength({min: 5, max: 20}),
+  body('password', "Password must be bigger than 5 symbols and less than 20").isLength({min: 5, max: 20})
 ];
