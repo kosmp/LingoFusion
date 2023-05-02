@@ -175,6 +175,12 @@ export class Course {
         return await courses.findAndUpdateById(id, {tasks: tasks});
     }
 
+    static async addTaskById(id: ObjectId, task: ObjectId) {
+        const tasks: Array<ObjectId> = await Course.get_tasksById(id);
+        tasks.push(task);
+        return await courses.findAndUpdateById(id, {tasks: tasks});
+    }
+
     static async set_tagsById(id: ObjectId, tags: Set<string>) {
         return await courses.findAndUpdateById(id, {tags: tags});
     }

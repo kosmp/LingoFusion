@@ -13,7 +13,7 @@ export class TestQuestion extends Task {
                 question: model.question,
                 trueAnswers: model.trueAnswers,
                 receivedAnswers: model.receivedAnswers,
-                expForTrueTask: model.expForTrueTasK 
+                expForTrueTask: model.expForTrueTask
             }}
         )
 

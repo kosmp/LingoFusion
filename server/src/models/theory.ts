@@ -9,10 +9,10 @@ export class Theory extends Task {
         await tasks.updateOne(
             {_id: this._id},
             { $set: {
-                taskType: TaskType.Test,
+                taskType: TaskType.Theory,
                 content: model.content,
                 references: model.references,
-                images: model.imagesUrl,
+                imagesUrl: model.images,
                 expForTheory: model.expForTheory
             }}
         )

@@ -18,9 +18,9 @@ export enum EnglishLvl {
 }
 
 export enum TaskType {
-    Theory = 0,
-    Test = 1,
-    FillGaps = 2
+    Theory = 'theory',
+    Test = 'test',
+    FillGaps = 'fillgaps'
 }
 
 export interface TaskModelType {
@@ -33,13 +33,13 @@ export interface TestModelType extends TaskModelType {
     question: string;
     trueAnswers: Array<number>;
     receivedAnswers: Array<number>;
-    expForTrueTasK: number;
+    expForTrueTask: number;
 }
 
 export interface TheoryModelType extends TaskModelType {
     content: string;
     references: Array<string>;
-    imagesUrl: Array<string>;
+    images: Array<string>;
     expForTheory: number;
 }
 
@@ -63,7 +63,7 @@ export interface CourseModelType {
     englishLvl: EnglishLvl;
     imageUrl: string;
     rating: number;
-    tasks: Set<ObjectId>;
+    tasks: Array<ObjectId>;
     tags: Set<string>;
     authorId?: ObjectId;
 }

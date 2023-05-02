@@ -13,7 +13,7 @@ export const authValidation = [
 
 export const courseCreateValidation = [
     body('title', 'enter correct course title').isLength({min: 5}).isString(),
-    body('description', 'enter correct course description').isLength({min: 20, max: 230}).isString(),
+    body('description', 'enter correct course description').isLength({min: 10, max: 230}).isString(),
     body('englishLvl')
     .notEmpty()
     .isIn(Object.values(EnglishLvl))
@@ -37,7 +37,7 @@ export const courseCreateValidation = [
 
 export const courseUpdateValidation = [
     body('title', 'enter correct course title').isLength({min: 5}).isString(),
-    body('description', 'enter correct course description').isLength({min: 20, max: 230}).isString(),
+    body('description', 'enter correct course description').isLength({min: 10, max: 230}).isString(),
     body('englishLvl', 'enter correct englishLvl')
     .notEmpty()
     .isIn(Object.values(EnglishLvl))
@@ -80,3 +80,19 @@ export const userUpdateValidation = [
   body('login', "Login must be bigger than 5 and less than 20").isLength({min: 5, max: 20}),
   body('password', "Password must be bigger than 5 symbols and less than 20").isLength({min: 5, max: 20})
 ];
+
+export const taskCreateValidation = [
+  body('title', 'enter correct task title. Min 5').isLength({min: 5}).isString(),
+  body('description', 'enter correct task description. Min 5, max 50').isLength({min: 5, max: 50}).isString(),
+  body('content', 'enter correct content text. Min 10').optional().isLength({min: 10}).isString(),
+  body('options').optional(),
+  body('correctAnswers').optional(),
+  body('expForTrueAnswers').optional(),
+  body('question', 'enter correct question. Min 10 symbols').optional().isLength({min: 10}).isString(),
+  body('trueAnswers').optional(),
+  body('receivedAnswers').optional(),
+  body('expForTrueTask', 'enter expForTrueTask. Numeric type').optional().isNumeric(),
+  body('references').optional(),
+  body('images').optional(),
+  body('expForTheory', 'enter expForTheory. Only int type and not empty').optional().notEmpty().isInt()
+]
