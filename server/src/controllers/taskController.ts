@@ -85,7 +85,7 @@ class TaskController {
 
             const courseId = req.params.courseId;
             const course = await Course.findCourseById(new ObjectId(courseId));
-    
+
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}. Maybe course wasn't created`));
             }
@@ -102,13 +102,14 @@ class TaskController {
             }
 
             const tasks: Array<ObjectId> = await Course.get_tasksById(new ObjectId(courseId));
-            
-            if (!tasks.includes(new ObjectId(taskId))) {
+            const taskExists = tasks.some(task => task.equals(new ObjectId(taskId)));
+            if (!taskExists) {
                 return next(ApiError.AccessForbidden(`This task not from this course. So you can't update it`));
             }
 
             if (req.body.taskType === TaskType.FillGaps) {
-                await task.updateTask({
+                await Task.updateTask({
+                    _id: new ObjectId(taskId),
                     title: req.body.title,
                     description: req.body.description,
                     content: req.body.content,
@@ -116,8 +117,10 @@ class TaskController {
                     correctAnswers: req.body.correctAnswers,
                     expForTrueAnswers: req.body.expForTrueAnswers
                 });
+                return res.status(200).json({sucess: true});
             } else if (req.body.taskType === TaskType.Test) {
-                await task.updateTask({
+                await Task.updateTask({
+                    _id: new ObjectId(taskId),
                     title: req.body.title,
                     description: req.body.description,
                     question: req.body.question,
@@ -125,8 +128,10 @@ class TaskController {
                     receivedAnswers: req.body.receivedAnswers,
                     expForTrueTask: req.body.expForTrueTask 
                 });
+                return res.status(200).json({sucess: true});
             } else if (req.body.taskType === TaskType.Theory) {
-                await task.updateTask({
+                await Task.updateTask({
+                    _id: new ObjectId(taskId),
                     title: req.body.title,
                     description: req.body.description,
                     content: req.body.content,
@@ -134,6 +139,7 @@ class TaskController {
                     images: req.body.imagesUrl,
                     expForTheory: req.body.expForTheory
                 });
+                return res.status(200).json({sucess: true});
             } else {
                 return next(ApiError.BadRequest(`Invalid task type: ${req.body.taskType}`))
             }
@@ -221,7 +227,7 @@ class TaskController {
 
             await Course.removeTaskByIdFromCourseTasks(course._id, new ObjectId(taskId));    // updated list of tasks inside course
 
-            const deleteResult = await Task.deleteTaskById(new ObjectId(taskId));    // // task was removed from task collection in BD
+            const deleteResult = await Task.deleteTaskById(new ObjectId(taskId));    // removed from task collection in BD
 
             if (!deleteResult) {
                 return next(ApiError.NotFoundError(`Can't remove task with id: ${taskId}`));
@@ -248,15 +254,20 @@ class TaskController {
             }
 
             const tasks: Array<ObjectId> = await Course.get_tasksById(new ObjectId(courseId));
-            tasks.forEach(async task => {
-                await Course.removeTaskByIdFromCourseTasks(course._id, new ObjectId(task));    // updated list of tasks inside course
+            
+            if (tasks.length === 0) {
+                return res.status(200).json({ message: "Nothing to delete. Tasks: []" })
+            }
 
-                const deleteResult = await Task.deleteTaskById(new ObjectId(task));    // removed from task collection in BD
-                
-                if (!deleteResult) {
-                    return next(ApiError.NotFoundError(`Can't remove task with id: ${task}`));
-                }
-            });
+            for (const task of tasks) {
+              await Course.removeTaskByIdFromCourseTasks(course._id, new ObjectId(task));
+              const deleteResult = await Task.deleteTaskById(new ObjectId(task));
+            
+              if (!deleteResult) {
+                return next(ApiError.NotFoundError(`Can't remove task with id: ${task}`));
+              }
+            }
+            
 
             return res.status(200).json({success: true});
         } catch (e) {

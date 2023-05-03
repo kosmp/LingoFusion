@@ -75,7 +75,7 @@ export interface CourseUpdateModelType {
     englishLvl?: EnglishLvl;
     imageUrl?: string;
     rating?: number;
-    tasks?: Array<ObjectId>;
+    // tasks?: Array<ObjectId>;
     tags?: Set<string>;
 }
 

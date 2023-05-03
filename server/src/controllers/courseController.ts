@@ -129,7 +129,6 @@ class CourseController {
                 englishLvl: req.body.englishLvl,
                 imageUrl: req.body.imageUrl,
                 rating: req.body.rating,
-                tasks: req.body.tasks,
                 tags: req.body.tags
             })
 

@@ -47,18 +47,18 @@ export const courseUpdateValidation = [
     .isInt()
     .isIn([0, 1, 2, 3, 4, 5])
     .withMessage('Rating should be a number between 0 and 5'),
-    body('tasks', 'enter tasks')
-    .bail()
-    .custom((value: string[]) => {
-      if (value.length !== new Set(value).size) {
-        throw new Error('objectIdList should contain unique values');
-      }
-      if (value.some(id => !ObjectId.isValid(id))) {
-        throw new Error('Invalid ObjectId format found in objectIdList');
-      }
-      return true;
-    })
-    .withMessage('Invalid ObjectId format found in objectIdList or it contains duplicate values. Must be list of non-duplicated ObjectId values'),
+    // body('tasks', 'enter tasks')
+    // .bail()
+    // .custom((value: string[]) => {
+    //   if (value.length !== new Set(value).size) {
+    //     throw new Error('objectIdList should contain unique values');
+    //   }
+    //   if (value.some(id => !ObjectId.isValid(id))) {
+    //     throw new Error('Invalid ObjectId format found in objectIdList');
+    //   }
+    //   return true;
+    // })
+    // .withMessage('Invalid ObjectId format found in objectIdList or it contains duplicate values. Must be list of non-duplicated ObjectId values'),
     body('tags')
     .custom((tags: string[]) => {
       if (tags.length !== new Set(tags).size) {

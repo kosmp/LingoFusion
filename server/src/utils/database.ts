@@ -48,6 +48,11 @@ export class DB {
         return result.modifiedCount;
     }
 
+    async updateOneWithFieldsReplacement(query: object, update: object) {
+        const result = await this.collection.replaceOne(query, update);
+        return result.modifiedCount;
+    }
+
     async updateMany(filter: object, update: object) {
         await this.collection.updateMany(filter, update);
     }
