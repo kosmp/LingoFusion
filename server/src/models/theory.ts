@@ -4,17 +4,17 @@ import {TheoryModelType, TaskType} from '../utils/types';
 
 export class Theory extends Task {
     async initialize(model: TheoryModelType): Promise<ObjectId> {
-        super.initialize(model);
+        await super.initialize(model);
 
         await tasks.updateOne(
             {_id: this._id},
-            { $set: {
+            {
                 taskType: TaskType.Theory,
                 content: model.content,
                 references: model.references,
                 imagesUrl: model.images,
                 expForTheory: model.expForTheory
-            }}
+            }
         )
 
         return this._id;

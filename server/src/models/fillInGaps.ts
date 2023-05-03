@@ -8,13 +8,13 @@ export class FillInGaps extends Task {
 
         await tasks.updateOne(
             {_id: this._id},
-            { $set: {
+            {
                 taskType: TaskType.FillGaps,
                 content: model.content,
                 options: model.options,
                 correctAnswers: model.correctAnswers,
                 expForTrueAnswers: model.expForTrueAnswers
-            }}
+            }
         )
 
         return this._id;

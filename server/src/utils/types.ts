@@ -65,8 +65,20 @@ export interface CourseModelType {
     rating: number;
     tasks: Array<ObjectId>;
     tags: Set<string>;
-    authorId?: ObjectId;
+    authorId: ObjectId;
 }
+
+export interface CourseUpdateModelType {
+    _id: ObjectId;
+    title?: string;
+    description?: string;
+    englishLvl?: EnglishLvl;
+    imageUrl?: string;
+    rating?: number;
+    tasks?: Array<ObjectId>;
+    tags?: Set<string>;
+}
+
 
 export interface CourseCreateModelType {
     title: string;

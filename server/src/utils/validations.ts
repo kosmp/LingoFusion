@@ -81,7 +81,7 @@ export const userUpdateValidation = [
   body('password', "Password must be bigger than 5 symbols and less than 20").isLength({min: 5, max: 20})
 ];
 
-export const taskCreateValidation = [
+export const taskCreateUpdateValidation = [
   body('title', 'enter correct task title. Min 5').isLength({min: 5}).isString(),
   body('description', 'enter correct task description. Min 5, max 50').isLength({min: 5, max: 50}).isString(),
   body('content', 'enter correct content text. Min 10').optional().isLength({min: 10}).isString(),

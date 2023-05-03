@@ -1,6 +1,6 @@
 import {DB} from '../utils/database';
 import {ObjectId} from 'mongodb';
-import {CourseModelType, EnglishLvl} from '../utils/types';
+import {CourseModelType, CourseUpdateModelType, EnglishLvl} from '../utils/types';
 
 export const courses = new DB('courses');
 
@@ -22,7 +22,7 @@ export class Course {
         return this._id;
     }
 
-    static async updateCourse(model: CourseModelType) {
+    static async updateCourse(model: CourseUpdateModelType) {
         await courses.updateOne(
             {_id: model._id},
             {...model}
@@ -175,10 +175,25 @@ export class Course {
         return await courses.findAndUpdateById(id, {tasks: tasks});
     }
 
-    static async addTaskById(id: ObjectId, task: ObjectId) {
-        const tasks: Array<ObjectId> = await Course.get_tasksById(id);
+    static async addTaskByIdToCourse(courseId: ObjectId, task: ObjectId) {
+        const tasks: Array<ObjectId> = await Course.get_tasksById(courseId);
         tasks.push(task);
-        return await courses.findAndUpdateById(id, {tasks: tasks});
+        return await courses.findAndUpdateById(courseId, {tasks: tasks});
+    }
+
+    static async removeTaskByIdFromCourseTasks(courseId: ObjectId, task: ObjectId) {
+        const tasks: Array<ObjectId> = await Course.get_tasksById(new ObjectId(courseId));
+
+        const taskExists = tasks.some(task => task.equals(new ObjectId(task)));
+        
+        if (taskExists) {
+            const index = tasks.findIndex((el) => el.equals(new ObjectId(task)));
+            if (index !== -1) {
+                tasks.splice(index, 1);
+            }
+        }
+
+        return await courses.findAndUpdateById(courseId, {tasks: tasks});
     }
 
     static async set_tagsById(id: ObjectId, tags: Set<string>) {

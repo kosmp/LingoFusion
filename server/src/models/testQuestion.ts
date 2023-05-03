@@ -8,13 +8,13 @@ export class TestQuestion extends Task {
 
         await tasks.updateOne(
             {_id: this._id},
-            { $set: {
+            {
                 taskType: TaskType.Test,
                 question: model.question,
                 trueAnswers: model.trueAnswers,
                 receivedAnswers: model.receivedAnswers,
                 expForTrueTask: model.expForTrueTask
-            }}
+            }
         )
 
         return this._id;

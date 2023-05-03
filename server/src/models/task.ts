@@ -17,6 +17,13 @@ export abstract class Task {
         return this._id;
     }
 
+    static async updateTask(model: any) {
+        await tasks.updateOne(
+            {_id: model._id},
+            {...model}
+        )
+    }
+
     public async get_id(): Promise<ObjectId> {
         return this._id;
     }
@@ -51,5 +58,13 @@ export abstract class Task {
 
     public static async get_taskTypeById(id: ObjectId): Promise<TaskType> {
         return (await tasks.findOne({_id: id}))?.taskType;
+    }
+    
+    public static async findTaskById(id: ObjectId) {
+        return await tasks.findOne({_id: id});
+    }
+
+    static async deleteTaskById(id: ObjectId) {
+        return await tasks.findAndDeleteById(id);
     }
 }
