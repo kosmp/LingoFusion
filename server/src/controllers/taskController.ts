@@ -108,7 +108,7 @@ class TaskController {
             }
 
             if (req.body.taskType === TaskType.FillGaps) {
-                await Task.updateTask({
+                await FillInGaps.updateTask({
                     _id: new ObjectId(taskId),
                     title: req.body.title,
                     description: req.body.description,
@@ -119,7 +119,7 @@ class TaskController {
                 });
                 return res.status(200).json({sucess: true});
             } else if (req.body.taskType === TaskType.Test) {
-                await Task.updateTask({
+                await TestQuestion.updateTask({
                     _id: new ObjectId(taskId),
                     title: req.body.title,
                     description: req.body.description,
@@ -130,7 +130,7 @@ class TaskController {
                 });
                 return res.status(200).json({sucess: true});
             } else if (req.body.taskType === TaskType.Theory) {
-                await Task.updateTask({
+                await Theory.updateTask({
                     _id: new ObjectId(taskId),
                     title: req.body.title,
                     description: req.body.description,

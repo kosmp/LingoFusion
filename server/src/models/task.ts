@@ -17,10 +17,13 @@ export abstract class Task {
         return this._id;
     }
 
-    static async updateTask(model: any) {   // вместо any можно вписать тип с title и description. В остальных классах переопределить метод и вызывать этот тоже
+    static async updateTask(model: TaskModelType) {   
         await tasks.updateOneWithFieldsReplacement(
             {_id: model._id},
-            model
+            {
+                title: model.title,
+                description: model.description
+            }
         )
     }
 

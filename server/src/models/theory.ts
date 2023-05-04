@@ -19,6 +19,20 @@ export class Theory extends Task {
 
         return this._id;
     }
+
+    static async updateTask(model: TheoryModelType) {   
+        await super.updateTask(model);
+        console.log(model);
+        await tasks.updateOne(
+            {_id: model._id},
+            {
+                content: model.content,
+                references: model.references,
+                images: model.images,
+                expForTheory: model.expForTheory
+            }
+        )
+    }
     
     async get_content(): Promise<string> {
         return (await tasks.findOne({_id: this._id}))?.content;

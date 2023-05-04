@@ -20,6 +20,20 @@ export class TestQuestion extends Task {
         return this._id;
     }
 
+    static async updateTask(model: TestModelType) {   
+        await super.updateTask(model);
+        console.log(model);
+        await tasks.updateOne(
+            {_id: model._id},
+            {
+                question: model.question,
+                trueAnswers: model.trueAnswers,
+                receivedAnswers: model.receivedAnswers,
+                expForTrueTask: model.expForTrueTask
+            }
+        )
+    }
+
     async get_expForTrueTask(): Promise<number> {
         return (await tasks.findOne({_id: this._id}))?.expForTrueTask;
     }

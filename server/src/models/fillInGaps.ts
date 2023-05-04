@@ -20,6 +20,20 @@ export class FillInGaps extends Task {
         return this._id;
     }
 
+    static async updateTask(model: FillInGapsModelType) {   
+        await super.updateTask(model);
+
+        await tasks.updateOne(
+            {_id: model._id},
+            {
+                content: model.content,
+                options: model.options,
+                correctAnswers: model.correctAnswers,
+                expForTrueAnswers: model.expForTrueAnswers
+            }
+        )
+    }
+
     async get_content(): Promise<string> {
         return (await tasks.findOne({_id: this._id}))?.content;
     }
