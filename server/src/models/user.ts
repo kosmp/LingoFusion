@@ -14,7 +14,8 @@ export class User {
         this._id = await users.insertOne({
             login: login,
             password: password,
-            profile_id: profile_id
+            profile_id: profile_id,
+            createdCourses: []
         })
         return this._id;
     }
@@ -35,8 +36,33 @@ export class User {
         return (await users.findOne({_id: this._id}))?.profile_id;
     }
 
+    async get_createdCourses() {
+        return (await users.findOne({_id: this._id}))?.createdCourses;
+    }
+
     async set_login(login: string) {
         await users.updateOneField({_id: this._id}, 'login', login)
+    }
+
+    static async addCourseToListById(userId: ObjectId, courseId: ObjectId) {
+        const user = await users.findOne({_id: new ObjectId(userId)});
+        
+        if (user) {
+          const courses: Array<ObjectId> = user.createdCourses || [];
+          courses.push(courseId);
+          await users.findAndUpdateById(userId, {createdCourses: courses});
+        }
+    }
+
+    static async removeCourseFromListByID(userId: ObjectId, courseId: ObjectId) {
+        const tempCourses: Array<ObjectId> = (await users.findOne({_id: new ObjectId(userId)}))?.createdCourses;
+
+        const index = tempCourses.findIndex((el) => el.equals(courseId));
+        if (index !== -1) {
+            tempCourses.splice(index, 1);
+        }
+
+        return await users.findAndUpdateById(userId, {createdCourses: tempCourses});
     }
 
     static async findOneUser(query: object) {

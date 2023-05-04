@@ -36,7 +36,7 @@ export class DB {
         return result.insertedId;
     }
 
-    async updateOneField(query: object, field: string, value: string) {
+    async updateOneField(query: object, field: string, value: any) {
         const new_data: any  = await this.findOne(query)
         new_data[field] = value
         const result = await this.collection.updateOne(query, { $set: new_data });
@@ -71,7 +71,7 @@ export class DB {
     }
 
     async findAndUpdateById(id: ObjectId, newObject: object) {
-        await this.collection.updateOne({_id: id}, {$set: newObject})
+        await this.collection.updateOne({_id: new ObjectId(id)}, {$set: newObject})
     }
 
     async aggregate(query: object[]) {

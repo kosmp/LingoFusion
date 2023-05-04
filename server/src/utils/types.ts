@@ -5,6 +5,7 @@ export type UserDtoInitType = {
     _id: Promise<ObjectId>;
     login: Promise<string>;
     profile_id: Promise<ObjectId>;
+    createdCourses: Promise<Array<ObjectId>>;
 }
 
 export enum EnglishLvl {
@@ -54,6 +55,7 @@ export type UserDtoModelType = {
     _id: ObjectId;
     login: string;
     profile_id: ObjectId;
+    createdCoursed: Array<ObjectId>;
 }
 
 export interface CourseModelType {

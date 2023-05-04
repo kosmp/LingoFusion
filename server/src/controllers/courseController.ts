@@ -6,6 +6,7 @@ import {Course} from '../models/course';
 import {RequestForCreateCourse, RequestForUpdateCourse, RequestWithUserFromMiddleware} from '../utils/types';
 import {ObjectId} from 'mongodb';
 import {Task} from '../models/task';
+import {User} from '../models/user';
 
 
 class CourseController {
@@ -29,6 +30,8 @@ class CourseController {
                 rating: 0,
                 authorId: req.user?._id
             })
+            
+            await User.addCourseToListById(req.user?._id, await course.get_id());
 
             return res.status(200).json(course);
         } catch (e) {
@@ -95,6 +98,8 @@ class CourseController {
             if (!deleteResult) {
                 return next(ApiError.NotFoundError(`Can't remove course with id: ${courseId}`));
             }
+
+            await User.removeCourseFromListByID(req.user?._id, new ObjectId(courseId));
 
             return res.status(200).json({success: true});
         } catch (e) {
