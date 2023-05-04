@@ -40,6 +40,10 @@ export class User {
         return (await users.findOne({_id: this._id}))?.createdCourses;
     }
 
+    static async get_createdCoursesById(id: ObjectId) {
+        return (await users.findOne({_id: id}))?.createdCourses;
+    }
+
     async set_login(login: string) {
         await users.updateOneField({_id: this._id}, 'login', login)
     }

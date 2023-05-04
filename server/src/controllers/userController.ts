@@ -2,6 +2,7 @@
 const ApiError = require('../exceptions/apiError');
 const {validationResult} = require('express-validator');
 import {User} from '../models/user';
+import {Course} from '../models/course';
 import {ObjectId} from 'mongodb';
 import {Request, Response, NextFunction} from 'express';
 import {RequestWithUserFromMiddleware} from '../utils/types';
@@ -28,7 +29,35 @@ class UserController {
         } catch (e) {
             return next(e);
         }
-    }    
+    }
+
+    async getUserCreatedCourses(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.params.userId;
+
+            if (!ObjectId.isValid(userId)) {
+                return next(ApiError.BadRequest("Incorrect userId"));
+            }
+
+            const user = await User.findOneUserById(new ObjectId(userId));
+    
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
+            }
+
+            const createdCourses: Array<ObjectId> = await User.get_createdCoursesById(new ObjectId(userId));
+            const result: Array<any> = new Array<any>();
+            
+            for (const courseId of createdCourses) {
+                const course = await Course.findCourseById(courseId);
+                result.push(course);
+            }
+
+            return res.status(200).json(result);
+        } catch (e) {
+            return next(e);
+        }
+    }
     
     async patchUserPassword(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         const errors = validationResult(req);
@@ -100,6 +129,8 @@ class UserController {
             return res.status(403).json("You can delete only your account!");
         }
     }
+
+
 }
 
 module.exports = new UserController()
