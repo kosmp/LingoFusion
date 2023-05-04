@@ -89,20 +89,20 @@ export class Course {
         await courses.findAndUpdateById(this._id, {rating: rating});
     } 
 
-    async set_tasks(tasks: Set<ObjectId>) : Promise<void> {
+    async set_tasks(tasks: Array<ObjectId>) : Promise<void> {
         await courses.findAndUpdateById(this._id, {tasks: tasks});
     }
 
     async addTaskId(taskId: ObjectId) : Promise<void> {
         const tasks : Set<ObjectId> = (await courses.findOne({_id: this._id}))?.tasks;
         tasks.add(taskId);
-        await courses.findAndUpdateById(this._id, {tasks: tasks});
+        await courses.findAndUpdateById(this._id, {tasks: Array.from(tasks)});
     }
 
     async deleteTaskId(taskId: ObjectId) : Promise<boolean> {
         const tasks : Set<ObjectId> = (await courses.findOne({_id: this._id}))?.tasks;
         const deleteRes = tasks.delete(taskId);
-        await courses.findAndUpdateById(this._id, {tasks: tasks});
+        await courses.findAndUpdateById(this._id, {tasks: Array.from(tasks)});
         return deleteRes;
     }
 
@@ -171,14 +171,14 @@ export class Course {
         return await courses.findAndUpdateById(id, {rating: rating});
     }
 
-    static async set_tasksById(id: ObjectId, tasks: Set<ObjectId>) {
+    static async set_tasksById(id: ObjectId, tasks: Array<ObjectId>) {
         return await courses.findAndUpdateById(id, {tasks: tasks});
     }
 
     static async addTaskByIdToCourse(courseId: ObjectId, task: ObjectId) {
         const tasks: Array<ObjectId> = await Course.get_tasksById(courseId);
         tasks.push(task);
-        return await courses.findAndUpdateById(courseId, {tasks: tasks});
+        return await courses.findAndUpdateById(courseId, {tasks: Array.from(tasks)});
     }
 
     static async removeTaskByIdFromCourseTasks(courseId: ObjectId, task: ObjectId) {

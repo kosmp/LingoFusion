@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const ApiError = require('../exceptions/apiError');
 const {validationResult} = require('express-validator');
+const courseService = require('../services/courseService');
 import {User} from '../models/user';
-import {Course} from '../models/course';
 import {ObjectId} from 'mongodb';
 import {Request, Response, NextFunction} from 'express';
 import {RequestWithUserFromMiddleware} from '../utils/types';
@@ -46,12 +46,8 @@ class UserController {
             }
 
             const createdCourses: Array<ObjectId> = await User.get_createdCoursesById(new ObjectId(userId));
-            const result: Array<any> = new Array<any>();
-            
-            for (const courseId of createdCourses) {
-                const course = await Course.findCourseById(courseId);
-                result.push(course);
-            }
+
+            const result = await courseService.getCoursesByListOfIds(createdCourses);
 
             return res.status(200).json(result);
         } catch (e) {

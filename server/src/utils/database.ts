@@ -1,12 +1,12 @@
-import {MongoClient, Collection, Db, ObjectId} from 'mongodb';
+import {MongoClient, Collection, Db, ObjectId, WithId, Document} from 'mongodb';
 import dotenv from 'dotenv';
 
 dotenv.config();
 
-const DB_URI: string | undefined = process.env.DB_URI;
+const DB_URL: string | undefined = process.env.DB_URL;
 const DB_NAME = process.env.DB_NAME;
 
-export const CLIENT = new MongoClient(DB_URI!);
+export const CLIENT = new MongoClient(DB_URL!);
 
 export class DB {
     public collection!: Collection;
@@ -37,8 +37,10 @@ export class DB {
     }
 
     async updateOneField(query: object, field: string, value: any) {
-        const new_data: any  = await this.findOne(query)
-        new_data[field] = value
+        const new_data: WithId<Document> | null  = await this.findOne(query)
+        if (new_data) {
+            new_data![field] = value
+        }
         const result = await this.collection.updateOne(query, { $set: new_data });
         return result.modifiedCount;
     }
