@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const ApiError = require('../exceptions/apiError');
 const {validationResult} = require('express-validator');
+const courseService = require('../services/courseService');
 import {Request, Response, NextFunction} from 'express';
 import {Course} from '../models/course';
 import {RequestForCreateCourse, RequestForUpdateCourse, RequestWithUserFromMiddleware} from '../utils/types';
@@ -43,7 +44,14 @@ class CourseController {
         try {
             const courses = await Course.getAllCourses();
 
-            return res.status(200).json(courses)
+            const courseIds: Array<ObjectId> = new Array<ObjectId>();
+            for (const course of courses) {
+                courseIds.push(course._id);
+            }
+            
+            const result = await courseService.getCoursesByListOfIds(courseIds);
+
+            return res.status(200).json(result);
         } catch (e) {
             return next(e);
         }
@@ -63,7 +71,9 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
             }
 
-            return res.status(200).json(course);
+            const result = await courseService.getCoursesByListOfIds([course._id]);
+
+            return res.status(200).json(result);
         } catch (e) {
             return next(e);
         }
