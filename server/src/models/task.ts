@@ -15,7 +15,7 @@ export abstract class Task {
         this._id = await this.db.insertOne({
             title: model.title,
             description: model.description,
-            taskType: undefined
+            expForTrueTask: model.expForTrueTask
         })
 
         return this._id;
@@ -26,10 +26,13 @@ export abstract class Task {
             {_id: model._id},
             {
                 title: model.title,
-                description: model.description
+                description: model.description,
+                expForTrueTask: model.expForTrueTask
             }
         )
     }
+
+    abstract check(userAnswers: string[]): Promise<boolean>;
 
     public async get_id(): Promise<ObjectId> {
         return this._id;

@@ -28,27 +28,31 @@ export interface TaskModelType {
     _id?: ObjectId;
     title: string;
     description: string;
+    expForTrueTask: number;
 }
 
 export interface TestModelType extends TaskModelType {
     question: string;
-    trueAnswers: Array<number>;
-    receivedAnswers: Array<number>;
-    expForTrueTask: number;
+    trueAnswers: Array<string>;
 }
 
 export interface TheoryModelType extends TaskModelType {
     content: string;
     references: Array<string>;
     images: Array<string>;
-    expForTheory: number;
 }
 
-export interface FillInGapsModelType extends TaskModelType {
-    content: string;
-    options: Array<string>;
-    correctAnswers: Array<string>;
-    expForTrueAnswers: Array<number>;
+export interface Blank {
+    id: string;
+    hint: string;
+    answer: string;
+    options?: string[];
+  }
+  
+
+export interface FillInGapsModelType extends TaskModelType { 
+    text: string;
+    blanks: Blank[];
 }
 
 export type UserDtoModelType = {

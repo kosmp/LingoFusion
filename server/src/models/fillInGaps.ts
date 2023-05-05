@@ -1,6 +1,6 @@
 import {ObjectId} from 'mongodb';
 import {Task} from './task';
-import {FillInGapsModelType, TaskType} from '../utils/types';
+import {FillInGapsModelType, TaskType, Blank} from '../utils/types';
 import {tasks} from '../utils/database';
 
 export class FillInGaps extends Task {
@@ -15,10 +15,8 @@ export class FillInGaps extends Task {
             {_id: this._id},
             {
                 taskType: TaskType.FillGaps,
-                content: model.content,
-                options: model.options,
-                correctAnswers: model.correctAnswers,
-                expForTrueAnswers: model.expForTrueAnswers
+                text: model.text,
+                blanks: model.blanks
             }
         )
 
@@ -31,43 +29,48 @@ export class FillInGaps extends Task {
         await tasks.updateOne(
             {_id: model._id},
             {
-                content: model.content,
-                options: model.options,
-                correctAnswers: model.correctAnswers,
-                expForTrueAnswers: model.expForTrueAnswers
+                taskType: TaskType.FillGaps,
+                text: model.text,
+                blanks: model.blanks
             }
         )
     }
 
-    async get_content(): Promise<string> {
-        return (await this.db.findOne({_id: this._id}))?.content;
+    async check(userAnswers: string[]): Promise<boolean> {
+        const blanks: Array<Blank> = (await this.db.findOne({_id: this._id}))?.blanks;
+
+        if (userAnswers.length !== blanks.length) {
+            return false; // the number of user responses does not match the number of gaps in the task
+        }
+        
+        let isCorrect = true;
+        for (let i = 0; i < blanks.length; i++) {
+            if (userAnswers[i] !== blanks[i].answer) {
+                isCorrect = false;
+                break; // if the user gave an incorrect answer, then the task is considered incorrect
+            }
+        }
+        
+        if (isCorrect) {
+            // accrue experience to the user
+        }
+        
+        return isCorrect;
     }
 
-    async get_options(): Promise<Array<string>> {
-        return (await this.db.findOne({_id: this._id}))?.options;
+    async get_text(): Promise<string> {
+        return (await this.db.findOne({_id: this._id}))?.text;
     }
 
-    async get_correctAnswers(): Promise<Array<string>> {
-        return (await this.db.findOne({_id: this._id}))?.correctAnswers;
+    async get_blanks() {
+        return (await this.db.findOne({_id: this._id}))?.blanks;
     }
 
-    async get_expForTrueAnswers(): Promise<Array<number>> {
-        return (await this.db.findOne({_id: this._id}))?.expForTrueAnswers;
-    }
-
-    async set_content(content: string) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {content: content});
+    async set_text(text: string) : Promise<void> {
+        await this.db.findAndUpdateById(new ObjectId(this._id), {text: text});
     } 
 
-    async set_options(options: Array<string>) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {options: options});
-    } 
-
-    async set_correctAnswers(correctAnswers: Array<string>) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {correctAnswers: correctAnswers});
-    } 
-
-    async set_expForTrueAnswers(expForTrueAnswers: Array<number>) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {expForTrueAnswers: expForTrueAnswers});
+    async set_blanks(blanks: Array<Blank>) {
+        await this.db.findAndUpdateById(new ObjectId(this._id), {blanks: blanks});
     } 
 }

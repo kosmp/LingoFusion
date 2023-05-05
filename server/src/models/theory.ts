@@ -18,7 +18,7 @@ export class Theory extends Task {
                 content: model.content,
                 references: model.references,
                 imagesUrl: model.images,
-                expForTheory: model.expForTheory
+                expForTrueTask: 0   // no EXP for THEORY task
             }
         )
 
@@ -27,16 +27,20 @@ export class Theory extends Task {
 
     static async updateTask(model: TheoryModelType) {   
         await super.updateTask(model);
-        console.log(model);
+
         await tasks.updateOne(
             {_id: model._id},
             {
+                taskType: TaskType.Theory,
                 content: model.content,
                 references: model.references,
-                images: model.images,
-                expForTheory: model.expForTheory
+                images: model.images
             }
         )
+    }
+    
+    async check(userAnswers: string[] = []): Promise<boolean> {
+        return true;    // no check questions needed
     }
     
     async get_content(): Promise<string> {
@@ -51,10 +55,6 @@ export class Theory extends Task {
         return (await this.db.findOne({_id: this._id}))?.images;
     }
 
-    async get_expForTheory(): Promise<number> {
-        return (await this.db.findOne({_id: this._id}))?.expForTheory;
-    }
-
     async set_content(content: string) : Promise<void> {
         await this.db.findAndUpdateById(new ObjectId(this._id), {content: content});
     } 
@@ -65,9 +65,5 @@ export class Theory extends Task {
 
     async set_images(images: Array<string>) : Promise<void> {
         await this.db.findAndUpdateById(new ObjectId(this._id), {images: images});
-    } 
-
-    async set_expForTheory(expForTheory: number) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {expForTheory: expForTheory});
-    } 
+    }
 }

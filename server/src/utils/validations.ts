@@ -69,84 +69,52 @@ export const userUpdateValidation = [
   body('password', "Password must be bigger than 5 symbols and less than 20").isLength({min: 5, max: 20})
 ];
 
-export const taskCreateUpdateValidation = [
-  body('title', 'enter correct task title. Min 5').isLength({min: 5}).isString(),
+// export const taskCreateUpdateValidation = [
+//   body('title', 'enter correct task title. Min 5').isLength({min: 5}).isString(),
 
-  body('description', 'enter correct task description. Min 5, max 50').isLength({min: 5, max: 50}).isString(),
+//   body('description', 'enter correct task description. Min 5, max 50').isLength({min: 5, max: 50}).isString(),
 
-  body('content', 'enter correct content text. Min 10').optional().isLength({min: 10}).isString(),
+//   body('content', 'enter correct content text. Min 10').optional().isLength({min: 10}).isString(),
 
-  body('options')
-  .optional()
-  .notEmpty()
-  .custom((value) => isArray(value))
-  .withMessage('Options must be an array')
-  .isArray({ min: 1, max: 10 })
-  .withMessage('Options must have between 1 and 10 items')
-  .custom((value) => value.every((item: any) => isString(item)))
-  .withMessage('Each item in options must be a string'),
+//   body('expForTrueAnswers')
+//   .optional()
+//   .notEmpty()
+//   .custom((value) => isArray(value))
+//   .withMessage('expForTrueAnswers must be an array')
+//   .isArray({ min: 1, max: 10 })
+//   .withMessage('expForTrueAnswers must have between 1 and 10 items')
+//   .custom((value) => value.every((item: any) => isString(item)))
+//   .withMessage('Each item in expForTrueAnswers must be a string'),
 
-  body('correctAnswers')
-  .optional()
-  .notEmpty()
-  .custom((value) => isArray(value))
-  .withMessage('correctAnswers must be an array')
-  .isArray({ min: 1, max: 10 })
-  .withMessage('correctAnswers must have between 1 and 10 items')
-  .custom((value) => value.every((item: any) => isString(item)))
-  .withMessage('Each item in correctAnswers must be a string'),
+//   body('question', 'enter correct question. Min 10 symbols').optional().isLength({min: 10}).isString(),
 
-  body('expForTrueAnswers')
-  .optional()
-  .notEmpty()
-  .custom((value) => isArray(value))
-  .withMessage('expForTrueAnswers must be an array')
-  .isArray({ min: 1, max: 10 })
-  .withMessage('expForTrueAnswers must have between 1 and 10 items')
-  .custom((value) => value.every((item: any) => isString(item)))
-  .withMessage('Each item in expForTrueAnswers must be a string'),
+//   body('trueAnswers')
+//   .optional()
+//   .notEmpty()
+//   .custom((value) => isArray(value))
+//   .withMessage('trueAnswers must be an array')
+//   .isArray({ min: 1, max: 10 })
+//   .withMessage('trueAnswers must have between 1 and 10 items')
+//   .custom((value) => value.every((item: any) => isString(item)))
+//   .withMessage('Each item in trueAnswers must be a string'),
 
-  body('question', 'enter correct question. Min 10 symbols').optional().isLength({min: 10}).isString(),
+//   body('expForTrueTask', 'enter expForTrueTask. Numeric type').optional().notEmpty().isNumeric(),
 
-  body('trueAnswers')
-  .optional()
-  .notEmpty()
-  .custom((value) => isArray(value))
-  .withMessage('trueAnswers must be an array')
-  .isArray({ min: 1, max: 10 })
-  .withMessage('trueAnswers must have between 1 and 10 items')
-  .custom((value) => value.every((item: any) => isNumber(item)))
-  .withMessage('Each item in trueAnswers must be a number'),
+//   body('references')
+//   .optional()
+//   .custom((value) => isArray(value))
+//   .withMessage('references must be an array')
+//   .isArray({ min: 1, max: 10 })
+//   .withMessage('references must have between 1 and 10 items')
+//   .custom((value) => value.every((item: any) => isString(item)))
+//   .withMessage('Each item in references must be a string'),
 
-  body('receivedAnswers')
-  .optional()
-  .notEmpty()
-  .custom((value) => isArray(value))
-  .withMessage('receivedAnswers must be an array')
-  .isArray({ min: 1, max: 10 })
-  .withMessage('receivedAnswers must have between 1 and 10 items')
-  .custom((value) => value.every((item: any) => isNumber(item)))
-  .withMessage('Each item in receivedAnswers must be a number'),
-
-  body('expForTrueTask', 'enter expForTrueTask. Numeric type').optional().notEmpty().isNumeric(),
-
-  body('references')
-  .optional()
-  .custom((value) => isArray(value))
-  .withMessage('references must be an array')
-  .isArray({ min: 1, max: 10 })
-  .withMessage('references must have between 1 and 10 items')
-  .custom((value) => value.every((item: any) => isString(item)))
-  .withMessage('Each item in references must be a string'),
-
-  body('images')
-  .optional()
-  .custom((value) => isArray(value))
-  .withMessage('images must be an array')
-  .isArray({ min: 1, max: 10 })
-  .withMessage('images must have between 1 and 10 items')
-  .custom((value) => value.every((item: any) => isString(item)))
-  .withMessage('Each item in images must be a string'),
-
-  body('expForTheory', 'enter expForTheory. Only numeric type and not empty').optional().notEmpty().isNumeric()
-]
+//   body('images')
+//   .optional()
+//   .custom((value) => isArray(value))
+//   .withMessage('images must be an array')
+//   .isArray({ min: 1, max: 10 })
+//   .withMessage('images must have between 1 and 10 items')
+//   .custom((value) => value.every((item: any) => isString(item)))
+//   .withMessage('Each item in images must be a string')
+// ]

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 const ApiError = require('../exceptions/apiError');
 const {validationResult} = require('express-validator');
+const taskService = require('../services/taskService');
 import {Request, Response, NextFunction} from 'express';
 import {Course} from '../models/course';
 import {RequestWithUserFromMiddleware} from '../utils/types';
@@ -34,10 +35,9 @@ class TaskController {
                 await task.initialize({
                     title: req.body.title,
                     description: req.body.description,
-                    content: req.body.content,
-                    options: req.body.options,
-                    correctAnswers: req.body.correctAnswers,
-                    expForTrueAnswers: req.body.expForTrueAnswers
+                    text: req.body.text,
+                    blanks: req.body.blanks,
+                    expForTrueTask: req.body.expForTrueTask
                 });
                 } else if (req.body.taskType === TaskType.Test) {
                 task = new TestQuestion();
@@ -46,7 +46,6 @@ class TaskController {
                     description: req.body.description,
                     question: req.body.question,
                     trueAnswers: req.body.trueAnswers,
-                    receivedAnswers: req.body.receivedAnswers,
                     expForTrueTask: req.body.expForTrueTask 
                 });
             } else if (req.body.taskType === TaskType.Theory) {
@@ -57,7 +56,7 @@ class TaskController {
                     content: req.body.content,
                     references: req.body.references,
                     images: req.body.imagesUrl,
-                    expForTheory: req.body.expForTheory
+                    expForTrueTask: 0
                 });
             } else {
                 return next(ApiError.BadRequest(`Invalid task type: ${req.body.taskType}`))
@@ -187,12 +186,7 @@ class TaskController {
 
             const tasks: Array<ObjectId> = await Course.get_tasksById(new ObjectId(courseId));
 
-            const tasksPromises = tasks.map(async taskId => {
-                const task = await Task.findTaskById(taskId);
-                return task;
-            })
-
-            return res.status(200).json(await Promise.all(tasksPromises));
+            return res.status(200).json(await taskService.getTasksByListOfIds(tasks));
         } catch (e) {
             return next(e);
         }
