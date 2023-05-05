@@ -111,10 +111,9 @@ class TaskController {
                     _id: new ObjectId(taskId),
                     title: req.body.title,
                     description: req.body.description,
-                    content: req.body.content,
-                    options: req.body.options,
-                    correctAnswers: req.body.correctAnswers,
-                    expForTrueAnswers: req.body.expForTrueAnswers
+                    text: req.body.text,
+                    blanks: req.body.blanks,
+                    expForTrueTask: req.body.expForTrueTask
                 });
                 return res.status(200).json({sucess: true});
             } else if (req.body.taskType === TaskType.Test) {
@@ -124,7 +123,6 @@ class TaskController {
                     description: req.body.description,
                     question: req.body.question,
                     trueAnswers: req.body.trueAnswers,
-                    receivedAnswers: req.body.receivedAnswers,
                     expForTrueTask: req.body.expForTrueTask 
                 });
                 return res.status(200).json({sucess: true});
@@ -136,7 +134,7 @@ class TaskController {
                     content: req.body.content,
                     references: req.body.references,
                     images: req.body.imagesUrl,
-                    expForTheory: req.body.expForTheory
+                    expForTrueTask: 0
                 });
                 return res.status(200).json({sucess: true});
             } else {
@@ -267,6 +265,10 @@ class TaskController {
         } catch (e) {
             return next(e);
         }
+    }
+
+    async submitCourseTask(req: Request, res: Response, next: NextFunction) {
+        
     }
 }
 

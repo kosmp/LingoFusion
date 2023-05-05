@@ -44,14 +44,9 @@ class CourseController {
         try {
             const courses = await Course.getAllCourses();
 
-            const courseIds: Array<ObjectId> = new Array<ObjectId>();
-            for (const course of courses) {
-                courseIds.push(course._id);
-            }
-            
-            const result = await courseService.getCoursesByListOfIds(courseIds);
-
-            return res.status(200).json(result);
+            // general information about the course and a list of task IDs
+            // there is no point in the full presentation of tasks
+            return res.status(200).json(courses);
         } catch (e) {
             return next(e);
         }
@@ -73,6 +68,7 @@ class CourseController {
 
             const result = await courseService.getCoursesByListOfIds([course._id]);
 
+            // general information about the course and full presentations of tasks 
             return res.status(200).json(result);
         } catch (e) {
             return next(e);
@@ -151,6 +147,22 @@ class CourseController {
         } catch (e) {
             return next(e);
         }
+    }
+
+    async enrollInCourse(req: Request, res: Response, next: NextFunction) {
+    
+    }
+
+    async startCourse(req: Request, res: Response, next: NextFunction) {
+    
+    }
+
+    async completeCourse(req: Request, res: Response, next: NextFunction) {
+    
+    }
+
+    async getProgressOfCourse(req: Request, res: Response, next: NextFunction) {
+    
     }
 }
 
