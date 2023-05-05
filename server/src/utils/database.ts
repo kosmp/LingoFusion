@@ -81,3 +81,8 @@ export class DB {
         return res[0];
     }
 }
+
+export const courses = new DB('courses');
+export const tasks = new DB('tasks');
+export const profiles = new DB('profiles');
+export const tokens = new DB('user-tokens');

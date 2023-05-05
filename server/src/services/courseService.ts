@@ -1,9 +1,17 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {Document, ObjectId, WithId} from "mongodb";
+import {DB} from '../utils/database';
+import {courses} from '../utils/database';
 import {Course} from "../models/course";
 const taskService = require('../services/taskService');
 
 class CourseService {
+    private db!: DB;
+    
+    constructor() {
+        this.db = courses;
+    }
+
     async getCoursesByListOfIds(courses: Array<ObjectId>) {
         const resultCourses: Array<WithId<Document> | null> = new Array<WithId<Document> | null>();
 

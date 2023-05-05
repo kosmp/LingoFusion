@@ -1,13 +1,17 @@
-import { DB } from '../utils/database';
-import { ObjectId } from "mongodb";
-
-export const profiles = new DB('profiles');
+import {DB} from '../utils/database';
+import {ObjectId} from "mongodb";
+import {profiles} from '../utils/database';
 
 export class Profile {
     private id!: ObjectId;
+    protected db!: DB;
+
+    constructor() {
+        this.db = profiles;
+    }
 
     async initialize() {
-        this.id = await profiles.insertOne({
+        this.id = await this.db.insertOne({
             username: '',
             email: '',
             englishLvl: ''
@@ -16,27 +20,27 @@ export class Profile {
     }
 
     async get_username() {
-        return (await profiles.findOne({_id: this.id}))?.username;
+        return (await this.db.findOne({_id: this.id}))?.username;
     }
 
     async get_email() {
-        return (await profiles.findOne({_id: this.id}))?.email;
+        return (await this.db.findOne({_id: this.id}))?.email;
     }
 
     async get_englishLvl() {
-        return (await profiles.findOne({_id: this.id}))?.englishLvl;
+        return (await this.db.findOne({_id: this.id}))?.englishLvl;
     }
 
     async set_username(username: string) {
-        await profiles.updateOneField({_id: this.id}, 'username', username)
+        await this.db.updateOneField({_id: this.id}, 'username', username)
     }
 
     async set_email(email: string) {
-        await profiles.updateOneField({_id: this.id}, 'email', email)
+        await this.db.updateOneField({_id: this.id}, 'email', email)
     }
 
     async set_englishLvl(englishLvl: string) {
-        await profiles.updateOneField({_id: this.id}, 'englishLvl', englishLvl)
+        await this.db.updateOneField({_id: this.id}, 'englishLvl', englishLvl)
     }
 
     static async findProfileById(id: ObjectId) {

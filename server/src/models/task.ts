@@ -1,14 +1,18 @@
 import {DB} from '../utils/database';
 import {ObjectId} from 'mongodb';
 import {TaskType, TaskModelType} from '../utils/types';
-
-export const tasks = new DB('tasks');
+import {tasks} from '../utils/database';
 
 export abstract class Task {
     protected _id!: ObjectId;
+    protected db!: DB;
+    
+    constructor() {
+        this.db = tasks;
+    }
 
     public async initialize(model: TaskModelType): Promise<ObjectId> {
-        this._id = await tasks.insertOne({
+        this._id = await this.db.insertOne({
             title: model.title,
             description: model.description,
             taskType: undefined
@@ -32,23 +36,23 @@ export abstract class Task {
     }
 
     public async get_title(): Promise<string> {
-        return (await tasks.findOne({_id: this._id}))?.title;
+        return (await this.db.findOne({_id: this._id}))?.title;
     }
 
     public async get_description(): Promise<string> {
-        return (await tasks.findOne({_id: this._id}))?.description;
+        return (await this.db.findOne({_id: this._id}))?.description;
     }
 
     public async get_taskType(): Promise<TaskType> {
-        return (await tasks.findOne({_id: this._id}))?.taskType;
+        return (await this.db.findOne({_id: this._id}))?.taskType;
     }
 
     public async set_title(title: string) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {title: title});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {title: title});
     } 
 
     public async set_description(description: string) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {description: description});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {description: description});
     } 
 
     public static async get_titleById(id: ObjectId): Promise<string> {

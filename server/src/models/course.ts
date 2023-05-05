@@ -1,14 +1,18 @@
 import {DB} from '../utils/database';
 import {ObjectId} from 'mongodb';
 import {CourseModelType, CourseUpdateModelType, EnglishLvl} from '../utils/types';
-
-export const courses = new DB('courses');
+import {courses} from '../utils/database';
 
 export class Course {
     private _id!: ObjectId;
+    private db!: DB;
     
+    constructor() {
+        this.db = courses;
+    }
+
     async initialize(model: CourseModelType) {
-        this._id = await courses.insertOne({
+        this._id = await this.db.insertOne({
             title: model.title,
             description: model.description,
             englishLvl: model.englishLvl,
@@ -34,64 +38,64 @@ export class Course {
     }
 
     async get_title() {
-        return (await courses.findOne({_id: this._id}))?.title;
+        return (await this.db.findOne({_id: this._id}))?.title;
     }
 
     async get_description() {
-        return (await courses.findOne({_id: this._id}))?.description;
+        return (await this.db.findOne({_id: this._id}))?.description;
     }
 
     async get_englishLvl() {
-        return (await courses.findOne({_id: this._id}))?.englishLvl;
+        return (await this.db.findOne({_id: this._id}))?.englishLvl;
     }
 
     async get_imageUrl() {
-        return (await courses.findOne({_id: this._id}))?.imageUrl;
+        return (await this.db.findOne({_id: this._id}))?.imageUrl;
     }
 
     async get_rating() {
-        return (await courses.findOne({_id: this._id}))?.rating;
+        return (await this.db.findOne({_id: this._id}))?.rating;
     }
 
     async get_tasks() {
-        return (await courses.findOne({_id: this._id}))?.tasks;
+        return (await this.db.findOne({_id: this._id}))?.tasks;
     }
 
     async get_tags() {
-        return (await courses.findOne({_id: this._id}))?.tags;
+        return (await this.db.findOne({_id: this._id}))?.tags;
     }
 
     async get_authorId() {
-        return (await courses.findOne({_id: this._id}))?.authorId;
+        return (await this.db.findOne({_id: this._id}))?.authorId;
     }
 
-    async set_tags(tags: Set<string>) : Promise<void> {
-        await courses.findAndUpdateById(this._id, {tags: tags});
-    } 
-
     async set_title(title: string) : Promise<void> {
-        await courses.findAndUpdateById(this._id, {title: title});
+        await this.db.findAndUpdateById(this._id, {title: title});
     } 
 
     async set_description(description: string) : Promise<void> {
-        await courses.findAndUpdateById(this._id, {description: description});
+        await this.db.findAndUpdateById(this._id, {description: description});
     } 
 
     async set_englishLvl(englishLvl: EnglishLvl) : Promise<void> {
-        await courses.findAndUpdateById(this._id, {englishLvl: englishLvl});
+        await this.db.findAndUpdateById(this._id, {englishLvl: englishLvl});
     } 
 
     async set_imageUrl(imageUrl: string) : Promise<void> {
-        await courses.findAndUpdateById(this._id, {imageUrl: imageUrl});
+        await this.db.findAndUpdateById(this._id, {imageUrl: imageUrl});
     } 
 
     async set_rating(rating: string) : Promise<void> {
-        await courses.findAndUpdateById(this._id, {rating: rating});
+        await this.db.findAndUpdateById(this._id, {rating: rating});
     } 
 
     async set_tasks(tasks: Array<ObjectId>) : Promise<void> {
-        await courses.findAndUpdateById(this._id, {tasks: tasks});
+        await this.db.findAndUpdateById(this._id, {tasks: tasks});
     }
+
+    async set_tags(tags: Set<string>) : Promise<void> {
+        await this.db.findAndUpdateById(this._id, {tags: tags});
+    } 
 
     async addTaskId(taskId: ObjectId) : Promise<void> {
         const tasks : Set<ObjectId> = (await courses.findOne({_id: this._id}))?.tasks;
@@ -175,9 +179,13 @@ export class Course {
         return await courses.findAndUpdateById(id, {tasks: tasks});
     }
 
+    static async set_tagsById(id: ObjectId, tags: Set<string>) {
+        return await courses.findAndUpdateById(id, {tags: tags});
+    }
+
     static async addTaskByIdToCourse(courseId: ObjectId, task: ObjectId) {
-        const tasks: Array<ObjectId> = await Course.get_tasksById(courseId);
-        tasks.push(task);
+        const tasks: Set<ObjectId> = new Set<ObjectId>(await Course.get_tasksById(courseId));
+        tasks.add(task);
         return await courses.findAndUpdateById(courseId, {tasks: Array.from(tasks)});
     }
 
@@ -194,10 +202,6 @@ export class Course {
         }
 
         return await courses.findAndUpdateById(courseId, {tasks: tasks});
-    }
-
-    static async set_tagsById(id: ObjectId, tags: Set<string>) {
-        return await courses.findAndUpdateById(id, {tags: tags});
     }
 
     static async findCourseById(id: ObjectId) {

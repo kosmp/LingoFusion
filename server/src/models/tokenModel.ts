@@ -1,13 +1,17 @@
 import {DB} from '../utils/database';
 import {ObjectId} from "mongodb";
-
-export const tokens = new DB('user-tokens');
+import {tokens} from '../utils/database';
 
 export class Token {
     private _id!: ObjectId;
+    protected db!: DB;
+
+    constructor() {
+        this.db = tokens;
+    }
 
     async initialize(userId: ObjectId, refreshTokenn: string) {
-        this._id = await tokens.insertOne({
+        this._id = await this.db.insertOne({
             user: userId,
             refreshToken: refreshTokenn
         })
@@ -16,11 +20,11 @@ export class Token {
     }
 
     async get_refreshToken() {
-        return (await tokens.findOne({_id: this._id}))?.refreshToken;
+        return (await this.db.findOne({_id: this._id}))?.refreshToken;
     }
 
     async update_refreshToken(refreshToken: string) {
-        await tokens.updateOneField({_id: this._id}, 'refreshToken', refreshToken)
+        await this.db.updateOneField({_id: this._id}, 'refreshToken', refreshToken)
     }
 
     static async updateToken(token: object, field: string, value: string) {

@@ -1,12 +1,17 @@
 import {ObjectId} from 'mongodb';
-import {Task, tasks} from './task';
+import {Task} from './task';
 import {FillInGapsModelType, TaskType} from '../utils/types';
+import {tasks} from '../utils/database';
 
 export class FillInGaps extends Task {
+    constructor() {
+        super();
+    }
+
     async initialize(model: FillInGapsModelType): Promise<ObjectId> {
         super.initialize(model);
 
-        await tasks.updateOne(
+        await this.db.updateOne(
             {_id: this._id},
             {
                 taskType: TaskType.FillGaps,
@@ -35,34 +40,34 @@ export class FillInGaps extends Task {
     }
 
     async get_content(): Promise<string> {
-        return (await tasks.findOne({_id: this._id}))?.content;
+        return (await this.db.findOne({_id: this._id}))?.content;
     }
 
     async get_options(): Promise<Array<string>> {
-        return (await tasks.findOne({_id: this._id}))?.options;
+        return (await this.db.findOne({_id: this._id}))?.options;
     }
 
     async get_correctAnswers(): Promise<Array<string>> {
-        return (await tasks.findOne({_id: this._id}))?.correctAnswers;
+        return (await this.db.findOne({_id: this._id}))?.correctAnswers;
     }
 
     async get_expForTrueAnswers(): Promise<Array<number>> {
-        return (await tasks.findOne({_id: this._id}))?.expForTrueAnswers;
+        return (await this.db.findOne({_id: this._id}))?.expForTrueAnswers;
     }
 
     async set_content(content: string) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {content: content});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {content: content});
     } 
 
     async set_options(options: Array<string>) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {options: options});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {options: options});
     } 
 
     async set_correctAnswers(correctAnswers: Array<string>) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {correctAnswers: correctAnswers});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {correctAnswers: correctAnswers});
     } 
 
     async set_expForTrueAnswers(expForTrueAnswers: Array<number>) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {expForTrueAnswers: expForTrueAnswers});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {expForTrueAnswers: expForTrueAnswers});
     } 
 }

@@ -1,12 +1,17 @@
 import {ObjectId} from 'mongodb';
-import {Task, tasks} from './task';
+import {Task} from './task';
 import {TheoryModelType, TaskType} from '../utils/types';
+import {tasks} from '../utils/database';
 
 export class Theory extends Task {
+    constructor() {
+        super();
+    }
+
     async initialize(model: TheoryModelType): Promise<ObjectId> {
         await super.initialize(model);
 
-        await tasks.updateOne(
+        await this.db.updateOne(
             {_id: this._id},
             {
                 taskType: TaskType.Theory,
@@ -35,34 +40,34 @@ export class Theory extends Task {
     }
     
     async get_content(): Promise<string> {
-        return (await tasks.findOne({_id: this._id}))?.content;
+        return (await this.db.findOne({_id: this._id}))?.content;
     }
 
     async get_references(): Promise<Array<string>> {
-        return (await tasks.findOne({_id: this._id}))?.references;
+        return (await this.db.findOne({_id: this._id}))?.references;
     }
 
     async get_images(): Promise<Array<string>> {
-        return (await tasks.findOne({_id: this._id}))?.images;
+        return (await this.db.findOne({_id: this._id}))?.images;
     }
 
     async get_expForTheory(): Promise<number> {
-        return (await tasks.findOne({_id: this._id}))?.expForTheory;
+        return (await this.db.findOne({_id: this._id}))?.expForTheory;
     }
 
     async set_content(content: string) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {content: content});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {content: content});
     } 
 
     async set_references(references: Array<string>) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {references: references});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {references: references});
     } 
 
     async set_images(images: Array<string>) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {images: images});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {images: images});
     } 
 
     async set_expForTheory(expForTheory: number) : Promise<void> {
-        await tasks.findAndUpdateById(new ObjectId(this._id), {expForTheory: expForTheory});
+        await this.db.findAndUpdateById(new ObjectId(this._id), {expForTheory: expForTheory});
     } 
 }
