@@ -1,53 +1,24 @@
 import {DB} from '../utils/database';
 import {ObjectId} from "mongodb";
-import {profiles} from '../utils/database';
 
 export class Profile {
-    private id!: ObjectId;
-    protected db!: DB;
-
-    constructor() {
-        this.db = profiles;
-    }
-
-    async initialize() {
-        this.id = await this.db.insertOne({
+    static readonly collection: DB = new DB('profiles');
+    
+    static async initialize() {
+        const profileId: ObjectId = await this.collection.insertOne({
             username: '',
             email: '',
             englishLvl: ''
-        })
-        return this.id;
+        });
+
+        return profileId;
     }
 
-    async get_username() {
-        return (await this.db.findOne({_id: this.id}))?.username;
-    }
-
-    async get_email() {
-        return (await this.db.findOne({_id: this.id}))?.email;
-    }
-
-    async get_englishLvl() {
-        return (await this.db.findOne({_id: this.id}))?.englishLvl;
-    }
-
-    async set_username(username: string) {
-        await this.db.updateOneField({_id: this.id}, 'username', username)
-    }
-
-    async set_email(email: string) {
-        await this.db.updateOneField({_id: this.id}, 'email', email)
-    }
-
-    async set_englishLvl(englishLvl: string) {
-        await this.db.updateOneField({_id: this.id}, 'englishLvl', englishLvl)
+    static async deleteProfileById(id: ObjectId) {
+        return await this.collection.findAndDeleteById(id);
     }
 
     static async findProfileById(id: ObjectId) {
-        return await profiles.findOne({_id: id});
-    }
-
-    static async findProfileByIdAndDelete(id: ObjectId) {
-        return await profiles.findAndDeleteById(id);
+        return await this.collection.findOne({_id: new ObjectId(id)});
     }
 }

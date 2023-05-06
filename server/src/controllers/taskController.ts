@@ -3,14 +3,14 @@ const ApiError = require('../exceptions/apiError');
 const {validationResult} = require('express-validator');
 const taskService = require('../services/taskService');
 import {Request, Response, NextFunction} from 'express';
-import {Course} from '../models/course';
+import {Course} from '../models/courseEnrollment';
 import {RequestWithUserFromMiddleware} from '../utils/types';
 import {ObjectId} from 'mongodb';
 import {FillInGaps} from '../models/fillInGaps';
 import {TestQuestion} from '../models/testQuestion';
 import {Theory} from '../models/theory';
 import {TaskType} from '../utils/types';
-import {Task} from '../models/task';
+import {Task} from '../models/taskTemplate';
 
 
 class TaskController {
@@ -28,7 +28,7 @@ class TaskController {
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}. Maybe course wasn't created`));
             }
-    
+                
             let task;
             if (req.body.taskType === TaskType.FillGaps) {
                 task = new FillInGaps();

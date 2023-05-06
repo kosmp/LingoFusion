@@ -3,15 +3,17 @@ const ApiError = require('../exceptions/apiError');
 const {validationResult} = require('express-validator');
 const courseService = require('../services/courseService');
 import {Request, Response, NextFunction} from 'express';
-import {Course} from '../models/course';
-import {RequestForCreateCourse, RequestForUpdateCourse, RequestWithUserFromMiddleware} from '../utils/types';
+import {CourseEnrollment} from '../models/courseEnrollment';
+import {CourseTemplate} from '../models/courseTemplate';
+import {RequestForCreateCourseTemplate, RequestForUpdateCourse, RequestWithUserFromMiddleware} from '../utils/types';
 import {ObjectId} from 'mongodb';
-import {Task} from '../models/task';
+import {TaskTemplate} from '../models/taskTemplate';
+import {TaskEnrollment} from '../models/taskEnrollment';
 import {User} from '../models/user';
 
 
 class CourseController {
-    async createCourse(req: RequestForCreateCourse, res: Response, next: NextFunction) {
+    async createCourse(req: RequestForCreateCourseTemplate, res: Response, next: NextFunction) {
         try {
             const errors = validationResult(req);
 
@@ -19,40 +21,56 @@ class CourseController {
                 return next(ApiError.BadRequest("Validation error", errors.array()))
             }
 
-            const course = new Course();
-
-            await course.initialize({
+            const courseId: ObjectId = await CourseTemplate.initialize({
                 title: req.body.title,
                 description: req.body.description,
                 englishLvl: req.body.englishLvl,
                 imageUrl: req.body.imageUrl,
                 tags: req.body.tags,
-                tasks: [],
+                taskTemplates: [],
                 rating: 0,
                 authorId: req.user?._id
             })
             
-            await User.addCourseToListById(req.user?._id, await course.get_id());
+            await User.addCourseToCreatedById(req.user?._id, courseId);
 
-            return res.status(200).json(course);
+            return res.status(200).json(await CourseTemplate.findCourseById(courseId));
         } catch (e) {
             return next(e);
         }
     }
 
-    async getAllCourses(req: Request, res: Response, next: NextFunction) {
+    async getAllAvailableCourses(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courses = await Course.getAllCourses();
+            const courses = [...(await CourseTemplate.findAllCourses()), ...(await courseService.getCourseEnrollmentsByUserId(new ObjectId(req.user._id)))];
 
-            // general information about the course and a list of task IDs
-            // there is no point in the full presentation of tasks
             return res.status(200).json(courses);
         } catch (e) {
             return next(e);
         }
     }
 
-    async getCourse(req: Request, res: Response, next: NextFunction) {
+    async getAllCourseTemplates(req: Request, res: Response, next: NextFunction) {
+        try {
+            const courses = await CourseTemplate.findAllCourses();
+            
+            return res.status(200).json(courses);
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async getAllCourseEnrollmentsOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        try {
+            const courses = await courseService.getCourseEnrollmentsByUserId(new ObjectId(req.user._id));
+
+            return res.status(200).json(courses);
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async getCourseTemplate(req: Request, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
 
@@ -60,26 +78,45 @@ class CourseController {
                 return next(ApiError.BadRequest("Incorrect courseId"));
             }
 
-            const course = await Course.findCourseById(new ObjectId(courseId));
+            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
             
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
             }
 
             const result = await courseService.getCoursesByListOfIds([course._id]);
-
-            // general information about the course and full presentations of tasks 
             return res.status(200).json(result);
         } catch (e) {
             return next(e);
         }
     }
 
-    async removeCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+    async getCourseEnrollment(req: Request, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
 
-            const course = await Course.findCourseById(new ObjectId(courseId));
+            if (!ObjectId.isValid(courseId)) {
+                return next(ApiError.BadRequest("Incorrect courseId"));
+            }
+
+            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
+            
+            if (!course) {
+                return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
+            }
+
+            const result = await courseService.getCoursesByListOfIds([course._id]);
+            return res.status(200).json(result);
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async removeCourseTemplate(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        try {
+            const courseId = req.params.courseId;
+
+            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
             
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
@@ -89,23 +126,23 @@ class CourseController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete course he didn't create`));
             }
 
-            const tasks: Array<ObjectId> = await Course.get_tasksById(new ObjectId(courseId));
+            const tasks: Array<ObjectId> = (await CourseTemplate.findCourseById(new ObjectId(courseId)))?.tasks;
             
             tasks.forEach(async task => {
-                const deleteResult = await Task.deleteTaskById(new ObjectId(task));    // task was removed from task collection in BD
+                const deleteResult = await TaskTemplate.deleteTaskById(new ObjectId(task));
                 
                 if (!deleteResult) {
                     return next(ApiError.NotFoundError(`Can't remove task with id: ${task}`));
                 }
             });
 
-            const deleteResult = await Course.deleteCourseById(new ObjectId(courseId));
+            const deleteResult = await CourseTemplate.deleteCourseById(new ObjectId(courseId));
 
             if (!deleteResult) {
                 return next(ApiError.NotFoundError(`Can't remove course with id: ${courseId}`));
             }
 
-            await User.removeCourseFromListByID(req.user?._id, new ObjectId(courseId));
+            await User.removeCourseFromCreatedById(req.user?._id, new ObjectId(courseId));
 
             return res.status(200).json({success: true});
         } catch (e) {
@@ -113,7 +150,7 @@ class CourseController {
         }
     }
 
-    async updateCourse(req: RequestForUpdateCourse, res: Response, next: NextFunction) {
+    async updateCourseTemplate(req: RequestForUpdateCourse, res: Response, next: NextFunction) {
         try {
             const errors = validationResult(req);
 
@@ -123,7 +160,7 @@ class CourseController {
 
             const courseId = req.params.courseId;
 
-            const course = await Course.findCourseById(new ObjectId(courseId));
+            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
 
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
@@ -133,7 +170,7 @@ class CourseController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete course he didn't create`));
             }
 
-            Course.updateCourse({
+            CourseTemplate.updateCourse({
                 _id: course._id,
                 title: req.body.title,
                 description: req.body.description,
@@ -150,6 +187,10 @@ class CourseController {
     }
 
     async enrollInCourse(req: Request, res: Response, next: NextFunction) {
+    
+    }
+
+    async unEnrollFromCourse(req: Request, res: Response, next: NextFunction) {
     
     }
 

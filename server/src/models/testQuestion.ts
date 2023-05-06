@@ -1,9 +1,9 @@
 import {ObjectId} from 'mongodb';
-import {Task} from './task';
+import {TaskTemplate} from './taskTemplate';
 import {TestModelType, TaskType} from '../utils/types';
-import {tasks} from '../utils/database';
+import {taskTemplates} from '../utils/database';
 
-export class TestQuestion extends Task {
+export class TestQuestion extends TaskTemplate {
     constructor() {
         super();
     }
@@ -26,7 +26,7 @@ export class TestQuestion extends Task {
     static async updateTask(model: TestModelType) {   
         await super.updateTask(model);
         
-        await tasks.updateOne(
+        await taskTemplates.updateOne(
             {_id: model._id},
             {
                 question: model.question,

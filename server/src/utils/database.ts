@@ -82,7 +82,6 @@ export class DB {
     }
 }
 
-export const courses = new DB('courses');
-export const tasks = new DB('tasks');
-export const profiles = new DB('profiles');
+export const taskTemplates = new DB('task-templates');
+export const taskEnrollments = new DB('task-enrollments');
 export const tokens = new DB('user-tokens');

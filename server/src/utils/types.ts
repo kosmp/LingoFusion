@@ -1,5 +1,6 @@
 import {ObjectId} from 'mongodb';
 import {Request} from 'express';
+import {EnglishLvl, StatusType, TaskType} from './enums';
 
 export type UserDtoInitType = {
     _id: Promise<ObjectId>;
@@ -8,35 +9,26 @@ export type UserDtoInitType = {
     createdCourses: Promise<Array<ObjectId>>;
 }
 
-export enum EnglishLvl {
-    A0 = 'A0',
-    A1 = 'A1',
-    A2 = 'A2',
-    B1 = 'B1',
-    B2 = 'B2',
-    C1 = 'C1',
-    C2 = 'C2'
+export type UserDtoModelType = {
+    _id: ObjectId;
+    login: string;
+    profile_id: ObjectId;
+    createdCourses: Array<ObjectId>;
 }
 
-export enum TaskType {
-    Theory = 'theory',
-    Test = 'test',
-    FillGaps = 'fillgaps'
-}
-
-export interface TaskModelType {
+export interface TaskTemplateModelType {
     _id?: ObjectId;
     title: string;
     description: string;
     expForTrueTask: number;
 }
 
-export interface TestModelType extends TaskModelType {
+export interface TestModelType extends TaskTemplateModelType {
     question: string;
     trueAnswers: Array<string>;
 }
 
-export interface TheoryModelType extends TaskModelType {
+export interface TheoryModelType extends TaskTemplateModelType {
     content: string;
     references: Array<string>;
     images: Array<string>;
@@ -50,43 +42,48 @@ export interface Blank {
   }
   
 
-export interface FillInGapsModelType extends TaskModelType { 
+export interface FillInGapsModelType extends TaskTemplateModelType { 
     text: string;
     blanks: Blank[];
 }
 
-export type UserDtoModelType = {
-    _id: ObjectId;
-    login: string;
-    profile_id: ObjectId;
-    createdCoursed: Array<ObjectId>;
+export interface TaskEnrollmentModelType {
+    _id?: ObjectId
+    taskTemplateId: ObjectId,
+    status: TaskType,
+    title: string,
+    description: string,
+    expForTrueTask: number,
+    startedAt: Date,
+    completedAt: Date,
+    answers: Array<string>
 }
 
-export interface CourseModelType {
+export interface CourseTemplateModelType {
     _id?: ObjectId;
-    title: string;
-    description: string;
-    englishLvl: EnglishLvl;
-    imageUrl: string;
-    rating: number;
-    tasks: Array<ObjectId>;
-    tags: Set<string>;
-    authorId: ObjectId;
-}
-
-export interface CourseUpdateModelType {
-    _id: ObjectId;
     title?: string;
     description?: string;
     englishLvl?: EnglishLvl;
     imageUrl?: string;
     rating?: number;
-    // tasks?: Array<ObjectId>;
+    taskTemplates?: Array<ObjectId>;
     tags?: Set<string>;
+    authorId?: ObjectId;
 }
 
+export interface CourseEnrollmentModelType {
+    _id?: ObjectId;
+    coursePresentationId?: ObjectId;
+    title?: string;
+    status?: StatusType;
+    currentTaskId?: ObjectId;
+    startedAt?: Date;
+    completedAt?: Date | null;
+    tasks?: Array<ObjectId>;
+    authorId?: ObjectId;
+}
 
-export interface CourseCreateModelType {
+export interface CourseCreateTemplateModelType {
     title: string;
     description: string;
     englishLvl: EnglishLvl;
@@ -94,9 +91,9 @@ export interface CourseCreateModelType {
     tags: Set<string>;
 }
 
-export interface RequestForCreateCourse extends Request {
+export interface RequestForCreateCourseTemplate extends Request {
     user: UserDtoModelType;
-    course: CourseCreateModelType;
+    course: CourseCreateTemplateModelType;
 }
 
 export interface RequestWithUserFromMiddleware extends Request {
@@ -105,5 +102,5 @@ export interface RequestWithUserFromMiddleware extends Request {
 
 export interface RequestForUpdateCourse extends Request {
     user: UserDtoModelType;
-    course: CourseModelType;
+    course: CourseTemplateModelType;
 }

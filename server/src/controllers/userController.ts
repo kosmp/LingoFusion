@@ -6,8 +6,8 @@ import {User} from '../models/user';
 import {ObjectId} from 'mongodb';
 import {Request, Response, NextFunction} from 'express';
 import {RequestWithUserFromMiddleware} from '../utils/types';
-import { Token } from '../models/tokenModel';
-import { Profile } from '../models/profile';
+import {Token} from '../models/tokenModel';
+import {Profile} from '../models/profile';
 const bcrypt = require("bcrypt");
 
 class UserController {
