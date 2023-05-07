@@ -58,6 +58,10 @@ class CourseService {
 
         return result;
     }
+
+    async calculateCourseCompletionStatistics(courseId: ObjectId, userId: ObjectId) {
+        
+    }
 }
 
 module.exports = new CourseService();

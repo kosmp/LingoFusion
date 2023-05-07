@@ -82,6 +82,4 @@ export class DB {
     }
 }
 
-export const taskTemplates = new DB('task-templates');
-export const taskEnrollments = new DB('task-enrollments');
 export const tokens = new DB('user-tokens');

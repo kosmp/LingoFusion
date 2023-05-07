@@ -1,6 +1,7 @@
 import {Document, ObjectId, WithId} from "mongodb";
 import {TaskTemplate} from "../models/taskTemplate";
 import {TaskEnrollment} from "../models/taskEnrollment";
+import {TaskType} from '../utils/enums';
 
 class TaskService {
     async getTaskTemplatesByListOfIds(tasks: Array<ObjectId>) {

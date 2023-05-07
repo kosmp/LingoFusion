@@ -1,18 +1,14 @@
 import {ObjectId} from 'mongodb';
 import {TaskTemplate} from './taskTemplate';
-import {TestModelType, TaskType} from '../utils/types';
-import {taskTemplates} from '../utils/database';
+import {TestModelType} from '../utils/types';
+import {TaskType} from '../utils/enums';
 
 export class TestQuestion extends TaskTemplate {
-    constructor() {
-        super();
-    }
+    public static async initialize(model: TestModelType): Promise<ObjectId> {
+        const taskTemplateId = super.initialize(model);
 
-    async initialize(model: TestModelType): Promise<ObjectId> {
-        super.initialize(model);
-
-        await this.db.updateOne(
-            {_id: this._id},
+        await this.collection.updateOne(
+            {_id: taskTemplateId},
             {
                 taskType: TaskType.Test,
                 question: model.question,
@@ -20,13 +16,13 @@ export class TestQuestion extends TaskTemplate {
             }
         )
 
-        return this._id;
+        return taskTemplateId;
     }
 
-    static async updateTask(model: TestModelType) {   
+    public static async updateTask(model: TestModelType) {   
         await super.updateTask(model);
         
-        await taskTemplates.updateOne(
+        await this.collection.updateOne(
             {_id: model._id},
             {
                 question: model.question,
@@ -35,31 +31,15 @@ export class TestQuestion extends TaskTemplate {
         )
     }
 
-    async check(userAnswers: string[]): Promise<boolean> {
-        const answers: Array<string> = (await this.db.findOne({_id: this._id}))?.trueAnswers;
+    public static async check(taskTemplateId: ObjectId, userAnswers: string[] | null): Promise<boolean> {
+        if (userAnswers === null || userAnswers.length === 0) {
+            return false;
+        }
+
+        const answers: Array<string> = (await this.collection.findOne({_id: taskTemplateId}))?.trueAnswers;
         
         const isCorrect = answers.every((answer: string) => userAnswers.includes(answer));
-
-        if (isCorrect) {
-            // accrue experience to the user    
-        }
     
         return isCorrect;
     }
-
-    async get_question() : Promise<string> {
-        return (await this.db.findOne({_id: this._id}))?.question;
-    }
-
-    async get_trueAnswers() : Promise<Array<string>> {
-        return (await this.db.findOne({_id: this._id}))?.trueAnswers;
-    }
-
-    async set_question(question: string) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {question: question});
-    } 
-
-    async set_trueAnswers(answers: Array<number>) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {trueAnswers: answers});
-    } 
 }

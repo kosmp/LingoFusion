@@ -6,7 +6,7 @@ const authCheck = require("../middlewares/authMiddleware");
 
 task_router.post('/:courseId/tasks', authCheck, taskCreateUpdateValidation, taskController.createTaskForCourse);
 task_router.put('/:courseId/tasks/:taskId/edit', authCheck, taskCreateUpdateValidation, taskController.updateTaskForCourse);
-task_router.get('/:courseId/tasks/:taskId', authCheck, taskController.getCourseTask);
+task_router.get('/:courseId/tasks/:taskId', authCheck, taskController.getCourseTaskEnrollment);
 task_router.get('/:courseId/tasks', authCheck, taskController.getAllCourseTasks);
 task_router.delete('/:courseId/tasks/:taskId', authCheck, taskController.deleteCourseTask);
 task_router.delete('/:courseId/tasks', authCheck, taskController.deleteAllCourseTasks);

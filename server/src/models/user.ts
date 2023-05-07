@@ -1,6 +1,7 @@
 import {DB} from '../utils/database';
 import {Profile} from "./profile";
 import {ObjectId} from 'mongodb';
+import {UserCourseProperty} from '../utils/enums';
 
 export class User {
     static readonly collection: DB = new DB('users');
@@ -10,6 +11,7 @@ export class User {
             login: login,
             password: password,
             profile_id: await Profile.initialize(),
+            courseEnrollments: [],
             createdCourses: []
         });
 
@@ -20,25 +22,25 @@ export class User {
         return await this.collection.findAndDeleteById(id);
     }
 
-    static async addCourseToCreatedById(userId: ObjectId, courseId: ObjectId) {
+    static async addCourseToUserById(userId: ObjectId, courseId: ObjectId, property: UserCourseProperty) {
         const user = await this.collection.findOne({_id: new ObjectId(userId)});
         
         if (user) {
-          const courses: Array<ObjectId> = user.createdCourses || [];
+          const courses: Array<ObjectId> = user[property] || [];
           courses.push(courseId);
-          await this.collection.findAndUpdateById(userId, {createdCourses: courses});
+          await this.collection.findAndUpdateById(userId, {[property]: courses});
         }
     }
 
-    static async removeCourseFromCreatedById(userId: ObjectId, courseId: ObjectId) {
-        const tempCourses: Array<ObjectId> = (await this.collection.findOne({_id: new ObjectId(userId)}))?.createdCourses;
+    static async removeCourseFromUserById(userId: ObjectId, courseId: ObjectId, property: UserCourseProperty) {
+        const tempCourses: Array<ObjectId> = (await this.collection.findOne({_id: new ObjectId(userId)}))?.[property];
 
         const index = tempCourses.findIndex((el) => el.equals(courseId));
         if (index !== -1) {
             tempCourses.splice(index, 1);
         }
 
-        return await this.collection.findAndUpdateById(userId, {createdCourses: tempCourses});
+        return await this.collection.findAndUpdateById(userId, {[property]: tempCourses});
     }
 
     static async findOneUser(query: object) {

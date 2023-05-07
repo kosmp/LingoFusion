@@ -18,3 +18,8 @@ export enum StatusType {
     InProgress = "InProgress",
     Completed = "Completed"
 }
+
+export enum UserCourseProperty {
+    CourseEnrollments = 'courseEnrollments',
+    CreatedCourses = 'createdCourses',
+}

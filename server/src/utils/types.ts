@@ -49,14 +49,15 @@ export interface FillInGapsModelType extends TaskTemplateModelType {
 
 export interface TaskEnrollmentModelType {
     _id?: ObjectId
-    taskTemplateId: ObjectId,
-    status: TaskType,
-    title: string,
-    description: string,
-    expForTrueTask: number,
-    startedAt: Date,
-    completedAt: Date,
-    answers: Array<string>
+    taskTemplateId?: ObjectId,
+    taskType?: TaskType,
+    status?: StatusType,
+    title?: string,
+    description?: string,
+    expForTask?: number,
+    startedAt?: Date | null,
+    completedAt?: Date | null,
+    userAnswers?: Array<string> | null
 }
 
 export interface CourseTemplateModelType {
@@ -76,7 +77,7 @@ export interface CourseEnrollmentModelType {
     coursePresentationId?: ObjectId;
     title?: string;
     status?: StatusType;
-    currentTaskId?: ObjectId;
+    currentTaskId?: ObjectId | null;
     startedAt?: Date;
     completedAt?: Date | null;
     tasks?: Array<ObjectId>;

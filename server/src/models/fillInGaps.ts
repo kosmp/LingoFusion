@@ -1,18 +1,14 @@
 import {ObjectId} from 'mongodb';
 import {TaskTemplate} from './taskTemplate';
-import {FillInGapsModelType, TaskType, Blank} from '../utils/types';
-import {taskTemplates} from '../utils/database';
+import {FillInGapsModelType, Blank} from '../utils/types';
+import {TaskType} from '../utils/enums';
 
 export class FillInGaps extends TaskTemplate {
-    constructor() {
-        super();
-    }
+    public static async initialize(model: FillInGapsModelType): Promise<ObjectId> {
+        const taskTemplateId = super.initialize(model);
 
-    async initialize(model: FillInGapsModelType): Promise<ObjectId> {
-        super.initialize(model);
-
-        await this.db.updateOne(
-            {_id: this._id},
+        await this.collection.updateOne(
+            {_id: taskTemplateId},
             {
                 taskType: TaskType.FillGaps,
                 text: model.text,
@@ -20,13 +16,13 @@ export class FillInGaps extends TaskTemplate {
             }
         )
 
-        return this._id;
+        return taskTemplateId;
     }
 
-    static async updateTask(model: FillInGapsModelType) {   
+    public static async updateTask(model: FillInGapsModelType) {   
         await super.updateTask(model);
 
-        await taskTemplates.updateOne(
+        await this.collection.updateOne(
             {_id: model._id},
             {
                 taskType: TaskType.FillGaps,
@@ -36,8 +32,12 @@ export class FillInGaps extends TaskTemplate {
         )
     }
 
-    async check(userAnswers: string[]): Promise<boolean> {
-        const blanks: Array<Blank> = (await this.db.findOne({_id: this._id}))?.blanks;
+    public static async check(taskTemplateId: ObjectId, userAnswers: string[] | null): Promise<boolean> {
+        if (userAnswers === null || userAnswers.length === 0) {
+            return false;
+        }
+
+        const blanks: Array<Blank> = (await this.collection.findOne({_id: taskTemplateId}))?.blanks;
 
         if (userAnswers.length !== blanks.length) {
             return false; // the number of user responses does not match the number of gaps in the task
@@ -51,26 +51,6 @@ export class FillInGaps extends TaskTemplate {
             }
         }
         
-        if (isCorrect) {
-            // accrue experience to the user
-        }
-        
         return isCorrect;
     }
-
-    async get_text(): Promise<string> {
-        return (await this.db.findOne({_id: this._id}))?.text;
-    }
-
-    async get_blanks() {
-        return (await this.db.findOne({_id: this._id}))?.blanks;
-    }
-
-    async set_text(text: string) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {text: text});
-    } 
-
-    async set_blanks(blanks: Array<Blank>) {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {blanks: blanks});
-    } 
 }

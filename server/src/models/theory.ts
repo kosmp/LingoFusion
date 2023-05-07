@@ -1,34 +1,29 @@
 import {ObjectId} from 'mongodb';
 import {TaskTemplate} from './taskTemplate';
-import {TheoryModelType, TaskType} from '../utils/types';
-import {taskTemplates} from '../utils/database';
+import {TheoryModelType} from '../utils/types';
+import {TaskType} from '../utils/enums';
 
 export class Theory extends TaskTemplate {
-    constructor() {
-        super();
-    }
+    public static async initialize(model: TheoryModelType): Promise<ObjectId> {
+        const taskTemplateId = await super.initialize(model);
 
-    async initialize(model: TheoryModelType): Promise<ObjectId> {
-        await super.initialize(model);
-
-        await this.db.updateOne(
-            {_id: this._id},
+        await this.collection.updateOne(
+            {_id: taskTemplateId},
             {
                 taskType: TaskType.Theory,
                 content: model.content,
                 references: model.references,
-                imagesUrl: model.images,
-                expForTrueTask: 0   // no EXP for THEORY task
+                imagesUrl: model.images
             }
         )
 
-        return this._id;
+        return taskTemplateId;
     }
 
-    static async updateTask(model: TheoryModelType) {   
+    public static async updateTask(model: TheoryModelType) {   
         await super.updateTask(model);
 
-        await taskTemplates.updateOne(
+        await this.collection.updateOne(
             {_id: model._id},
             {
                 taskType: TaskType.Theory,
@@ -39,31 +34,7 @@ export class Theory extends TaskTemplate {
         )
     }
     
-    async check(userAnswers: string[] = []): Promise<boolean> {
+    public static async check(taskTemplateId: ObjectId, userAnswers: string[] | null): Promise<boolean> {
         return true;    // no check questions needed
-    }
-    
-    async get_content(): Promise<string> {
-        return (await this.db.findOne({_id: this._id}))?.content;
-    }
-
-    async get_references(): Promise<Array<string>> {
-        return (await this.db.findOne({_id: this._id}))?.references;
-    }
-
-    async get_images(): Promise<Array<string>> {
-        return (await this.db.findOne({_id: this._id}))?.images;
-    }
-
-    async set_content(content: string) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {content: content});
-    } 
-
-    async set_references(references: Array<string>) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {references: references});
-    } 
-
-    async set_images(images: Array<string>) : Promise<void> {
-        await this.db.findAndUpdateById(new ObjectId(this._id), {images: images});
     }
 }
