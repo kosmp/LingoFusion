@@ -1,7 +1,7 @@
 import {DB} from '../utils/database';
 import {Profile} from "./profile";
 import {ObjectId} from 'mongodb';
-import {UserCourseProperty} from '../utils/enums';
+import {EnglishLvl, UserCourseProperty} from '../utils/enums';
 
 export class User {
     static readonly collection: DB = new DB('users');
@@ -10,7 +10,11 @@ export class User {
         const userId: ObjectId = await this.collection.insertOne({
             login: login,
             password: password,
-            profile_id: await Profile.initialize(),
+            profile_id: await Profile.initialize({
+                username: '',
+                email: '',
+                englishLvl: EnglishLvl.A0
+            }),
             courseEnrollments: [],
             createdCourses: []
         });

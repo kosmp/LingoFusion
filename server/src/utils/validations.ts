@@ -1,7 +1,7 @@
 import {body} from 'express-validator';
 import validator from 'validator';
 import {isArray, isString, isNumber} from 'class-validator';
-import {EnglishLvl} from '../utils/types';
+import {EnglishLvl} from '../utils/enums';
 
 const validTags = new Set(['tag1', 'tag2', 'tag3']);
 

@@ -2,6 +2,7 @@
 import {Document, ObjectId, WithId} from "mongodb";
 import {CourseEnrollment} from "../models/courseEnrollment";
 import {CourseTemplate} from "../models/courseTemplate";
+import { TaskEnrollment } from "../models/taskEnrollment";
 const taskService = require('../services/taskService');
 
 class CourseService {
@@ -39,28 +40,39 @@ class CourseService {
         return resultCourses;
     }
 
-    async getCourseEnrollmentsByUserId(userId: ObjectId) : Promise<Array<WithId<Document>>> {
-        const courses = await CourseEnrollment.findAllCourses();
-
-        if (!courses) {
-            throw Error(`Can't find any courses`);
-        }
-
-        const result: Array<WithId<Document>> = new Array<WithId<Document>>();
-
-        for (const course of courses) {
-            if (course.authorId != userId) {
-                continue;
+    async checkExistenceOfCourseEnrollmentWithId(courseTemplateId: ObjectId) {
+        const allCourseEnrollments = await CourseEnrollment.findAllCourses();
+        
+        allCourseEnrollments.forEach((course) => {
+            if (course.coursePresentationId === courseTemplateId) {
+                return true;
             }
+        });
 
-            result.push(course);
-        }
-
-        return result;
+        return false;
     }
 
-    async calculateCourseCompletionStatistics(courseId: ObjectId, userId: ObjectId) {
+    async calculateCourseStatistics(courseId: ObjectId) {
+        const courseEnrollment = await CourseEnrollment.findCourseById(courseId);
+
+        const courseEnrollmentTasks: Array<ObjectId> = courseEnrollment?.tasks;
         
+        let resultExp = 0;
+        let counterOfTrueTasks = 0;
+        courseEnrollmentTasks.forEach(async (taskId) => {
+            const task = await TaskEnrollment.findTaskById(taskId);
+
+            if (task?.expForTrueTask != 0) {
+                ++counterOfTrueTasks;
+            }
+
+            resultExp += task?.expForTask;
+        });
+
+        return {
+            resultExp: resultExp,
+            counterOfTrueTasks: counterOfTrueTasks
+        }
     }
 }
 

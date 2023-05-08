@@ -14,7 +14,7 @@ export class CourseEnrollment {
             startedAt: model.startedAt,
             completedAt: model.completedAt,
             tasks: model.tasks,
-            authorId: model.authorId 
+            userId: model.userId 
         })
 
         return courseEnrollmentId;

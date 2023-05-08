@@ -18,6 +18,14 @@ export type UserDtoModelType = {
     courseEnrollments: Array<ObjectId>;
 }
 
+export type ProfileModelType = {
+    _id?: ObjectId;
+    username?: string;
+    email?: string;
+    englishLvl?: EnglishLvl;
+    exp?: number;
+}
+
 export interface TaskTemplateModelType {
     _id?: ObjectId;
     title: string;
@@ -80,10 +88,10 @@ export interface CourseEnrollmentModelType {
     title?: string;
     status?: StatusType;
     currentTaskId?: ObjectId | null;
-    startedAt?: Date;
+    startedAt?: Date | null;
     completedAt?: Date | null;
     tasks?: Array<ObjectId>;
-    authorId?: ObjectId;
+    userId?: ObjectId;
 }
 
 export interface CourseCreateTemplateModelType {
