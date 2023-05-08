@@ -235,7 +235,7 @@ class TaskController {
         try {
             const courseId = req.params.courseId;
 
-            const course = await Course.findCourseById(new ObjectId(courseId));
+            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
             
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
@@ -245,15 +245,15 @@ class TaskController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete tasks from course he didn't create`));
             }
 
-            const tasks: Array<ObjectId> = await Course.get_tasksById(new ObjectId(courseId));
+            const tasks: Array<ObjectId> = await CourseTemplate.get_tasksById(new ObjectId(courseId));
             
             if (tasks.length === 0) {
                 return res.status(200).json({ message: "Nothing to delete. Tasks: []" })
             }
 
             for (const task of tasks) {
-              await Course.removeTaskByIdFromCourseTasks(course._id, new ObjectId(task));
-              const deleteResult = await Task.deleteTaskById(new ObjectId(task));
+              await CourseTemplate.removeTaskId(course._id, new ObjectId(task));
+              const deleteResult = await TaskTemplate.deleteTaskById(new ObjectId(task));
             
               if (!deleteResult) {
                 return next(ApiError.NotFoundError(`Can't remove task with id: ${task}`));
@@ -271,7 +271,7 @@ class TaskController {
         try {
             const courseId = req.params.courseId;
 
-            const course = await Course.findCourseById(new ObjectId(courseId));
+            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
             
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));

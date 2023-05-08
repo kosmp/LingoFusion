@@ -6,9 +6,10 @@ const authCheck = require("../middlewares/authMiddleware");
 
 course_router.get('/', authCheck, courseController.getAllAvailableCourses);
 course_router.get('/:courseId/start', authCheck, courseController.getCourseEnrollment);
-course_router.put('/:courseId', authCheck, courseController.getCourseTemplate);
+course_router.get('/:courseId', authCheck, courseController.getCourseTemplate);
 course_router.get('/templates', authCheck, courseController.getAllCourseTemplates);
 course_router.get('/enrollments', authCheck, courseController.getAllCourseEnrollmentsOfUser);
+course_router.get('/createdCourses', authCheck, courseController.getAllCourseTemplatesOfUser);
 course_router.get('/:courseId/progress', authCheck, courseController.getProgressOfCourse);
 course_router.post('/', authCheck, courseCreateValidation, courseController.createCourse);
 course_router.post('/:courseId/enroll', authCheck, courseController.enrollInCourse);

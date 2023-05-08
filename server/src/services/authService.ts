@@ -16,15 +16,21 @@ class AuthService {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
-        const user = new User();
-        await user.initialize(login, hashedPassword)
+        const userId: ObjectId = await User.initialize(login, hashedPassword);
+        const user = await User.findOneUserById(userId);
+        
+        if (!user) {
+            throw ApiError.BadRequest(`User with id ${userId} doesn't exist`);
+        }
 
         const userDto = new UserDto();
         await userDto.initializeAsync({
-            "_id": await user.get_id(),
-            "login": await user.get_login(),
-            "profile_id": await user.get_profile_id(),
-            "createdCourses": await user.get_createdCourses()});
+            "_id": userId,
+            "login": user.login,
+            "profile_id": user.profile_id,
+            "createdCourses": user.createdCourses,
+            "courseEnrollments": user.courseEnrollments
+        });
         const tokens = tokenService.generateTokens({...userDto}); 
         await tokenService.saveToken(userDto._id, tokens.refreshToken)
     

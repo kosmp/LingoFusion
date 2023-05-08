@@ -7,6 +7,7 @@ export type UserDtoInitType = {
     login: Promise<string>;
     profile_id: Promise<ObjectId>;
     createdCourses: Promise<Array<ObjectId>>;
+    courseEnrollments: Promise<Array<ObjectId>>;
 }
 
 export type UserDtoModelType = {
@@ -14,6 +15,7 @@ export type UserDtoModelType = {
     login: string;
     profile_id: ObjectId;
     createdCourses: Array<ObjectId>;
+    courseEnrollments: Array<ObjectId>;
 }
 
 export interface TaskTemplateModelType {

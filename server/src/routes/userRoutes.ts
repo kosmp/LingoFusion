@@ -5,11 +5,7 @@ const userController = require("../controllers/userController");
 const authCheck = require("../middlewares/authMiddleware");
 
 user_router.get("/:userId", authCheck, userController.getUser);
-
 user_router.patch("/:userId", userUpdateValidation, authCheck, userController.patchUserPassword);
-
 user_router.delete("/:userId", authCheck, userController.deleteUser);
-
-user_router.get("/:userId/createdCourses", authCheck, userController.getUserCreatedCourses);
 
 module.exports = user_router;

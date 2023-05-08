@@ -30,30 +30,6 @@ class UserController {
             return next(e);
         }
     }
-
-    async getUserCreatedCourses(req: Request, res: Response, next: NextFunction) {
-        try {
-            const userId = req.params.userId;
-
-            if (!ObjectId.isValid(userId)) {
-                return next(ApiError.BadRequest("Incorrect userId"));
-            }
-
-            const user = await User.findOneUserById(new ObjectId(userId));
-    
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
-            }
-
-            const createdCourses: Array<ObjectId> = await User.get_createdCoursesById(new ObjectId(userId));
-
-            const result = await courseService.getCoursesByListOfIds(createdCourses);
-
-            return res.status(200).json(result);
-        } catch (e) {
-            return next(e);
-        }
-    }
     
     async patchUserPassword(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         const errors = validationResult(req);
@@ -115,7 +91,7 @@ class UserController {
                 if (!profileDoc) {
                     return next(ApiError.BadRequest("Not found profileDoc to delete with User"));
                 }
-                await Profile.findProfileByIdAndDelete(profileDoc._id);
+                await Profile.deleteProfileById(profileDoc._id);
 
                 return res.status(200).json("Account has been deleted");
             } catch (e) {

@@ -81,5 +81,3 @@ export class DB {
         return res[0];
     }
 }
-
-export const tokens = new DB('user-tokens');

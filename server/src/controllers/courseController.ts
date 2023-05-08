@@ -63,9 +63,47 @@ class CourseController {
 
     async getAllCourseEnrollmentsOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courses = await courseService.getCourseEnrollmentsByUserId(new ObjectId(req.user._id));
+            const userId = req.params.userId;
 
-            return res.status(200).json(courses);
+            if (!ObjectId.isValid(userId)) {
+                return next(ApiError.BadRequest("Incorrect userId"));
+            }
+
+            const user = await User.findOneUserById(new ObjectId(userId));
+    
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
+            }
+
+            const courseEnrollments: Array<ObjectId> = user.courseEnrollments;
+
+            const result = await courseService.getCourseEnrollmentsByListOfIds(courseEnrollments);
+
+            return res.status(200).json(result);
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async getUserCreatedCourses(req: Request, res: Response, next: NextFunction) {
+        try {
+            const userId = req.params.userId;
+
+            if (!ObjectId.isValid(userId)) {
+                return next(ApiError.BadRequest("Incorrect userId"));
+            }
+
+            const user = await User.findOneUserById(new ObjectId(userId));
+    
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
+            }
+
+            const createdCourses: Array<ObjectId> = user.createdCourses;
+
+            const result = await courseService.getCourseTemplatesByListOfIds(createdCourses);
+
+            return res.status(200).json(result);
         } catch (e) {
             return next(e);
         }

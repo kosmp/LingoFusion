@@ -1,49 +1,43 @@
 import {DB} from '../utils/database';
 import {ObjectId} from "mongodb";
-import {tokens} from '../utils/database';
 
 export class Token {
-    private _id!: ObjectId;
-    protected db!: DB;
+    static readonly collection: DB = new DB('user-tokens');
 
-    constructor() {
-        this.db = tokens;
-    }
-
-    async initialize(userId: ObjectId, refreshTokenn: string) {
-        this._id = await this.db.insertOne({
+    static async initialize(userId: ObjectId, refreshTokenn: string) {
+        const tokenId = await this.collection.insertOne({
             user: userId,
             refreshToken: refreshTokenn
         })
 
-        return this._id;
+        return tokenId;
     }
 
-    async get_refreshToken() {
-        return (await this.db.findOne({_id: this._id}))?.refreshToken;
+    static async get_refreshToken(tokenId: ObjectId) {
+        return (await this.collection.findOne({_id: tokenId}))?.refreshToken;
     }
 
-    async update_refreshToken(refreshToken: string) {
-        await this.db.updateOneField({_id: this._id}, 'refreshToken', refreshToken)
+    static async update_refreshToken(tokenId: ObjectId, refreshToken: string) {
+        await this.collection.updateOneField({_id: tokenId}, 'refreshToken', refreshToken)
     }
 
     static async updateToken(token: object, field: string, value: string) {
-        return await tokens.updateOneField(token, field, value);
+        return await this.collection.updateOneField(token, field, value);
     }
 
     static async getTokenByUserId(userId: ObjectId) {
-        return await tokens.findOne({user: userId});
+        return await this.collection.findOne({user: userId});
     }
 
     static async deleteToken(refresh_token: string) {
-        return await tokens.deleteOne({refreshToken: refresh_token});
+        return await this.collection.deleteOne({refreshToken: refresh_token});
     }
 
     static async findTokenByUserID(userId: ObjectId) {
-        return await tokens.findOne({user: userId});
+        return await this.collection.findOne({user: userId});
     }
 
     static async findTokenByIdAndDelete(userId: ObjectId) {
-        return await tokens.findAndDeleteById(userId);
+        return await this.collection.findAndDeleteById(userId);
     }
 }
