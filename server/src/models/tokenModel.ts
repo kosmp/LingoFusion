@@ -4,10 +4,10 @@ import {ObjectId} from "mongodb";
 export class Token {
     static readonly collection: DB = new DB('user-tokens');
 
-    static async initialize(userId: ObjectId, refreshTokenn: string) {
+    static async initialize(userId: ObjectId, refreshToken: string) {
         const tokenId = await this.collection.insertOne({
             user: userId,
-            refreshToken: refreshTokenn
+            refreshToken: refreshToken
         })
 
         return tokenId;
@@ -25,15 +25,19 @@ export class Token {
         return await this.collection.updateOneField(token, field, value);
     }
 
-    static async getTokenByUserId(userId: ObjectId) {
-        return await this.collection.findOne({user: userId});
-    }
-
     static async deleteToken(refresh_token: string) {
         return await this.collection.deleteOne({refreshToken: refresh_token});
     }
 
-    static async findTokenByUserID(userId: ObjectId) {
+    static async findToken(refresh_token: string) {
+        return await this.collection.findOne({refreshToken: refresh_token});
+    }
+
+    static async findTokenById(id: ObjectId) {
+        return await this.collection.findOne({_id: id});
+    }
+
+    static async findTokenByUserId(userId: ObjectId) {
         return await this.collection.findOne({user: userId});
     }
 

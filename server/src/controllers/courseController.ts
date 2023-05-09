@@ -79,10 +79,7 @@ class CourseController {
 
     async getAllCourseEnrollmentsOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const userId = req.params.userId;
-            if (!ObjectId.isValid(userId)) {
-                return next(ApiError.BadRequest("Incorrect userId"));
-            }
+            const userId = req.user._id;
 
             const user = await User.findOneUserById(new ObjectId(userId));
             if (!user) {
@@ -99,12 +96,9 @@ class CourseController {
         }
     }
 
-    async geAllCourseTemplatesOfUser(req: Request, res: Response, next: NextFunction) {
+    async getAllCourseTemplatesOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const userId = req.params.userId;
-            if (!ObjectId.isValid(userId)) {
-                return next(ApiError.BadRequest("Incorrect userId"));
-            }
+            const userId = req.user._id;
 
             const user = await User.findOneUserById(new ObjectId(userId));
             if (!user) {
@@ -133,7 +127,7 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
             }
 
-            const result = await courseService.getCoursesByListOfIds([course._id]);
+            const result = await courseService.getCourseTemplatesByListOfIds([course._id]);
             return res.status(200).json(result);
         } catch (e) {
             return next(e);
@@ -152,7 +146,7 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
             }
 
-            const result = await courseService.getCoursesByListOfIds([course._id]);
+            const result = await courseService.getCourseEnrollmentsByListOfIds([course._id]);
             return res.status(200).json(result);
         } catch (e) {
             return next(e);
@@ -224,8 +218,9 @@ class CourseController {
             }
 
             // if other users have started enrolling the course, then refuse to update courseTemplate
-            if (await courseService.checkExistenceOfCourseEnrollmentWithId(courseId)) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete a course while other users are subscribed to it`));
+            const courseExists: boolean = courseService.checkExistenceOfCourseEnrollmentWithId(courseId);
+            if (courseExists) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can not change a course that is already being enrolled`));
             }
 
             CourseTemplate.updateCourse({
@@ -254,6 +249,11 @@ class CourseController {
             const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseId}`));
+            }
+
+            const courseEnrollmentsWithUserId = await CourseEnrollment.findCoursesByUserId(req.user._id);
+            if (courseEnrollmentsWithUserId.some((courseEnrollment) => courseEnrollment.coursePresentationId.equals(new ObjectId(courseId)))) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} is already enrolling the course`));
             }
 
             const taskTemplates: Array<ObjectId> = course.taskTemplates;
@@ -293,9 +293,13 @@ class CourseController {
             });
 
             const result = await CourseEnrollment.findCourseById(courseEnrollmentId);
-            if (!result) {
-                return next(ApiError.BadRequest("Error when enrolling in a course"))
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
             }
+
+            await User.findUserByIdAndUpdate(req.user._id, {courseEnrollments: [...user.courseEnrollments, courseEnrollmentId]});
 
             return res.status(200).json({
                 success: true,

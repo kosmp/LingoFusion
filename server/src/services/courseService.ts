@@ -44,7 +44,7 @@ class CourseService {
         const allCourseEnrollments = await CourseEnrollment.findAllCourses();
         
         allCourseEnrollments.forEach((course) => {
-            if (course.coursePresentationId === courseTemplateId) {
+            if (course.coursePresentationId.equals(courseTemplateId)) {
                 return true;
             }
         });

@@ -56,6 +56,10 @@ export class CourseEnrollment {
         return await this.collection.findOne({_id: new ObjectId(id)});
     }
 
+    static async findCoursesByUserId(userId: ObjectId) {
+        return await this.collection.findAll({userId: userId});
+    }
+
     static async findAllCourses() {
         return await this.collection.findAll();
     }

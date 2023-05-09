@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 import {ObjectId} from "mongodb";
+import {Token} from '../models/tokenModel';
 const jwt = require('jsonwebtoken');
-const TokenModel = require('../models/tokenModel').Token;
 
 require('dotenv').config();
 
@@ -34,25 +34,24 @@ class TokenService {
     }
 
     async saveToken(userId: string, newRefreshToken: string) {
-        const tokenData = await TokenModel?.getTokenByUserId(new ObjectId(userId));
+        const tokenData = await Token?.findTokenByUserId(new ObjectId(userId));
         
         if (tokenData) {
-            TokenModel.updateToken(tokenData, "refreshToken", newRefreshToken)
+            await Token.updateToken(tokenData, "refreshToken", newRefreshToken)
             return tokenData;
         }
 
-        const token = new TokenModel();
-        token.initialize(new ObjectId(userId), newRefreshToken);
-        return token; 
+        const id = await Token.initialize(new ObjectId(userId), newRefreshToken);
+        return await Token.findTokenById(id); 
     }
 
     async removeToken(refreshToken: string) {
-        const tokenData = await TokenModel.deleteToken(refreshToken);
+        const tokenData = await Token.deleteToken(refreshToken);
         return tokenData;
     }
 
     async findToken(refreshToken: string) {
-        const tokenData = await TokenModel.findToken(refreshToken);
+        const tokenData = await Token.findToken(refreshToken);
         return tokenData;
     }
 }

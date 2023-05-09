@@ -79,7 +79,7 @@ class UserController {
                 
                 await User.deleteUserById(new ObjectId(req.params.userId));
 
-                const tokenDoc = await Token.findTokenByUserID(new ObjectId(req.params.userId));
+                const tokenDoc = await Token.findTokenByUserId(new ObjectId(req.params.userId));
 
                 if (!tokenDoc) {
                     return next(ApiError.BadRequest("Not found tokenDoc to delete with User"));
