@@ -5,7 +5,7 @@ import {TaskType} from '../utils/enums';
 
 export class FillInGaps extends TaskTemplate {
     public static async initialize(model: FillInGapsModelType): Promise<ObjectId> {
-        const taskTemplateId = super.initialize(model);
+        const taskTemplateId = await super.initialize(model);
 
         await this.collection.updateOne(
             {_id: taskTemplateId},

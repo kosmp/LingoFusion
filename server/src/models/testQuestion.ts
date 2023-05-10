@@ -5,7 +5,7 @@ import {TaskType} from '../utils/enums';
 
 export class TestQuestion extends TaskTemplate {
     public static async initialize(model: TestModelType): Promise<ObjectId> {
-        const taskTemplateId = super.initialize(model);
+        const taskTemplateId = await super.initialize(model);
 
         await this.collection.updateOne(
             {_id: taskTemplateId},
@@ -25,6 +25,7 @@ export class TestQuestion extends TaskTemplate {
         await this.collection.updateOne(
             {_id: model._id},
             {
+                taskType: TaskType.Test,
                 question: model.question,
                 trueAnswers: model.trueAnswers
             }

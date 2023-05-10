@@ -45,17 +45,17 @@ class CourseController {
         try {
             const courseEnrollments = await CourseEnrollment.findAllCourses();
             if (!courseEnrollments) {
-                throw Error(`Can't find any courses`);
+                return next(ApiError.NotFoundError(`Can't find any courses`));
             }
     
             const result: Array<WithId<Document>> = new Array<WithId<Document>>();
             const userId = new ObjectId(req.user._id)
 
             for (const course of courseEnrollments) {
-                if (course.userId != userId) {
+                if (!(new ObjectId(course.userId)).equals(userId)) {
                     continue;
                 }
-    
+
                 result.push(course);
             }
 
@@ -136,9 +136,9 @@ class CourseController {
 
     async getCourseEnrollment(req: Request, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
+            const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
+                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
             }
 
             const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
@@ -165,6 +165,11 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
             }
 
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
+
             if (course.authorId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete course he didn't create`));
             }
@@ -174,7 +179,7 @@ class CourseController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete a course while other users are subscribed to it`));
             }
 
-            const tasks: Array<ObjectId> = course?.taskTemplates;
+            const tasks: Array<ObjectId> = course.taskTemplates;
             
             tasks.forEach(async task => {
                 const deleteResult = await TaskTemplate.deleteTaskById(new ObjectId(task));
@@ -213,12 +218,17 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
             }
 
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
+
             if (course.authorId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete course he didn't create`));
             }
 
             // if other users have started enrolling the course, then refuse to update courseTemplate
-            const courseExists: boolean = courseService.checkExistenceOfCourseEnrollmentWithId(courseId);
+            const courseExists: boolean = await courseService.checkExistenceOfCourseEnrollmentWithId(courseId);
             if (courseExists) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can not change a course that is already being enrolled`));
             }
@@ -249,6 +259,11 @@ class CourseController {
             const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseId}`));
+            }
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
             }
 
             const courseEnrollmentsWithUserId = await CourseEnrollment.findCoursesByUserId(req.user._id);
@@ -294,11 +309,6 @@ class CourseController {
 
             const result = await CourseEnrollment.findCourseById(courseEnrollmentId);
 
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
-
             await User.findUserByIdAndUpdate(req.user._id, {courseEnrollments: [...user.courseEnrollments, courseEnrollmentId]});
 
             return res.status(200).json({
@@ -312,22 +322,26 @@ class CourseController {
 
     async unEnrollFromCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
+            const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
+                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
             }
     
             const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
             }
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
     
             if (course.authorId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
             }
     
-            const tasks: Array<ObjectId> = course?.tasks;
-                
+            const tasks: Array<ObjectId> = course.tasks;
             tasks.forEach(async task => {
                 const deleteResult = await TaskEnrollment.deleteTaskById(new ObjectId(task));
                 if (!deleteResult) {
@@ -350,31 +364,38 @@ class CourseController {
 
     async startCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
+            const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
+                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
             }
     
             const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
             }
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
     
-            if (course.authorId != req.user._id) {
+            if (course.userId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
             }
-    
-            if (!course.currentTaskId) {
+
+            if (course.currentTaskId) {
                 return next(ApiError.BadRequest(`CourseEnrollment with id ${courseId} already started`));
             }
-    
-            if (!course.tasks) {
+
+            if (!(course.tasks) || course.tasks.length == 0) {
                 return next(ApiError.BadRequest(`CourseEnrollment with id ${courseId} hasn't any taskEnrollments`));
             }
     
+            const firstTaskId: ObjectId = course.tasks[0];
+
             await CourseEnrollment.updateCourse({
                 _id: new ObjectId(courseId),
-                currentTaskId: course.tasks[0]._id,
+                currentTaskId: firstTaskId,
                 startedAt: new Date()
             })
             
@@ -394,7 +415,7 @@ class CourseController {
 
     async completeCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
+            const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
                 return next(ApiError.BadRequest("Incorrect courseId"));
             }
@@ -403,18 +424,26 @@ class CourseController {
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
             }
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
     
             if (course.userId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
             }
+
+            if (!course.startedAt) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not started this courseEnrollment`));
+            }
     
-            const taskIds: Array<ObjectId> = course?.tasks;
-                
+            const taskIds: Array<ObjectId> = course.tasks;
             taskIds.forEach(async taskId => {
                 const task = await TaskEnrollment.findTaskById(taskId);
     
                 if (!task) {
-                    return next(ApiError.BadRequest("Can't get taskEnrollment"));
+                    return next(ApiError.BadRequest(`Can't get taskEnrollment with id ${taskId}`));
                 }
     
                 if (task.status == StatusType.InProgress) {
@@ -423,11 +452,6 @@ class CourseController {
             });
     
             const statistics = await courseService.calculateCourseStatistics(new ObjectId(courseId));
-    
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
     
             await Profile.addExpToProfile(user.profile_id, statistics.resultExp);
     
@@ -448,14 +472,19 @@ class CourseController {
 
     async getProgressOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
+            const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
+                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
             }
     
             const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
             if (!course) {
                 return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
+            }
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
             }
     
             if (course.userId != req.user._id) {

@@ -15,7 +15,7 @@ class CourseService {
             if (course) {
                 const taskIds: Array<ObjectId> = (await CourseTemplate.findCourseById(course!._id))?.taskTemplates;
                 const tasks: Array<WithId<Document>> = await taskService.getTaskTemplatesByListOfIds(taskIds);
-                course!.tasks = tasks;
+                course.taskTemplates = tasks;
                 resultCourses.push(course);
             }
         }
@@ -32,7 +32,7 @@ class CourseService {
             if (course) {
                 const taskIds: Array<ObjectId> = (await CourseEnrollment.findCourseById(course!._id))?.tasks;
                 const tasks: Array<WithId<Document>> = await taskService.getTaskEnrollmentsByListOfIds(taskIds);
-                course!.tasks = tasks;
+                course.tasks = tasks;
                 resultCourses.push(course);
             }
         }
@@ -42,12 +42,12 @@ class CourseService {
 
     async checkExistenceOfCourseEnrollmentWithId(courseTemplateId: ObjectId) {
         const allCourseEnrollments = await CourseEnrollment.findAllCourses();
-        
-        allCourseEnrollments.forEach((course) => {
+
+        for (const course of allCourseEnrollments) {
             if (course.coursePresentationId.equals(courseTemplateId)) {
-                return true;
+              return true;
             }
-        });
+        }
 
         return false;
     }

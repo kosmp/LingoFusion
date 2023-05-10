@@ -19,6 +19,12 @@ export enum StatusType {
     Completed = "Completed"
 }
 
+export enum TaskStatusType {
+    InProgress = "InProgress",
+    Checked = "Checked",
+    Completed = "Completed"
+}
+
 export enum UserCourseProperty {
     CourseEnrollments = 'courseEnrollments',
     CreatedCourses = 'createdCourses',
