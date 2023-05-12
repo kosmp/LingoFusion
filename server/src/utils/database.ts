@@ -73,7 +73,7 @@ export class DB {
     }
 
     async findAndUpdateById(id: ObjectId, newObject: object) {
-        await this.collection.updateOne({_id: new ObjectId(id)}, {$set: newObject})
+        return await this.collection.updateOne({_id: new ObjectId(id)}, {$set: newObject})
     }
 
     async aggregate(query: object[]) {
