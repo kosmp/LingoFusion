@@ -11,6 +11,7 @@ import {TaskTemplate} from '../models/taskTemplate';
 import {TaskEnrollment} from '../models/taskEnrollment';
 import {User} from '../models/user';
 import {CourseStatusType, TaskStatusType, UserCourseProperty} from '../utils/enums';
+import {Profile} from '../models/profile';
 
 
 class CourseController {
@@ -21,6 +22,12 @@ class CourseController {
                 return next(ApiError.BadRequest("Validation error", errors.array()))
             }
 
+            const userId: ObjectId = req.user._id;
+            const user = await User.findOneUserById(new ObjectId(userId));
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
+            }
+
             const courseId: ObjectId = await CourseTemplate.initialize({
                 title: req.body.title,
                 description: req.body.description,
@@ -29,8 +36,22 @@ class CourseController {
                 tags: req.body.tags,
                 taskTemplates: [],
                 rating: 0,
-                authorId: req.user?._id
-            })
+                authorId: userId
+            });
+
+            const profile = await Profile.findProfileById(user.profile_id);
+            if (!profile) {
+                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
+            }
+
+            await Profile.updateProfile({
+                _id: user.profile_id,
+                statistics: {
+                    totalUserCountOfCompletedCourses: profile.statistics.totalUserCountOfCompletedCourses,
+                    totalUserCountInProgressCourses: profile.statistics.totalUserCountInProgressCourses,
+                    totalUserCountOfCreatedCourses: profile.statistics.totalUserCountOfCreatedCourses + 1
+                }
+            });
             
             await User.addCourseToUserById(req.user?._id, courseId, UserCourseProperty.CreatedCourses);
 
@@ -180,12 +201,12 @@ class CourseController {
 
             const tasks: Array<ObjectId> = course.taskTemplates;
             
-            tasks.forEach(async task => {
+            for(const task of tasks) {
                 const deleteResult = await TaskTemplate.deleteTaskById(new ObjectId(task));
                 if (!deleteResult) {
                     return next(ApiError.NotFoundError(`Can't remove task with id: ${task}`));
                 }
-            });
+            }
 
             const deleteResult = await CourseTemplate.deleteCourseById(new ObjectId(courseId));
             if (!deleteResult) {
@@ -232,7 +253,7 @@ class CourseController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can not change a course that is already being enrolled`));
             }
 
-            CourseTemplate.updateCourse({
+            await CourseTemplate.updateCourse({
                 _id: course._id,
                 title: req.body.title,
                 description: req.body.description,
@@ -270,15 +291,17 @@ class CourseController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} is already enrolling the course`));
             }
 
-            const taskTemplates: Array<ObjectId> = course.taskTemplates;
-            
+            const taskTemplates: Array<ObjectId> = course.taskTemplates
             const tasks: Array<ObjectId> = new Array<ObjectId>;
-            
+            let maxExpForTrueTasks = 0;
+
             for (const taskTemplateId of taskTemplates) {
                 const taskTemplate = await TaskTemplate.findTaskById(taskTemplateId);
                 if (!taskTemplate) {
                     return next(ApiError.NotFoundError(`Can't find taskTemplate with id: ${taskTemplateId}`));
                 }
+
+                maxExpForTrueTasks += taskTemplate.expForTrueTask
 
                 const task = await TaskEnrollment.initialize({
                     taskTemplateId: taskTemplate._id,
@@ -307,7 +330,8 @@ class CourseController {
                     resultExp: 0,
                     counterOfTrueTasks: 0
                 },
-                userId: req.user._id
+                userId: req.user._id,
+                maxPossibleExpAmount: maxExpForTrueTasks
             });
 
             const result = await CourseEnrollment.findCourseById(courseEnrollmentId);
@@ -414,6 +438,20 @@ class CourseController {
             if (!result) {
                 return next(ApiError.BadRequest("Can't get getCourseEnrollmentsByListOfIds"));
             }
+
+            const profile = await Profile.findProfileById(user.profile_id);
+            if (!profile) {
+                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
+            }
+
+            await Profile.updateProfile({
+                _id: user.profile_id,
+                statistics: {
+                    totalUserCountOfCompletedCourses: profile.statistics.totalUserCountOfCompletedCourses,
+                    totalUserCountInProgressCourses: profile.statistics.totalUserCountInProgressCourses + 1,
+                    totalUserCountOfCreatedCourses: profile.statistics.totalUserCountOfCreatedCourses
+                }
+            });
     
             return res.status(200).json({
                 success: true,
@@ -464,6 +502,20 @@ class CourseController {
                     return next(ApiError.AccessForbidden(`You can complete course only with all completed tasks`));
                 }
             }
+
+            const profile = await Profile.findProfileById(user.profile_id);
+            if (!profile) {
+                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
+            }
+
+            await Profile.updateProfile({
+                _id: user.profile_id,
+                statistics: {
+                    totalUserCountOfCompletedCourses: profile.statistics.totalUserCountOfCompletedCourses + 1,
+                    totalUserCountInProgressCourses: profile.statistics.totalUserCountInProgressCourses - 1,
+                    totalUserCountOfCreatedCourses: profile.statistics.totalUserCountOfCreatedCourses
+                }
+            });
     
             const statistics = await courseService.calculateCourseStatistics(new ObjectId(courseId));
     

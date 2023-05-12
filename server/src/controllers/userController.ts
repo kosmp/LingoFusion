@@ -102,7 +102,40 @@ class UserController {
         }
     }
 
+    async getUserProfile(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        try {
+            const userId = req.params.userId
+            if (!ObjectId.isValid(userId)) {
+                return next(ApiError.BadRequest("Incorrect userId"));
+            }
 
+            const user = await User.findOneUserById(new ObjectId(userId));
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
+            }
+    
+            const profile = await Profile.findProfileById(user.profile_id);
+            if (!profile) {
+                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
+            }
+
+            return res.status(200).json(profile);
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async updateUsernameInProfile(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        
+    }
+
+    async updateEmailInProfile(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        
+    }
+
+    async updateEnglishLvlInProfile(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        
+    }
 }
 
 module.exports = new UserController()

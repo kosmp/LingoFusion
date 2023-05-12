@@ -18,12 +18,18 @@ export type UserDtoModelType = {
     courseEnrollments: Array<ObjectId>;
 }
 
+export type UserStatistics = {
+    totalUserCountOfCompletedCourses: number;
+    totalUserCountInProgressCourses: number;
+    totalUserCountOfCreatedCourses: number;
+}
+
 export type ProfileModelType = {
     _id?: ObjectId;
     username?: string;
     email?: string;
     englishLvl?: EnglishLvl;
-    exp?: number;
+    statistics: UserStatistics;
 }
 
 export interface TaskTemplateModelType {
@@ -97,6 +103,7 @@ export interface CourseEnrollmentModelType {
     tasks?: Array<ObjectId>;
     statistics?: CourseStatistics;
     userId?: ObjectId;
+    maxPossibleExpAmount?: number;
 }
 
 export interface CourseCreateTemplateModelType {

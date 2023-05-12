@@ -13,7 +13,12 @@ export class User {
             profile_id: await Profile.initialize({
                 username: '',
                 email: '',
-                englishLvl: EnglishLvl.A0
+                englishLvl: EnglishLvl.A0,
+                statistics: {
+                    totalUserCountOfCompletedCourses: 0,
+                    totalUserCountInProgressCourses: 0,
+                    totalUserCountOfCreatedCourses: 0
+                }
             }),
             courseEnrollments: [],
             createdCourses: []

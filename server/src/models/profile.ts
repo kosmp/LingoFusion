@@ -9,14 +9,13 @@ export class Profile {
         const profileId: ObjectId = await this.collection.insertOne({
             username: model.username,
             email: model.email,
-            englishLvl: model.englishLvl,
-            exp: 0
+            englishLvl: model.englishLvl
         });
 
         return profileId;
     }
 
-    static async updateCourse(model: ProfileModelType) {
+    static async updateProfile(model: ProfileModelType) {
         await this.collection.updateOne(
             {_id: model._id},
             {...model}
