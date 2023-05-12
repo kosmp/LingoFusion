@@ -13,7 +13,7 @@ import {Theory} from '../models/theory';
 import {TaskType} from '../utils/enums';
 import {TaskTemplate} from '../models/taskTemplate';
 import {TaskEnrollment} from '../models/taskEnrollment';
-import {CourseStatusType, TaskStatusType} from '../utils/enums';
+import {TaskStatusType} from '../utils/enums';
 import {CourseTemplate} from '../models/courseTemplate';
 import {User} from '../models/user';
 
@@ -182,9 +182,9 @@ class TaskController {
     
     async getCourseTaskEnrollment(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
+            const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
+                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
             }
 
             const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
@@ -200,9 +200,9 @@ class TaskController {
                 return next(ApiError.AccessForbidden(`Course hasn't started. So user can't get courseTaskEnrollment`));
             }
 
-            const taskId = req.params.taskId;
+            const taskId = req.params.taskEnrollmentId;
             if (!ObjectId.isValid(taskId)) {
-                return next(ApiError.BadRequest("Incorrect taskId"));
+                return next(ApiError.BadRequest("Incorrect taskEnrollmentId"));
             }
 
             const task = await TaskEnrollment.findTaskById(new ObjectId(taskId));
@@ -386,9 +386,9 @@ class TaskController {
                 return next(ApiError.AccessForbidden(`Course hasn't started`));
             }
     
-            const taskEnrollmentId = req.params.taskId;
+            const taskEnrollmentId = req.params.taskEnrollmentId;
             if (!ObjectId.isValid(taskEnrollmentId)) {
-                return next(ApiError.BadRequest("Incorrect taskId"));
+                return next(ApiError.BadRequest("Incorrect taskEnrollmentId"));
             }
     
             let taskEnrollment = await TaskEnrollment.findTaskById(new ObjectId(taskEnrollmentId));
@@ -480,7 +480,7 @@ class TaskController {
         try {
             const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
+                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
             }
 
             const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
@@ -540,7 +540,7 @@ class TaskController {
         try {
             const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
+                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
             }
 
             const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
@@ -591,6 +591,43 @@ class TaskController {
                 return next(ApiError.AccessForbidden(`Prev taskEnrollment doesn't exist`));
             }
         } catch (e) {
+            return next(e);
+        }
+    }
+
+    async getTaskTemplateOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        try {
+            const courseId = req.params.courseId;
+            if (!ObjectId.isValid(courseId)) {
+                return next(ApiError.BadRequest("Incorrect courseId"));
+            }
+    
+            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
+            if (!course) {
+                return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
+            }
+    
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
+    
+            if (course.authorId != req.user._id) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't get taskTemplate from course he hasn't created`));
+            }
+
+            const taskId = req.params.taskId;
+            if (!ObjectId.isValid(taskId)) {
+                return next(ApiError.BadRequest("Incorrect taskId"));
+            }
+
+            const task = await TaskTemplate.findTaskById(new ObjectId(taskId));
+            if (!task) {
+                return next(ApiError.NotFoundError(`Can't find task with id: ${taskId}. Maybe task wasn't created`));
+            }
+            
+            return res.status(200).json(task);
+        } catch(e) {
             return next(e);
         }
     }
