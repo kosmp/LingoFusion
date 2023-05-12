@@ -3,7 +3,7 @@ const ApiError = require('../exceptions/apiError');
 const {validationResult} = require('express-validator');
 const taskService = require('../services/taskService');
 const courseService = require('../services/courseService');
-import {Request, Response, NextFunction} from 'express';
+import {Response, NextFunction} from 'express';
 import {CourseEnrollment} from '../models/courseEnrollment';
 import {RequestWithUserFromMiddleware} from '../utils/types';
 import {ObjectId} from 'mongodb';
@@ -13,7 +13,7 @@ import {Theory} from '../models/theory';
 import {TaskType} from '../utils/enums';
 import {TaskTemplate} from '../models/taskTemplate';
 import {TaskEnrollment} from '../models/taskEnrollment';
-import {StatusType} from '../utils/enums';
+import {CourseStatusType, TaskStatusType} from '../utils/enums';
 import {CourseTemplate} from '../models/courseTemplate';
 import {User} from '../models/user';
 
@@ -196,6 +196,10 @@ class TaskController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
             }
 
+            if (!course.startedAt) {
+                return next(ApiError.AccessForbidden(`Course hasn't started. So user can't get courseTaskEnrollment`));
+            }
+
             const taskId = req.params.taskId;
             if (!ObjectId.isValid(taskId)) {
                 return next(ApiError.BadRequest("Incorrect taskId"));
@@ -206,13 +210,25 @@ class TaskController {
                 return next(ApiError.NotFoundError(`Can't find task with id: ${taskId}. Maybe task wasn't created`));
             }
 
-            const tasks: Array<ObjectId> = (await CourseEnrollment.findCourseById(new ObjectId(courseId)))?.tasks;
-            const taskExists = tasks.some(task => task.equals(new ObjectId(taskId)));
+            const taskIds: Array<ObjectId> = (await CourseEnrollment.findCourseById(new ObjectId(courseId)))?.tasks;
+            const taskExists = taskIds.some(task => task.equals(new ObjectId(taskId)));
             if (!taskExists) {
                 return next(ApiError.AccessForbidden(`This task not from this course. So you can't get it`));
             }
 
-            return res.status(200).json(task);
+            if (!task.startedAt) {
+                TaskEnrollment.updateTask({
+                    _id: new ObjectId(taskId),
+                    startedAt: new Date()
+                });
+            }
+
+            CourseEnrollment.updateCourse({
+                _id: new ObjectId(courseId),
+                currentTaskId: new ObjectId(taskId)
+            });
+            
+            return res.status(200).json(await TaskEnrollment.findTaskById(new ObjectId(taskId)));
         } catch (e) {
             return next(e);
         }
@@ -345,7 +361,7 @@ class TaskController {
         }
     }
 
-    async checkCourseTask(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+    async submitCourseTask(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseEnrollmentId;
             if (!ObjectId.isValid(courseId)) {
@@ -365,20 +381,43 @@ class TaskController {
             if (course.userId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't submit task in course he hasn't enrolled`));
             }
+
+            if (!course.startedAt) {
+                return next(ApiError.AccessForbidden(`Course hasn't started`));
+            }
     
             const taskEnrollmentId = req.params.taskId;
             if (!ObjectId.isValid(taskEnrollmentId)) {
                 return next(ApiError.BadRequest("Incorrect taskId"));
             }
     
-            const taskEnrollment = await TaskEnrollment.findTaskById(new ObjectId(taskEnrollmentId));
+            let taskEnrollment = await TaskEnrollment.findTaskById(new ObjectId(taskEnrollmentId));
             if (!taskEnrollment) {
                 return next(ApiError.NotFoundError(`Can't find taskEnrollment with id: ${taskEnrollmentId}`));
             }
 
-            // if (taskEnrollment.status === StatusType.Completed) {
-            //     return next(ApiError.AccessForbidden(`You can submit task only 1 time`));
-            // }
+            if (!taskEnrollment.startedAt) {
+                return next(ApiError.AccessForbidden(`Task hasn't started`));
+            }
+
+            if (taskEnrollment.status === TaskStatusType.Completed) {
+                return next(ApiError.AccessForbidden(`You can submit task only 1 time`));
+            }
+
+            let userAnswers = req.body.userAnswers;
+            if (userAnswers == null) {
+                userAnswers = new Array<string>;
+            }
+
+            await TaskEnrollment.updateTask({
+                _id: new ObjectId(taskEnrollmentId),
+                userAnswers: userAnswers
+            })
+
+            taskEnrollment = await TaskEnrollment.findTaskById(new ObjectId(taskEnrollmentId)); // updated doc
+            if (!taskEnrollment) {
+                return next(ApiError.NotFoundError(`Can't find taskEnrollment with id: ${taskEnrollmentId}`));
+            }
     
             const taskTemplateId = taskEnrollment.taskTemplateId;
             const taskTemplate = await TaskTemplate.findTaskById(taskTemplateId);
@@ -393,51 +432,166 @@ class TaskController {
             let isCorrect: boolean;
             if (taskType === 'test') {
                 isCorrect = await TestQuestion.check(taskTemplateId, taskEnrollment.userAnswers);
+
                 trueAnswers = taskTemplate.trueAnswers;
             } else if (taskType === 'fillgaps') {
                 isCorrect = await FillInGaps.check(taskTemplateId, taskEnrollment.userAnswers);
+
                 trueAnswers = taskTemplate.blanks;
             } else if (taskType === 'theory') {
                 isCorrect = await Theory.check(taskTemplateId, taskEnrollment.userAnswers);
+                
                 trueAnswers = null;
             } else {
                 return next(ApiError.BadRequest(`Invalid task type`));
             }
 
+            if (isCorrect) {
+                await TaskEnrollment.updateTask({
+                    _id: new ObjectId(taskEnrollmentId),
+                    status: TaskStatusType.Completed,
+                    expForTask: taskTemplate.expForTrueTask,
+                    completedAt: new Date()
+                });
 
+                return res.status(200).json({
+                    expForTaskGained: taskTemplate.expForTrueTask,
+                    trueAnswers: trueAnswers
+                });
+            } else {
+                await TaskEnrollment.updateTask({
+                    _id: new ObjectId(taskEnrollmentId),
+                    status: TaskStatusType.Completed,
+                    expForTask: 0,
+                    completedAt: new Date()
+                });
 
-            // if (isCorrect) {
-            //     await TaskEnrollment.updateTask({
-            //         _id: new ObjectId(taskEnrollmentId),
-            //         status: StatusType.Completed,
-            //         expForTask: taskTemplate.expForTrueTask,
-            //         completedAt: new Date(),
-            //     });
-
-            //     return res.status(200).json({expForTaskGained: taskTemplate.expForTrueTask});
-            // } else {
-            //     await TaskEnrollment.updateTask({
-            //         _id: new ObjectId(taskEnrollmentId),
-            //         status: StatusType.Completed,
-            //         expForTask: 0,
-            //         completedAt: new Date(),
-            //     })
-                
-            //     return res.status(200).json({expForTaskGained: 0});
-            // }
+                return res.status(200).json({
+                    expForTaskGained: 0,
+                    trueAnswers: trueAnswers
+                });
+            }
         } catch (e) {
             return next(e);
         }
     }
 
-    async submitCourseTask(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+    async getNextTaskEnrollmentOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            // If not check then refuse to submit.
-            // If checked at least 1 time and then mark the task as completed, set expForTask and completedAt.
-            
+            const courseId = req.params.courseEnrollmentId;
+            if (!ObjectId.isValid(courseId)) {
+                return next(ApiError.BadRequest("Incorrect courseId"));
+            }
 
+            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
+            if (!course) {
+                return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
+            }
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
+    
+            if (course.userId != req.user._id) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't get taskEnrollment from course he hasn't enrolled`));
+            }
+
+            if (!course.startedAt) {
+                return next(ApiError.AccessForbidden(`Course hasn't started`));
+            }
+
+            const taskEnrollmentIds: Array<ObjectId> = course.tasks;
+            if (taskEnrollmentIds.length == 0) {
+                return next(ApiError.BadRequest("No taskEnrollments in this course"));
+            }
+
+            const currentTaskId: ObjectId = course.currentTaskId;
+            if (!currentTaskId) {
+                return next(ApiError.BadRequest("No currentTaskId in courseEnrollment"));
+            }
+
+            const indexOfCurr = taskEnrollmentIds.findIndex(id => id.equals(currentTaskId));
+            if (indexOfCurr + 1 != taskEnrollmentIds.length) {
+                const nextTaskId: ObjectId = taskEnrollmentIds[indexOfCurr + 1];
+                
+                const nextTaskEnrollment = await TaskEnrollment.findTaskById(nextTaskId);
+                if (!nextTaskEnrollment) {
+                    return next(ApiError.BadRequest("Can't find next task enrollment"));
+                }
+
+                return res.status(200).json({
+                    courseStatus: course.status,
+                    courseTitle: course.title,
+                    taskEnrollmentId: nextTaskEnrollment._id,
+                    taskEnrollmentTitle: nextTaskEnrollment.title,
+                    taskEnrollmentType: nextTaskEnrollment.taskType,
+                    taskEnrollmentStatus: nextTaskEnrollment.status
+                });   
+            } else {
+                return next(ApiError.AccessForbidden(`Next taskEnrollment doesn't exist`));
+            }
         } catch (e) {
-            return next(e)
+            return next(e);
+        }
+    }
+
+    async getPrevTaskEnrollmentOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        try {
+            const courseId = req.params.courseEnrollmentId;
+            if (!ObjectId.isValid(courseId)) {
+                return next(ApiError.BadRequest("Incorrect courseId"));
+            }
+
+            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
+            if (!course) {
+                return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
+            }
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
+    
+            if (course.userId != req.user._id) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't get taskEnrollment from course he hasn't enrolled`));
+            }
+
+            if (!course.startedAt) {
+                return next(ApiError.AccessForbidden(`Course hasn't started`));
+            }
+
+            const taskEnrollmentIds: Array<ObjectId> = course.tasks;
+            if (taskEnrollmentIds.length == 0) {
+                return next(ApiError.BadRequest("No taskEnrollments in this course"));
+            }
+
+            const currentTaskId: ObjectId = course.currentTaskId;
+            if (!currentTaskId) {
+                return next(ApiError.BadRequest("No currentTaskId in courseEnrollment"));
+            }
+
+            const indexOfCurr = taskEnrollmentIds.findIndex(id => id.equals(currentTaskId));
+            if (indexOfCurr !== 0) {
+                const prevTaskId: ObjectId = taskEnrollmentIds[indexOfCurr - 1];
+
+                const prevTaskEnrollment = await TaskEnrollment.findTaskById(prevTaskId);
+                if (!prevTaskEnrollment) {
+                    return next(ApiError.BadRequest("Can't find prev task enrollment"));
+                }
+
+                return res.status(200).json({
+                    courseTitle: course.title,
+                    taskEnrollmentId: prevTaskEnrollment._id,
+                    taskEnrollmentTitle: prevTaskEnrollment.title,
+                    taskEnrollmentType: prevTaskEnrollment.taskType,
+                    taskEnrollmentStatus: prevTaskEnrollment.status
+                });
+            } else {
+                return next(ApiError.AccessForbidden(`Prev taskEnrollment doesn't exist`));
+            }
+        } catch (e) {
+            return next(e);
         }
     }
 }

@@ -10,8 +10,7 @@ import {Document, ObjectId, WithId} from 'mongodb';
 import {TaskTemplate} from '../models/taskTemplate';
 import {TaskEnrollment} from '../models/taskEnrollment';
 import {User} from '../models/user';
-import {StatusType, TaskType, UserCourseProperty} from '../utils/enums';
-import { Profile } from '../models/profile';
+import {CourseStatusType, TaskStatusType, UserCourseProperty} from '../utils/enums';
 
 
 class CourseController {
@@ -284,7 +283,7 @@ class CourseController {
                 const task = await TaskEnrollment.initialize({
                     taskTemplateId: taskTemplate._id,
                     taskType: taskTemplate.taskType,
-                    status: StatusType.InProgress,
+                    status: TaskStatusType.InProgress,
                     title: taskTemplate.title,
                     description: taskTemplate.description,
                     expForTask: 0,
@@ -299,11 +298,15 @@ class CourseController {
             const courseEnrollmentId: ObjectId = await CourseEnrollment.initialize({
                 coursePresentationId: course._id,
                 title: course.title,
-                status: StatusType.InProgress,
+                status: CourseStatusType.InProgress,
                 currentTaskId: null,
                 startedAt: null,
                 completedAt: null,
                 tasks: tasks,
+                statistics: {
+                    resultExp: 0,
+                    counterOfTrueTasks: 0
+                },
                 userId: req.user._id
             });
 
@@ -337,17 +340,25 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
             }
     
-            if (course.authorId != req.user._id) {
+            if (course.userId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
+            }
+
+            if (!course.startedAt) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not started this courseEnrollment`));
+            }
+
+            if (!course.completedAt) {
+                return next(ApiError.AccessForbidden(`CourseEnrollment hasn't completed`));
             }
     
             const tasks: Array<ObjectId> = course.tasks;
-            tasks.forEach(async task => {
+            for (const task of tasks) {
                 const deleteResult = await TaskEnrollment.deleteTaskById(new ObjectId(task));
                 if (!deleteResult) {
                     return next(ApiError.NotFoundError(`Can't remove taskEnrollment with id: ${task}`));
                 }
-            });
+            }
     
             const deleteResult = await CourseEnrollment.deleteCourseById(new ObjectId(courseId));
             if (!deleteResult) {
@@ -383,7 +394,7 @@ class CourseController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
             }
 
-            if (course.currentTaskId) {
+            if (course.startedAt) {
                 return next(ApiError.BadRequest(`CourseEnrollment with id ${courseId} already started`));
             }
 
@@ -437,64 +448,36 @@ class CourseController {
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not started this courseEnrollment`));
             }
+
+            if (course.completedAt) {
+                return next(ApiError.AccessForbidden(`CourseEnrollment with id: ${courseId} has already completed`));
+            }
     
             const taskIds: Array<ObjectId> = course.tasks;
-            taskIds.forEach(async taskId => {
+            for(const taskId of taskIds) {
                 const task = await TaskEnrollment.findTaskById(taskId);
-    
                 if (!task) {
                     return next(ApiError.BadRequest(`Can't get taskEnrollment with id ${taskId}`));
                 }
     
-                if (task.status == StatusType.InProgress) {
+                if (task.status == TaskStatusType.InProgress) {
                     return next(ApiError.AccessForbidden(`You can complete course only with all completed tasks`));
                 }
-            });
+            }
     
             const statistics = await courseService.calculateCourseStatistics(new ObjectId(courseId));
     
-            await Profile.addExpToProfile(user.profile_id, statistics.resultExp);
-    
             await CourseEnrollment.updateCourse({
                 _id: course._id,
-                status: StatusType.Completed,
-                completedAt: new Date()
+                status: CourseStatusType.Completed,
+                completedAt: new Date(),
+                statistics: statistics
             });
     
             return res.status(200).json({
                 success: true,
                 statistics: statistics
             });
-        } catch(e) {
-            return next(e);
-        }
-    }
-
-    async getProgressOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
-        try {
-            const courseId = req.params.courseEnrollmentId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
-            }
-    
-            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
-            }
-
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
-    
-            if (course.userId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
-            }
-    
-            const currentTaskId: ObjectId = course.currentTaskId;
-    
-            const result = await courseService.getCoursesByListOfIds([currentTaskId]);
-            return res.status(200).json(result);
         } catch(e) {
             return next(e);
         }

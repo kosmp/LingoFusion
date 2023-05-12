@@ -14,7 +14,7 @@ export enum TaskType {
     FillGaps = 'fillgaps'
 }
 
-export enum StatusType {
+export enum CourseStatusType {
     InProgress = "InProgress",
     Completed = "Completed"
 }

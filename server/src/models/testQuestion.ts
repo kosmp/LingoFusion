@@ -39,7 +39,7 @@ export class TestQuestion extends TaskTemplate {
 
         const answers: Array<string> = (await this.collection.findOne({_id: taskTemplateId}))?.trueAnswers;
         
-        const isCorrect = answers.every((answer: string) => userAnswers.includes(answer));
+        const isCorrect = answers.every((element, index) => element === userAnswers[index]);
     
         return isCorrect;
     }

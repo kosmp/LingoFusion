@@ -1,7 +1,6 @@
 import {DB} from '../utils/database';
 import {ObjectId} from 'mongodb';
 import {TaskTemplateModelType} from '../utils/types';
-import {TaskType} from '../utils/enums';
 
 export abstract class TaskTemplate {
     protected static readonly collection = new DB('task-templates');

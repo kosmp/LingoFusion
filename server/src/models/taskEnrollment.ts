@@ -22,13 +22,9 @@ export class TaskEnrollment {
     }
 
     public static async updateTask(model: TaskEnrollmentModelType) {   
-        await this.collection.updateOneWithFieldsReplacement(
+        await this.collection.updateOne(
             {_id: model._id},
-            {
-                title: model.title,
-                description: model.description,
-                expForTask: model.expForTask
-            }
+            {...model}
         )
     }
 

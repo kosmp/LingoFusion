@@ -1,6 +1,6 @@
 import {ObjectId} from 'mongodb';
 import {Request} from 'express';
-import {EnglishLvl, StatusType, TaskType} from './enums';
+import {EnglishLvl, TaskStatusType, CourseStatusType, TaskType} from './enums';
 
 export type UserDtoInitType = {
     _id: Promise<ObjectId>;
@@ -46,7 +46,6 @@ export interface TheoryModelType extends TaskTemplateModelType {
 
 export interface Blank {
     id: string;
-    hint: string;
     answer: string;
     options?: string[];
   }
@@ -58,16 +57,21 @@ export interface FillInGapsModelType extends TaskTemplateModelType {
 }
 
 export interface TaskEnrollmentModelType {
-    _id?: ObjectId
+    _id?: ObjectId,
     taskTemplateId?: ObjectId,
     taskType?: TaskType,
-    status?: StatusType,
+    status?: TaskStatusType,
     title?: string,
     description?: string,
     expForTask?: number,
     startedAt?: Date | null,
     completedAt?: Date | null,
     userAnswers?: Array<string> | null
+}
+
+export interface CourseStatistics {
+    resultExp?: number,
+    counterOfTrueTasks?: number
 }
 
 export interface CourseTemplateModelType {
@@ -86,11 +90,12 @@ export interface CourseEnrollmentModelType {
     _id?: ObjectId;
     coursePresentationId?: ObjectId;
     title?: string;
-    status?: StatusType;
+    status?: CourseStatusType;
     currentTaskId?: ObjectId | null;
     startedAt?: Date | null;
     completedAt?: Date | null;
     tasks?: Array<ObjectId>;
+    statistics?: CourseStatistics;
     userId?: ObjectId;
 }
 

@@ -2,7 +2,8 @@
 import {Document, ObjectId, WithId} from "mongodb";
 import {CourseEnrollment} from "../models/courseEnrollment";
 import {CourseTemplate} from "../models/courseTemplate";
-import { TaskEnrollment } from "../models/taskEnrollment";
+import {TaskEnrollment} from "../models/taskEnrollment";
+import {CourseStatistics} from "../utils/types";
 const taskService = require('../services/taskService');
 
 class CourseService {
@@ -52,27 +53,26 @@ class CourseService {
         return false;
     }
 
-    async calculateCourseStatistics(courseId: ObjectId) {
+    async calculateCourseStatistics(courseId: ObjectId) : Promise<CourseStatistics>{
         const courseEnrollment = await CourseEnrollment.findCourseById(courseId);
 
         const courseEnrollmentTasks: Array<ObjectId> = courseEnrollment?.tasks;
         
         let resultExp = 0;
         let counterOfTrueTasks = 0;
-        courseEnrollmentTasks.forEach(async (taskId) => {
-            const task = await TaskEnrollment.findTaskById(taskId);
-
-            if (task?.expForTrueTask != 0) {
+        for(const taskId of courseEnrollmentTasks) {
+            const taskEnrollment = await TaskEnrollment.findTaskById(taskId);
+            if (taskEnrollment?.expForTask != 0) {
                 ++counterOfTrueTasks;
             }
-
-            resultExp += task?.expForTask;
-        });
+            
+            resultExp += taskEnrollment?.expForTask;
+        }
 
         return {
             resultExp: resultExp,
             counterOfTrueTasks: counterOfTrueTasks
-        }
+        };
     }
 }
 
