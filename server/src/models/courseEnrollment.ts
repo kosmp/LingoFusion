@@ -14,6 +14,7 @@ export class CourseEnrollment {
             startedAt: model.startedAt,
             completedAt: model.completedAt,
             tasks: model.tasks,
+            statistics: model.statistics,
             userId: model.userId,
             maxPossibleExpAmount: model.maxPossibleExpAmount,
             ratingForCourse: model.ratingForCourse

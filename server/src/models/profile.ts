@@ -9,7 +9,8 @@ export class Profile {
         const profileId: ObjectId = await this.collection.insertOne({
             username: model.username,
             email: model.email,
-            englishLvl: model.englishLvl
+            englishLvl: model.englishLvl,
+            statistics: model.statistics
         });
 
         return profileId;

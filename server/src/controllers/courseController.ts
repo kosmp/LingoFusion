@@ -28,6 +28,11 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
             }
 
+            const profile = await Profile.findProfileById(user.profile_id);
+            if (!profile) {
+                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
+            }
+
             const courseId: ObjectId = await CourseTemplate.initialize({
                 title: req.body.title,
                 description: req.body.description,
@@ -40,11 +45,6 @@ class CourseController {
                 authorId: userId,
                 numberOfCompletedCourses: 0
             });
-
-            const profile = await Profile.findProfileById(user.profile_id);
-            if (!profile) {
-                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
-            }
 
             await Profile.updateProfile({
                 _id: user.profile_id,
@@ -581,12 +581,25 @@ class CourseController {
             }
 
             const courseTemplateId: ObjectId = course.coursePresentationId;
-            const courseTemplate = await CourseTemplate.findCourseById(courseTemplateId);
+            let courseTemplate = await CourseTemplate.findCourseById(courseTemplateId);
             if (!courseTemplate) {
                 return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseTemplateId}`));
             }
 
-            const oldNumberOfRatings: number = course.numberOfRatings;
+            if (!courseTemplate.rating) {
+                CourseTemplate.updateCourse({
+                    _id: courseTemplateId,
+                    rating: 0,
+                    numberOfRatings: 0
+                });
+
+                courseTemplate = await CourseTemplate.findCourseById(courseTemplateId);
+                if (!courseTemplate) {
+                    return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseTemplateId}`));
+                }
+            }
+
+            const oldNumberOfRatings: number = courseTemplate.numberOfRatings;
             let newNumberOfRatings: number = oldNumberOfRatings;
             let newCourseTemplateRating: number;
 

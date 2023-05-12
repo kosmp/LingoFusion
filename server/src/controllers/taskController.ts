@@ -70,7 +70,7 @@ class TaskController {
                     description: req.body.description,
                     content: req.body.content,
                     references: req.body.references,
-                    images: req.body.imagesUrl,
+                    images: req.body.images,
                     expForTrueTask: 0
                 });
             } else {
