@@ -36,7 +36,9 @@ class CourseController {
                 tags: req.body.tags,
                 taskTemplates: [],
                 rating: 0,
-                authorId: userId
+                numberOfRatings: 0,
+                authorId: userId,
+                numberOfCompletedCourses: 0
             });
 
             const profile = await Profile.findProfileById(user.profile_id);
@@ -331,7 +333,8 @@ class CourseController {
                     counterOfTrueTasks: 0
                 },
                 userId: req.user._id,
-                maxPossibleExpAmount: maxExpForTrueTasks
+                maxPossibleExpAmount: maxExpForTrueTasks,
+                ratingForCourse: null
             });
 
             const result = await CourseEnrollment.findCourseById(courseEnrollmentId);
@@ -474,6 +477,12 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
             }
 
+            const courseTemplateId = course.coursePresentationId;
+            const courseTemplate = await CourseTemplate.findCourseById(courseTemplateId);
+            if (!courseTemplate) {
+                return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseTemplateId}`));
+            }
+
             const user = await User.findOneUserById(req.user._id);
             if (!user) {
                 return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
@@ -525,12 +534,82 @@ class CourseController {
                 completedAt: new Date(),
                 statistics: statistics
             });
+
+            await CourseTemplate.updateCourse({
+                _id: courseTemplateId,
+                numberOfCompletedCourses: courseTemplate.numberOfCompletedCourses + 1
+            });
     
             return res.status(200).json({
                 success: true,
                 statistics: statistics
             });
         } catch(e) {
+            return next(e);
+        }
+    }
+
+    async updateCourseRating(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        try {
+            const rating: number = req.body.rating;
+
+            const courseId = req.params.courseEnrollmentId;
+            if (!ObjectId.isValid(courseId)) {
+                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
+            }
+    
+            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
+            if (!course) {
+                return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
+            }
+
+            const user = await User.findOneUserById(req.user._id);
+            if (!user) {
+                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
+            }
+    
+            if (course.userId != req.user._id) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
+            }
+
+            if (!course.startedAt) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not started this courseEnrollment`));
+            }
+
+            if (!course.completedAt) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not completed this course to set rating`));
+            }
+
+            const courseTemplateId: ObjectId = course.coursePresentationId;
+            const courseTemplate = await CourseTemplate.findCourseById(courseTemplateId);
+            if (!courseTemplate) {
+                return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseTemplateId}`));
+            }
+
+            const oldNumberOfRatings: number = course.numberOfRatings;
+            let newNumberOfRatings: number = oldNumberOfRatings;
+            let newCourseTemplateRating: number;
+
+            if (!course.ratingForCourse) {
+                ++newNumberOfRatings;
+                newCourseTemplateRating = (courseTemplate.rating * oldNumberOfRatings + rating) / newNumberOfRatings;
+            } else {
+                newCourseTemplateRating = (courseTemplate.rating * oldNumberOfRatings - course.ratingForCourse + rating) / newNumberOfRatings;
+            }
+
+            await CourseEnrollment.updateCourse({
+                _id: new ObjectId(courseId),
+                ratingForCourse: rating
+            });
+
+            await CourseTemplate.updateCourse({
+                _id: courseTemplateId,
+                rating: newCourseTemplateRating,
+                numberOfRatings: newNumberOfRatings
+            });
+
+            return res.status(200).json({success: true});
+        } catch (e) {
             return next(e);
         }
     }

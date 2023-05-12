@@ -87,9 +87,11 @@ export interface CourseTemplateModelType {
     englishLvl?: EnglishLvl;
     imageUrl?: string;
     rating?: number;
+    numberOfRatings?: number;
     taskTemplates?: Array<ObjectId>;
     tags?: Set<string>;
     authorId?: ObjectId;
+    numberOfCompletedCourses?: number;
 }
 
 export interface CourseEnrollmentModelType {
@@ -104,6 +106,7 @@ export interface CourseEnrollmentModelType {
     statistics?: CourseStatistics;
     userId?: ObjectId;
     maxPossibleExpAmount?: number;
+    ratingForCourse?: number | null;
 }
 
 export interface CourseCreateTemplateModelType {

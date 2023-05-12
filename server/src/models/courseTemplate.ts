@@ -12,9 +12,11 @@ export class CourseTemplate {
             englishLvl: model.englishLvl,
             imageUrl: model.imageUrl,
             rating: model.rating,
+            numberOfRatings: model.numberOfRatings,
             taskTemplates: model.taskTemplates,
             tags: model.tags,
-            authorId: model.authorId
+            authorId: model.authorId,
+            numberOfCompletedCourses: model.numberOfCompletedCourses
         })
 
         return courseTemplateId;

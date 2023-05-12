@@ -15,7 +15,8 @@ export class CourseEnrollment {
             completedAt: model.completedAt,
             tasks: model.tasks,
             userId: model.userId,
-            maxPossibleExpAmount: model.maxPossibleExpAmount
+            maxPossibleExpAmount: model.maxPossibleExpAmount,
+            ratingForCourse: model.ratingForCourse
         })
 
         return courseEnrollmentId;
