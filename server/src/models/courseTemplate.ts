@@ -71,7 +71,11 @@ export class CourseTemplate {
         return await this.collection.findOne({_id: new ObjectId(id)});
     }
 
-    static async findAllCourses() {
-        return await this.collection.findAll();
+    static async findAllCourses(query?: object) {
+        return await this.collection.findAll(query);
+    }
+
+    static async getFilteredCourses(query: object[]) {
+        return await this.collection.aggregate(query);
     }
 }

@@ -77,7 +77,6 @@ export class DB {
     }
 
     async aggregate(query: object[]) {
-        const res = await (await this.collection.aggregate(query)).toArray();
-        return res[0];
+        return (await this.collection.aggregate(query)).toArray();
     }
 }

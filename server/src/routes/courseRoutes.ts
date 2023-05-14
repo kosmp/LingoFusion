@@ -4,6 +4,9 @@ const courseController = require("../controllers/courseController");
 const authCheck = require("../middlewares/authMiddleware");
 
 course_router.get('/templates/all', authCheck, courseController.getAllCourseTemplates);
+course_router.get('/templates/rated/:ratingThreshold', authCheck, courseController.getRatedCourseTemplates);
+course_router.get('/templates/englishlvl/:englishLvl', authCheck, courseController.getCourseTemplatesByEnglishLvl);
+course_router.get('/templates/search-by-tag/:tag', authCheck, courseController.getCourseTemplatesByTag);
 course_router.get('/enrollments', authCheck, courseController.getAllCourseEnrollmentsOfUser);
 course_router.get('/templates/mine', authCheck, courseController.getAllCourseTemplatesOfUser);
 course_router.get('/', authCheck, courseController.getAllAvailableCourses);

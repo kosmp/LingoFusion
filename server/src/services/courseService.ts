@@ -3,6 +3,7 @@ import {CourseEnrollment} from "../models/courseEnrollment";
 import {CourseTemplate} from "../models/courseTemplate";
 import {TaskEnrollment} from "../models/taskEnrollment";
 import {CourseStatistics} from "../utils/types";
+import {EnglishLvl} from "../utils/enums";
 const taskService = require('../services/taskService');
 const ApiError = require('../exceptions/apiError');
 
@@ -108,6 +109,38 @@ class CourseService {
         }
 
         return exists;
+    }
+
+    async getRatedCourseTemplates(ratingThreshold: string) {
+        const pipeline = [
+            {
+              $match: { rating: { $ne: null, $gt: Number(ratingThreshold) } }
+            },
+            {
+              $sort: { rating: -1 }
+            }
+        ];
+        
+        const result = await CourseTemplate.getFilteredCourses(pipeline);
+        return result;
+    }
+
+    async getCourseTemplatesByEnglishLvl(englishLvl: EnglishLvl) {
+        const pipeline = [
+            {
+                $match: { englishLvl: { $eq: englishLvl } }
+            }
+        ];
+        
+        const result = await CourseTemplate.getFilteredCourses(pipeline);
+        return result;
+    }
+
+    async getCourseTemplatesByTag(tag: string) {
+        const pipeline = { tags: { $in: [tag] } };
+
+          const result = await CourseTemplate.findAllCourses(pipeline);
+          return result;
     }
 }
 

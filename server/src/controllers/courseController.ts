@@ -92,6 +92,39 @@ class CourseController {
             return next(e);
         }
     }
+    
+    async getRatedCourseTemplates(req: Request, res: Response, next: NextFunction) {
+        try {
+            const ratingThreshold = req.params.ratingThreshold;
+            const courses = await courseService.getRatedCourseTemplates(ratingThreshold);
+            
+            return res.status(200).json(courses);
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async getCourseTemplatesByEnglishLvl(req: Request, res: Response, next: NextFunction) {
+        try {
+            const englishLvl = req.params.englishLvl;
+            const courses = await courseService.getCoursesByEnglishLvl(englishLvl);
+            
+            return res.status(200).json(courses);
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async getCourseTemplatesByTag(req: Request, res: Response, next: NextFunction) {
+        try {
+            const tag = req.params.tag;
+            const courses = await courseService.getCourseTemplatesByTag(tag);
+            
+            return res.status(200).json(courses);
+        } catch (e) {
+            return next(e);
+        }
+    }
 
     async getAllCourseEnrollmentsOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
