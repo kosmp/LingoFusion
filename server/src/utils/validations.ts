@@ -63,6 +63,23 @@ export const courseUpdateValidation = [
     .withMessage('Tags are invalid. Must be list of non-duplicated values from validTags')
 ];
 
+export const updateCourseRatingValidation = [
+    body('rating', 'Enter rating from 1 to 5').isInt({min: 1, max: 5})
+] 
+
+export const updateProfileUsernameValidation = [
+    body('username', 'Enter username. Min 2, max 20 alpha symbols.')
+    .isLength({min: 2, max: 20})
+    .isAlpha()
+]
+
+export const updateProfileEnglishLvlValidation = [
+    body('englishLvl', 'Enter englishLvl in the correct format')
+    .notEmpty()
+    .isIn(Object.values(EnglishLvl))
+    .withMessage(`englishLvl must be one of [${Object.values(EnglishLvl)}]`),
+]
+
 export const userUpdateValidation = [
   body('login', "Login can't be empty.").notEmpty(),
   body('login', "Login must be bigger than 5 and less than 20").isLength({min: 5, max: 20}),

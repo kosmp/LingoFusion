@@ -1,4 +1,4 @@
-import {courseCreateValidation, courseUpdateValidation} from '../utils/validations';
+import {courseCreateValidation, courseUpdateValidation, updateCourseRatingValidation} from '../utils/validations';
 const course_router = require("express").Router();
 const courseController = require("../controllers/courseController");
 const authCheck = require("../middlewares/authMiddleware");
@@ -16,6 +16,6 @@ course_router.post('/:courseEnrollmentId/start', authCheck, courseController.sta
 course_router.post('/:courseEnrollmentId/complete', authCheck, courseController.completeCourse);
 course_router.put('/:courseId', authCheck, courseUpdateValidation, courseController.updateCourseTemplate);
 course_router.delete('/:courseId', authCheck, courseController.removeCourseTemplate);
-course_router.put('/:courseEnrollmentId/rating', authCheck, courseController.updateCourseRating);
+course_router.put('/:courseEnrollmentId/rating', authCheck, updateCourseRatingValidation, courseController.updateCourseRating);
 
 module.exports = course_router;
