@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {userUpdateValidation} from '../utils/validations';
 const user_router = require("express").Router();
 const userController = require("../controllers/userController");

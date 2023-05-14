@@ -1,8 +1,7 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const {validationResult} = require('express-validator');
-const profileService = require('../services/profileService');
 import {Response, NextFunction} from 'express';
 import {RequestWithUserFromMiddleware} from '../utils/types';
+const {validationResult} = require('express-validator');
+const profileService = require('../services/profileService');
 
 class ProfileController {
     async getUserProfile(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {

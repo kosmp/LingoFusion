@@ -1,10 +1,10 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {Document, ObjectId, WithId} from "mongodb";
 import {CourseEnrollment} from "../models/courseEnrollment";
 import {CourseTemplate} from "../models/courseTemplate";
 import {TaskEnrollment} from "../models/taskEnrollment";
 import {CourseStatistics} from "../utils/types";
 const taskService = require('../services/taskService');
+const ApiError = require('../exceptions/apiError');
 
 class CourseService {
     async getCourseTemplatesByListOfIds(courses: Array<ObjectId>) {
@@ -12,7 +12,6 @@ class CourseService {
 
         for (const courseId of courses) {
             const course: WithId<Document> | null = await CourseTemplate.findCourseById(courseId);
-            
             if (course) {
                 const taskIds: Array<ObjectId> = (await CourseTemplate.findCourseById(course!._id))?.taskTemplates;
                 const tasks: Array<WithId<Document>> = await taskService.getTaskTemplatesByListOfIds(taskIds);
@@ -29,7 +28,6 @@ class CourseService {
 
         for (const courseId of courses) {
             const course: WithId<Document> | null = await CourseEnrollment.findCourseById(courseId);
-            
             if (course) {
                 const taskIds: Array<ObjectId> = (await CourseEnrollment.findCourseById(course!._id))?.tasks;
                 const tasks: Array<WithId<Document>> = await taskService.getTaskEnrollmentsByListOfIds(taskIds);
@@ -41,9 +39,8 @@ class CourseService {
         return resultCourses;
     }
 
-    async checkExistenceOfCourseEnrollmentWithId(courseTemplateId: ObjectId) {
+    async checkExistenceOfCourseEnrollmentWithId(courseTemplateId: ObjectId) : Promise<boolean>{
         const allCourseEnrollments = await CourseEnrollment.findAllCourses();
-
         for (const course of allCourseEnrollments) {
             if (course.coursePresentationId.equals(courseTemplateId)) {
               return true;
@@ -54,10 +51,9 @@ class CourseService {
     }
 
     async calculateCourseStatistics(courseId: ObjectId) : Promise<CourseStatistics>{
-        const courseEnrollment = await CourseEnrollment.findCourseById(courseId);
+        const courseEnrollment = await this.getCourseEnrollment(courseId.toString());
 
-        const courseEnrollmentTasks: Array<ObjectId> = courseEnrollment?.tasks;
-        
+        const courseEnrollmentTasks: Array<ObjectId> = courseEnrollment.tasks;
         let resultExp = 0;
         let counterOfTrueTasks = 0;
         for(const taskId of courseEnrollmentTasks) {
@@ -73,6 +69,45 @@ class CourseService {
             resultExp: resultExp,
             counterOfTrueTasks: counterOfTrueTasks
         };
+    }
+
+    async getCourseTemplate(courseId: string) : Promise<WithId<Document>>{
+        if (!ObjectId.isValid(courseId)) {
+            throw ApiError.BadRequest("Incorrect courseTemplateId");
+        }
+
+        const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
+        if (!course) {
+            throw ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseId}. Maybe course wasn't created`);
+        }
+
+        return course;
+    }
+
+    async getCourseEnrollment(courseId: string) : Promise<WithId<Document>>{
+        if (!ObjectId.isValid(courseId)) {
+            throw ApiError.BadRequest("Incorrect courseEnrollmentId");
+        }
+
+        const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
+        if (!course) {
+            throw ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}. Maybe course wasn't created`);
+        }
+
+        return course;
+    }
+
+    async checkExistenceOfCourseEnrollmentForCourseTemplate(courseId: string) : Promise<boolean>{
+        if (!ObjectId.isValid(courseId)) {
+            throw ApiError.BadRequest("Incorrect courseId");
+        }
+
+        const exists: boolean = await this.checkExistenceOfCourseEnrollmentWithId(new ObjectId(courseId));
+        if (exists) {
+            throw ApiError.AccessForbidden(`User who created the course can't modify templates while other users are enrolled in this course`);
+        }
+
+        return exists;
     }
 }
 

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 const profile_router = require("express").Router();
 const profileController = require("../controllers/profileController");
 const authCheckProfile = require("../middlewares/authMiddleware");

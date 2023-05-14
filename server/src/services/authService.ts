@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {User} from '../models/user';
+import {ObjectId} from 'mongodb';
 const bcrypt = require("bcrypt");
 const tokenService = require('./tokenService');
 const UserDto = require('../dtos/userDto').UserDto;
 const ApiError = require('../exceptions/apiError');
-import {ObjectId} from 'mongodb';
 
 class AuthService {
     async registration(login: string, password: string) {

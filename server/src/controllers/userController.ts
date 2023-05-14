@@ -1,9 +1,8 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const ApiError = require('../exceptions/apiError');
-const userService = require('../services/userService');
-const {validationResult} = require('express-validator');
 import {Request, Response, NextFunction} from 'express';
 import {RequestWithUserFromMiddleware} from '../utils/types';
+const {validationResult} = require('express-validator');
+const ApiError = require('../exceptions/apiError');
+const userService = require('../services/userService');
 
 class UserController {
     async getUser(req: Request, res: Response, next: NextFunction) {

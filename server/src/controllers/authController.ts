@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {Request, Response, NextFunction} from 'express';
 const {validationResult} = require('express-validator');
 const authService = require('../services/authService');

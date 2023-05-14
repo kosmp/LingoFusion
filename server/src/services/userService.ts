@@ -1,10 +1,9 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const ApiError = require('../exceptions/apiError');
-const bcrypt = require("bcrypt");
 import {ObjectId} from "mongodb";
 import {Profile} from '../models/profile';
 import {User} from '../models/user';
 import {Token} from "../models/tokenModel";
+const ApiError = require('../exceptions/apiError');
+const bcrypt = require("bcrypt");
 
 class UserService {
     async getUser(userId: string) {
@@ -21,10 +20,7 @@ class UserService {
     }
 
     async deleteUser(userId: string) {
-        const user = await User.findOneUserById(new ObjectId(userId));
-        if (!user) {
-            throw ApiError.NotFoundError(`Can't find user with id: ${userId}`);
-        }  
+        const user = await this.getUser(userId);
         await User.deleteUserById(new ObjectId(userId));
 
         const tokenDoc = await Token.findTokenByUserId(new ObjectId(userId));
@@ -53,10 +49,7 @@ class UserService {
             hashedPassword = await bcrypt.hash(newPassword, salt);
         }
 
-        const user = await User.findOneUserById(new ObjectId(userId));
-        if (!user) {
-            throw ApiError.NotFoundError(`Can't find user with id: ${userId}`);
-        }
+        const user = await this.getUser(userId);
 
         if (login != user.login) {
             throw ApiError.BadRequest("Incorrect user login");

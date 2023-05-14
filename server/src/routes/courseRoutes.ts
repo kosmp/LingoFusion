@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {courseCreateValidation, courseUpdateValidation} from '../utils/validations';
 const course_router = require("express").Router();
 const courseController = require("../controllers/courseController");

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {ObjectId} from "mongodb";
 import {Profile} from '../models/profile';
 import {User} from '../models/user';

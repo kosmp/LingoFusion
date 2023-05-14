@@ -1,7 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
-const ApiError = require('../exceptions/apiError');
-const {validationResult} = require('express-validator');
-const courseService = require('../services/courseService');
 import {Request, Response, NextFunction} from 'express';
 import {CourseEnrollment} from '../models/courseEnrollment';
 import {CourseTemplate} from '../models/courseTemplate';
@@ -12,7 +8,12 @@ import {TaskEnrollment} from '../models/taskEnrollment';
 import {User} from '../models/user';
 import {CourseStatusType, TaskStatusType, UserCourseProperty} from '../utils/enums';
 import {Profile} from '../models/profile';
-
+const {validationResult} = require('express-validator');
+const ApiError = require('../exceptions/apiError');
+const profileService = require('../services/profileService');
+const courseService = require('../services/courseService');
+const userService = require('../services/userService');
+const taskService = require('../services/taskService');
 
 class CourseController {
     async createCourse(req: RequestForCreateCourseTemplate, res: Response, next: NextFunction) {
@@ -23,15 +24,9 @@ class CourseController {
             }
 
             const userId: ObjectId = req.user._id;
-            const user = await User.findOneUserById(new ObjectId(userId));
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
-            }
+            const user = await userService.getUser(userId.toString());
 
-            const profile = await Profile.findProfileById(user.profile_id);
-            if (!profile) {
-                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
-            }
+            const profile = await profileService.getUserProfile(userId.toString());
 
             const courseId: ObjectId = await CourseTemplate.initialize({
                 title: req.body.title,
@@ -55,9 +50,9 @@ class CourseController {
                 }
             });
             
-            await User.addCourseToUserById(req.user?._id, courseId, UserCourseProperty.CreatedCourses);
+            await User.addCourseToUserById(req.user._id, courseId, UserCourseProperty.CreatedCourses);
 
-            return res.status(200).json(await CourseTemplate.findCourseById(courseId));
+            return res.status(200).json(await courseService.getCourseTemplate(courseId.toString()));
         } catch (e) {
             return next(e);
         }
@@ -72,7 +67,6 @@ class CourseController {
     
             const result: Array<WithId<Document>> = new Array<WithId<Document>>();
             const userId = new ObjectId(req.user._id)
-
             for (const course of courseEnrollments) {
                 if (!(new ObjectId(course.userId)).equals(userId)) {
                     continue;
@@ -101,15 +95,10 @@ class CourseController {
 
     async getAllCourseEnrollmentsOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const userId = req.user._id;
-
-            const user = await User.findOneUserById(new ObjectId(userId));
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
-            }
+            const userId: ObjectId = req.user._id;
+            const user = await userService.getUser(userId.toString());
 
             const courseEnrollments: Array<ObjectId> = user.courseEnrollments;
-
             const result = await courseService.getCourseEnrollmentsByListOfIds(courseEnrollments);
 
             return res.status(200).json(result);
@@ -120,12 +109,8 @@ class CourseController {
 
     async getAllCourseTemplatesOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const userId = req.user._id;
-
-            const user = await User.findOneUserById(new ObjectId(userId));
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${userId}`));
-            }
+            const userId: ObjectId = req.user._id;
+            const user = await userService.getUser(userId.toString());
 
             const createdCourses: Array<ObjectId> = user.createdCourses;
 
@@ -140,14 +125,7 @@ class CourseController {
     async getCourseTemplate(req: Request, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
-            }
-
-            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
-            }
+            const course = await courseService.getCourseTemplate(courseId);
 
             const result = await courseService.getCourseTemplatesByListOfIds([course._id]);
             return res.status(200).json(result);
@@ -159,14 +137,7 @@ class CourseController {
     async getCourseEnrollment(req: Request, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseEnrollmentId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
-            }
-
-            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
-            }
+            const course = await courseService.getCourseEnrollment(courseId);
 
             const result = await courseService.getCourseEnrollmentsByListOfIds([course._id]);
             return res.status(200).json(result);
@@ -178,31 +149,18 @@ class CourseController {
     async removeCourseTemplate(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
-            }
+            const course = await courseService.getCourseTemplate(courseId);
 
-            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
-            }
-
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
+            const userId: ObjectId = req.user._id;
+            await userService.getUser(userId.toString());
 
             if (course.authorId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete course he didn't create`));
             }
 
-            // if other users have started enrolling the course, then refuse to delete courseTemplate
-            if (await courseService.checkExistenceOfCourseEnrollmentWithId(courseId)) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete a course while other users are subscribed to it`));
-            }
+            await courseService.checkExistenceOfCourseEnrollmentForCourseTemplate(courseId);
 
-            const tasks: Array<ObjectId> = course.taskTemplates;
-            
+            const tasks: Array<ObjectId> = course.taskTemplates;            
             for(const task of tasks) {
                 const deleteResult = await TaskTemplate.deleteTaskById(new ObjectId(task));
                 if (!deleteResult) {
@@ -231,29 +189,16 @@ class CourseController {
             }
 
             const courseId = req.params.courseId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
-            }
+            const course = await courseService.getCourseTemplate(courseId);
 
-            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find course with id: ${courseId}`));
-            }
-
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
+            const userId: ObjectId = req.user._id;
+            await userService.getUser(userId.toString());
 
             if (course.authorId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete course he didn't create`));
             }
 
-            // if other users have started enrolling the course, then refuse to update courseTemplate
-            const courseExists: boolean = await courseService.checkExistenceOfCourseEnrollmentWithId(courseId);
-            if (courseExists) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can not change a course that is already being enrolled`));
-            }
+            await courseService.checkExistenceOfCourseEnrollmentForCourseTemplate(courseId);
 
             await CourseTemplate.updateCourse({
                 _id: course._id,
@@ -274,19 +219,10 @@ class CourseController {
     async enrollInCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
-            }
+            const course = await courseService.getCourseTemplate(courseId);
 
-            const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseId}`));
-            }
-
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
+            const userId: ObjectId = req.user._id;
+            const user = await userService.getUser(userId.toString());
 
             const courseEnrollmentsWithUserId = await CourseEnrollment.findCoursesByUserId(req.user._id);
             if (courseEnrollmentsWithUserId.some((courseEnrollment) => courseEnrollment.coursePresentationId.equals(new ObjectId(courseId)))) {
@@ -298,10 +234,7 @@ class CourseController {
             let maxExpForTrueTasks = 0;
 
             for (const taskTemplateId of taskTemplates) {
-                const taskTemplate = await TaskTemplate.findTaskById(taskTemplateId);
-                if (!taskTemplate) {
-                    return next(ApiError.NotFoundError(`Can't find taskTemplate with id: ${taskTemplateId}`));
-                }
+                const taskTemplate = await taskService.getTaskTemplate(taskTemplateId.toString());
 
                 maxExpForTrueTasks += taskTemplate.expForTrueTask
 
@@ -337,7 +270,7 @@ class CourseController {
                 ratingForCourse: null
             });
 
-            const result = await CourseEnrollment.findCourseById(courseEnrollmentId);
+            const result = await courseService.getCourseEnrollment(courseEnrollmentId.toString());
 
             await User.findUserByIdAndUpdate(req.user._id, {courseEnrollments: [...user.courseEnrollments, courseEnrollmentId]});
 
@@ -353,19 +286,10 @@ class CourseController {
     async unEnrollFromCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseEnrollmentId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
-            }
-    
-            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
-            }
+            const course = await courseService.getCourseEnrollment(courseId);
 
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
+            const userId: ObjectId = req.user._id;
+            await userService.getUser(userId.toString());
     
             if (course.userId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
@@ -403,19 +327,10 @@ class CourseController {
     async startCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseEnrollmentId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
-            }
-    
-            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
-            }
+            const course = await courseService.getCourseEnrollment(courseId);
 
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
+            const userId: ObjectId = req.user._id;
+            const user = await userService.getUser(userId.toString());
     
             if (course.userId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
@@ -442,10 +357,7 @@ class CourseController {
                 return next(ApiError.BadRequest("Can't get getCourseEnrollmentsByListOfIds"));
             }
 
-            const profile = await Profile.findProfileById(user.profile_id);
-            if (!profile) {
-                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
-            }
+            const profile = await profileService.getUserProfile(userId.toString());
 
             await Profile.updateProfile({
                 _id: user.profile_id,
@@ -468,25 +380,13 @@ class CourseController {
     async completeCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseEnrollmentId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseId"));
-            }
-    
-            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
-            }
+            const course = await courseService.getCourseEnrollment(courseId);
 
             const courseTemplateId = course.coursePresentationId;
-            const courseTemplate = await CourseTemplate.findCourseById(courseTemplateId);
-            if (!courseTemplate) {
-                return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseTemplateId}`));
-            }
+            const courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString());
 
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
+            const userId: ObjectId = req.user._id;
+            const user = await userService.getUser(userId.toString());
     
             if (course.userId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
@@ -502,20 +402,14 @@ class CourseController {
     
             const taskIds: Array<ObjectId> = course.tasks;
             for(const taskId of taskIds) {
-                const task = await TaskEnrollment.findTaskById(taskId);
-                if (!task) {
-                    return next(ApiError.BadRequest(`Can't get taskEnrollment with id ${taskId}`));
-                }
+                const task = await taskService.getTaskEnrollment(taskId.toString());
     
                 if (task.status == TaskStatusType.InProgress) {
                     return next(ApiError.AccessForbidden(`You can complete course only with all completed tasks`));
                 }
             }
 
-            const profile = await Profile.findProfileById(user.profile_id);
-            if (!profile) {
-                return next(ApiError.NotFoundError(`Can't find profile with id ${user.profile_id}`));
-            }
+            const profile = await profileService.getUserProfile(userId.toString());
 
             await Profile.updateProfile({
                 _id: user.profile_id,
@@ -554,19 +448,10 @@ class CourseController {
             const rating: number = req.body.rating;
 
             const courseId = req.params.courseEnrollmentId;
-            if (!ObjectId.isValid(courseId)) {
-                return next(ApiError.BadRequest("Incorrect courseEnrollmentId"));
-            }
-    
-            const course = await CourseEnrollment.findCourseById(new ObjectId(courseId));
-            if (!course) {
-                return next(ApiError.NotFoundError(`Can't find courseEnrollment with id: ${courseId}`));
-            }
+            const course = await courseService.getCourseEnrollment(courseId);
 
-            const user = await User.findOneUserById(req.user._id);
-            if (!user) {
-                return next(ApiError.NotFoundError(`Can't find user with id: ${req.user._id}`));
-            }
+            const userId: ObjectId = req.user._id;
+            await userService.getUser(userId.toString());
     
             if (course.userId != req.user._id) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
@@ -581,22 +466,15 @@ class CourseController {
             }
 
             const courseTemplateId: ObjectId = course.coursePresentationId;
-            let courseTemplate = await CourseTemplate.findCourseById(courseTemplateId);
-            if (!courseTemplate) {
-                return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseTemplateId}`));
-            }
-
+            let courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString());
             if (!courseTemplate.rating) {
-                CourseTemplate.updateCourse({
+                await CourseTemplate.updateCourse({
                     _id: courseTemplateId,
                     rating: 0,
                     numberOfRatings: 0
                 });
 
-                courseTemplate = await CourseTemplate.findCourseById(courseTemplateId);
-                if (!courseTemplate) {
-                    return next(ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseTemplateId}`));
-                }
+                courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString());
             }
 
             const oldNumberOfRatings: number = courseTemplate.numberOfRatings;

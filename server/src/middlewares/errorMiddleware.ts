@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {Request, Response, NextFunction} from 'express';
 const ApiError = require('../exceptions/apiError');
 

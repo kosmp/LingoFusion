@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 // import {taskCreateUpdateValidation} from '../utils/validations';
 const task_router = require("express").Router();
 const taskController = require("../controllers/taskController");

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {Response, NextFunction} from 'express';
 import {RequestWithUserFromMiddleware} from '../utils/types';
 const ApiError = require('../exceptions/apiError');

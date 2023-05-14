@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {ObjectId} from "mongodb";
 import {Token} from '../models/tokenModel';
 const jwt = require('jsonwebtoken');

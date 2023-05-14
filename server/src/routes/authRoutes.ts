@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import {authValidation} from '../utils/validations';
 const auth_router = require("express").Router();
 const authController = require("../controllers/authController")
