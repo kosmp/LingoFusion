@@ -1,6 +1,6 @@
 import {body} from 'express-validator';
 import validator from 'validator';
-import {isArray, isString, isNumber} from 'class-validator';
+import {isArray, isString} from 'class-validator';
 import {EnglishLvl} from '../utils/enums';
 
 const validTags = new Set(['tag1', 'tag2', 'tag3']);
@@ -81,57 +81,67 @@ export const updateProfileEnglishLvlValidation = [
 ]
 
 export const userUpdateValidation = [
-  body('login', "Login can't be empty.").notEmpty(),
-  body('login', "Login must be bigger than 5 and less than 20").isLength({min: 5, max: 20}),
-  body('password', "Password must be bigger than 5 symbols and less than 20").isLength({min: 5, max: 20})
+    body('login', "Login can't be empty.").notEmpty(),
+    body('login', "Login must be bigger than 5 and less than 20").isLength({min: 5, max: 20}),
+    body('password', "Password must be bigger than 5 symbols and less than 20").isLength({min: 5, max: 20})
 ];
 
-// export const taskCreateUpdateValidation = [
-//   body('title', 'enter correct task title. Min 5').isLength({min: 5}).isString(),
+export const taskCreateUpdateValidation = [
+    body('title', 'Enter correct task title. Min 5')
+    .isLength({min: 5})
+    .isString(),
+    body('description', 'Enter correct task description. Min 5, max 50')
+    .isLength({min: 5, max: 50})
+    .isString(),
+    body('expForTrueTask', 'Enter expForTrueTask. Int type')
+    .notEmpty()
+    .isInt(),
+    body('question', 'Enter correct qustion text. Min 10')
+    .optional()
+    .isLength({min: 10})
+    .isString(),
+    body('content', 'Enter correct content text. Min 10')
+    .optional()
+    .isLength({min: 10})
+    .isString(),
+    body('text', 'Enter correct text. Min 10 symbols')
+    .optional().
+    isLength({min: 10})
+    .isString(),
+    body('trueAnswers', "Enter answers. List of strings")
+    .optional()
+    .custom((value) => isArray(value))
+    .withMessage('userAnswers must be an array')
+    .custom((value) => value.every((item: any) => isString(item)))
+    .withMessage('Each item in userAnswers must be a string'),
+    body('references')
+    .optional()
+    .custom((value) => isArray(value))
+    .withMessage('references must be an array')
+    .isArray({ min: 1, max: 10 })
+    .withMessage('references must have between 1 and 10 items')
+    .custom((value) => value.every((item: any) => isString(item)))
+    .withMessage('Each item in references must be a string'),
+    body('images')
+    .optional()
+    .custom((value) => isArray(value))
+    .withMessage('images must be an array')
+    .isArray({ min: 1, max: 10 })
+    .withMessage('images must have between 1 and 10 items')
+    .custom((value) => value.every((item: any) => isString(item)))
+    .withMessage('Each item in images must be a string'),
+    body('blanks').isArray().withMessage('The "blanks" field must be an array'),
+    body('blanks.*').isObject().withMessage('Each element in the "blanks" array must be an object'),
+    body('blanks.*.answer').isString().withMessage('Each object in the "blanks" array must have a "answer" property of type string'),
+    body('blanks.*.options').optional().isArray().withMessage('If provided, the "options" property in each object of the "blanks" array must be an array'),
+    body('blanks.*.options.*').isString().withMessage('Each element in the "options" array must be a string')
+]
 
-//   body('description', 'enter correct task description. Min 5, max 50').isLength({min: 5, max: 50}).isString(),
-
-//   body('content', 'enter correct content text. Min 10').optional().isLength({min: 10}).isString(),
-
-//   body('expForTrueAnswers')
-//   .optional()
-//   .notEmpty()
-//   .custom((value) => isArray(value))
-//   .withMessage('expForTrueAnswers must be an array')
-//   .isArray({ min: 1, max: 10 })
-//   .withMessage('expForTrueAnswers must have between 1 and 10 items')
-//   .custom((value) => value.every((item: any) => isString(item)))
-//   .withMessage('Each item in expForTrueAnswers must be a string'),
-
-//   body('question', 'enter correct question. Min 10 symbols').optional().isLength({min: 10}).isString(),
-
-//   body('trueAnswers')
-//   .optional()
-//   .notEmpty()
-//   .custom((value) => isArray(value))
-//   .withMessage('trueAnswers must be an array')
-//   .isArray({ min: 1, max: 10 })
-//   .withMessage('trueAnswers must have between 1 and 10 items')
-//   .custom((value) => value.every((item: any) => isString(item)))
-//   .withMessage('Each item in trueAnswers must be a string'),
-
-//   body('expForTrueTask', 'enter expForTrueTask. Numeric type').optional().notEmpty().isNumeric(),
-
-//   body('references')
-//   .optional()
-//   .custom((value) => isArray(value))
-//   .withMessage('references must be an array')
-//   .isArray({ min: 1, max: 10 })
-//   .withMessage('references must have between 1 and 10 items')
-//   .custom((value) => value.every((item: any) => isString(item)))
-//   .withMessage('Each item in references must be a string'),
-
-//   body('images')
-//   .optional()
-//   .custom((value) => isArray(value))
-//   .withMessage('images must be an array')
-//   .isArray({ min: 1, max: 10 })
-//   .withMessage('images must have between 1 and 10 items')
-//   .custom((value) => value.every((item: any) => isString(item)))
-//   .withMessage('Each item in images must be a string')
-// ]
+export const taskSubmitValidation = [
+    body('userAnswers', "Enter answers. List of strings")
+    .optional()
+    .custom((value) => isArray(value))
+    .withMessage('userAnswers must be an array')
+    .custom((value) => value.every((item: any) => isString(item)))
+    .withMessage('Each item in userAnswers must be a string')
+]

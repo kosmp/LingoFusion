@@ -51,10 +51,9 @@ export interface TheoryModelType extends TaskTemplateModelType {
 }
 
 export interface Blank {
-    id: string;
     answer: string;
     options?: string[];
-  }
+}
   
 
 export interface FillInGapsModelType extends TaskTemplateModelType { 

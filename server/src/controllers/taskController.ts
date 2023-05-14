@@ -253,6 +253,11 @@ class TaskController {
 
     async submitCourseTask(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return next(ApiError.BadRequest("Validation error", errors.array()));
+            }
+
             const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId);
 
@@ -279,7 +284,7 @@ class TaskController {
             }
 
             let userAnswers = req.body.userAnswers;
-            if (userAnswers == null) {
+            if (userAnswers == null || userAnswers.length == 0) {
                 userAnswers = new Array<string>;
             }
 
