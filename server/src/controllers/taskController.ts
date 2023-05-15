@@ -138,11 +138,8 @@ class TaskController {
     async getCourseTaskEnrollment(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseEnrollmentId;
-            const course = await courseService.getCourseEnrollment(courseId);
-
-            if (course.userId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not enrolled in this course`));
-            }
+            const userId: ObjectId = req.user._id;
+            const course = await courseService.getCourseEnrollment(courseId, userId.toString());
 
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`Course hasn't started. So user can't get courseTaskEnrollment`));
@@ -242,14 +239,10 @@ class TaskController {
             }
 
             const courseId = req.params.courseEnrollmentId;
-            const course = await courseService.getCourseEnrollment(courseId);
+            const userId: ObjectId = req.user._id;
 
-            const userId = req.user._id;
+            const course = await courseService.getCourseEnrollment(courseId, userId.toString());
             await userService.getUser(userId.toString());
-    
-            if (course.userId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't submit task in course he hasn't enrolled`));
-            }
 
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`Course hasn't started`));
@@ -335,14 +328,10 @@ class TaskController {
     async getNextTaskEnrollmentOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseEnrollmentId;
-            const course = await courseService.getCourseEnrollment(courseId);
+            const userId: ObjectId = req.user._id;
 
-            const userId = req.user._id;
+            const course = await courseService.getCourseEnrollment(courseId, userId.toString());
             await userService.getUser(userId.toString());
-    
-            if (course.userId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't get taskEnrollment from course he hasn't enrolled`));
-            }
 
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`Course hasn't started`));
@@ -383,14 +372,10 @@ class TaskController {
     async getPrevTaskEnrollmentOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseEnrollmentId;
-            const course = await courseService.getCourseEnrollment(courseId);
+            const userId: ObjectId = req.user._id;
 
-            const userId = req.user._id;
+            const course = await courseService.getCourseEnrollment(courseId, userId.toString());
             await userService.getUser(userId.toString());
-    
-            if (course.userId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't get taskEnrollment from course he hasn't enrolled`));
-            }
 
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`Course hasn't started`));

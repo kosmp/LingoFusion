@@ -52,8 +52,8 @@ class CourseService {
         return false;
     }
 
-    async calculateCourseStatistics(courseId: ObjectId) : Promise<CourseStatistics>{
-        const courseEnrollment = await this.getCourseEnrollment(courseId.toString());
+    async calculateCourseStatistics(courseId: string, userId: string) : Promise<CourseStatistics>{
+        const courseEnrollment = await this.getCourseEnrollment(courseId, userId);
 
         const courseEnrollmentTasks: Array<ObjectId> = courseEnrollment.tasks;
         let resultExp = 0;
@@ -106,7 +106,7 @@ class CourseService {
         return course;
     }
 
-    async getCourseEnrollment(courseId: string) : Promise<WithId<Document>>{
+    async getCourseEnrollment(courseId: string, userId: string) : Promise<WithId<Document>>{
         if (!ObjectId.isValid(courseId)) {
             throw ApiError.BadRequest("Incorrect courseEnrollmentId");
         }
@@ -117,6 +117,10 @@ class CourseService {
         }
 
         await this.checkPublicTrueInCourseTemplate(course.coursePresentationId.toString());
+
+        if (course.userId.toString() != userId) {
+            throw ApiError.AccessForbidden(`User with id: ${userId} has not enrolled in this course`);
+        }
 
         return course;
     }
