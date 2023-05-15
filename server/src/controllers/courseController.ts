@@ -24,8 +24,6 @@ class CourseController {
             }
 
             const userId: ObjectId = req.user._id;
-            const user = await userService.getUser(userId.toString());
-
             const profile = await profileService.getUserProfile(userId.toString());
 
             const courseId: ObjectId = await CourseTemplate.initialize({
@@ -43,7 +41,7 @@ class CourseController {
             });
 
             await Profile.updateProfile({
-                _id: user.profile_id,
+                _id: profile._id,
                 statistics: {
                     totalUserCountOfCompletedCourses: profile.statistics.totalUserCountOfCompletedCourses,
                     totalUserCountInProgressCourses: profile.statistics.totalUserCountInProgressCourses,
@@ -61,12 +59,14 @@ class CourseController {
 
     async publishCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
             const userId: ObjectId = req.user._id;
-
-            await courseService.getCourseTemplate(courseId, userId.toString());
+            const courseId = req.params.courseId;
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
             await courseService.checkPublicFalseInCourseTemplate(courseId);
-            await userService.getUser(userId.toString());
+
+            if (course.taskTemplates.length <= 1) {
+                return next(ApiError.AccessForbidden(`User can't publish courseTemplate with 1 task. Only 2+`));
+            }
 
             await CourseTemplate.updateCourse({
                 _id: new ObjectId(courseId),
@@ -81,8 +81,10 @@ class CourseController {
 
     async getAllAvailableCourses(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
+            const userId: ObjectId = req.user._id;
+
             const resultCourses = [...(await courseService.getAllPublicCourseTemplates()),
-                 ...(await courseService.getUserCourseEnrollments(req.user._id.toString()))];
+                 ...(await courseService.getUserCourseEnrollments(userId.toString()))];
 
             return res.status(200).json(resultCourses);
         } catch (e) {
@@ -132,7 +134,8 @@ class CourseController {
 
     async getAllCourseEnrollmentsOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const result = await courseService.getUserCourseEnrollments(req.user._id.toString());
+            const userId: ObjectId = req.user._id;
+            const result = await courseService.getUserCourseEnrollments(userId.toString());
 
             return res.status(200).json(result);
         } catch (e) {
@@ -142,7 +145,8 @@ class CourseController {
 
     async getUserCreatedCourseTemplates(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const result = await courseService.getUserCreatedCourseTemplates(req.user._id.toString());
+            const userId: ObjectId = req.user._id;
+            const result = await courseService.getUserCreatedCourseTemplates(userId.toString());
 
             return res.status(200).json(result);
         } catch (e) {
@@ -152,7 +156,9 @@ class CourseController {
 
     async getCourseTemplate(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const course = await courseService.getCourseTemplate(req.params.courseId, req.user._id.toString());
+            const userId: ObjectId = req.user._id;
+
+            const course = await courseService.getCourseTemplate(req.params.courseId, userId.toString());
             const result = await courseService.getCourseTemplatesByListOfIds([course._id]);
 
             return res.status(200).json(result);
@@ -163,8 +169,8 @@ class CourseController {
 
     async getCourseEnrollment(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
             const result = await courseService.getCourseEnrollmentsByListOfIds([course._id]);
 
@@ -176,12 +182,10 @@ class CourseController {
 
     async removeCourseTemplate(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseId;
             const course = await courseService.getCourseTemplate(courseId, userId.toString());
             await courseService.checkPublicFalseInCourseTemplate(courseId);
-            await userService.getUser(userId.toString());
 
             const tasks: Array<ObjectId> = course.taskTemplates;            
             for(const task of tasks) {
@@ -211,13 +215,10 @@ class CourseController {
                 return next(ApiError.BadRequest("Validation error", errors.array()))
             }
 
-            const courseId = req.params.courseId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseId;
             const course = await courseService.getCourseTemplate(courseId, userId.toString());
             await courseService.checkPublicFalseInCourseTemplate(courseId);
-            
-            await userService.getUser(userId.toString());
 
             await CourseTemplate.updateCourse({
                 _id: course._id,
@@ -237,17 +238,14 @@ class CourseController {
 
     async enrollInCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseId;
             const course = await courseService.getCourseTemplate(courseId, userId.toString());
             await courseService.checkPublicTrueInCourseTemplate(courseId);
-            
-            const user = await userService.getUser(userId.toString());
 
-            const courseEnrollmentsWithUserId = await CourseEnrollment.findCoursesByUserId(req.user._id);
+            const courseEnrollmentsWithUserId = await CourseEnrollment.findCoursesByUserId(userId);
             if (courseEnrollmentsWithUserId.some((courseEnrollment) => courseEnrollment.coursePresentationId.equals(new ObjectId(courseId)))) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} is already enrolling the course`));
+                return next(ApiError.AccessForbidden(`User with id: ${userId} is already enrolling the course`));
             }
 
             const taskTemplates: Array<ObjectId> = course.taskTemplates
@@ -286,14 +284,14 @@ class CourseController {
                     resultExp: 0,
                     counterOfTrueTasks: 0
                 },
-                userId: req.user._id,
+                userId: userId,
                 maxPossibleExpAmount: maxExpForTrueTasks,
                 ratingForCourse: null
             });
 
             const result = await courseService.getCourseEnrollment(courseEnrollmentId.toString(), userId.toString());
 
-            await User.findUserByIdAndUpdate(req.user._id, {courseEnrollments: [...user.courseEnrollments, courseEnrollmentId]});
+            await User.findUserByIdAndUpdate(userId, {courseEnrollments: [...(await userService.getUser(userId.toString())).courseEnrollments, courseEnrollmentId]});
 
             return res.status(200).json({
                 success: true,
@@ -306,14 +304,12 @@ class CourseController {
 
     async unEnrollFromCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
-            await userService.getUser(userId.toString());
 
             if (!course.startedAt) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not started this courseEnrollment`));
+                return next(ApiError.AccessForbidden(`User with id: ${userId} has not started this courseEnrollment`));
             }
 
             if (!course.completedAt) {
@@ -333,7 +329,7 @@ class CourseController {
                 return next(ApiError.NotFoundError(`Can't remove courseEnrollment with id: ${courseId}`));
             }
     
-            await User.removeCourseFromUserById(req.user?._id, new ObjectId(courseId), UserCourseProperty.CourseEnrollments);
+            await User.removeCourseFromUserById(userId, new ObjectId(courseId), UserCourseProperty.CourseEnrollments);
             
             return res.status(200).json({success: true});
         } catch (e) {
@@ -343,11 +339,9 @@ class CourseController {
 
     async startCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
-            const user = await userService.getUser(userId.toString());
 
             if (course.startedAt) {
                 return next(ApiError.BadRequest(`CourseEnrollment with id ${courseId} already started`));
@@ -373,7 +367,7 @@ class CourseController {
             const profile = await profileService.getUserProfile(userId.toString());
 
             await Profile.updateProfile({
-                _id: user.profile_id,
+                _id: profile._id,
                 statistics: {
                     totalUserCountOfCompletedCourses: profile.statistics.totalUserCountOfCompletedCourses,
                     totalUserCountInProgressCourses: profile.statistics.totalUserCountInProgressCourses + 1,
@@ -392,17 +386,15 @@ class CourseController {
 
     async completeCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
 
             const courseTemplateId = course.coursePresentationId;
             const courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString(), userId.toString()); // public: false can't be
-            
-            const user = await userService.getUser(userId.toString());
 
             if (!course.startedAt) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not started this courseEnrollment`));
+                return next(ApiError.AccessForbidden(`User with id: ${userId} has not started this courseEnrollment`));
             }
 
             if (course.completedAt) {
@@ -421,7 +413,7 @@ class CourseController {
             const profile = await profileService.getUserProfile(userId.toString());
 
             await Profile.updateProfile({
-                _id: user.profile_id,
+                _id: profile._id,
                 statistics: {
                     totalUserCountOfCompletedCourses: profile.statistics.totalUserCountOfCompletedCourses + 1,
                     totalUserCountInProgressCourses: profile.statistics.totalUserCountInProgressCourses - 1,
@@ -459,13 +451,9 @@ class CourseController {
                 return next(ApiError.BadRequest("Validation error", errors.array()))
             }
 
-            const rating: number = req.body.rating;
-
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
-            await userService.getUser(userId.toString());
 
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not started this courseEnrollment`));
@@ -475,6 +463,7 @@ class CourseController {
                 return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not completed this course to set rating`));
             }
 
+            const rating: number = req.body.rating;
             const courseTemplateId: ObjectId = course.coursePresentationId;
             let courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString(), userId.toString()); // public: false can't be
             if (!courseTemplate.rating) {

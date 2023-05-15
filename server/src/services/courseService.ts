@@ -4,8 +4,8 @@ import {CourseTemplate} from "../models/courseTemplate";
 import {TaskEnrollment} from "../models/taskEnrollment";
 import {CourseStatistics} from "../utils/types";
 import {EnglishLvl} from "../utils/enums";
-import {User} from "../models/user";
 const taskService = require('../services/taskService');
+const userService = require('../services/userService');
 const ApiError = require('../exceptions/apiError');
 
 class CourseService {
@@ -92,10 +92,12 @@ class CourseService {
     * @non-public_courses can only be accessed by creators
     */
     async getCourseTemplate(courseId: string, userId: string) : Promise<WithId<Document>>{
+        await userService.getUser(userId);
+
         if (!ObjectId.isValid(courseId)) {
             throw ApiError.BadRequest("Incorrect courseTemplateId");
         }
-
+        
         const course = await CourseTemplate.findCourseById(new ObjectId(courseId));
         if (!course) {
             throw ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseId}. Maybe course wasn't created`);
@@ -107,6 +109,8 @@ class CourseService {
     }
 
     async getCourseEnrollment(courseId: string, userId: string) : Promise<WithId<Document>>{
+        await userService.getUser(userId);
+
         if (!ObjectId.isValid(courseId)) {
             throw ApiError.BadRequest("Incorrect courseEnrollmentId");
         }
@@ -125,28 +129,23 @@ class CourseService {
         return course;
     }
 
-    async getAllPublicCourseTemplates() : Promise<Array<WithId<Document>>>{
+    async getAllPublicCourseTemplates() {
         const courses = await CourseTemplate.findAllCourses();
 
-        const publicCourses = new Array<WithId<Document>>;
+        const publicCourses = new Array<ObjectId>;
         for (const course of courses) {
             if (course.public === true) {
-                publicCourses.push(course);
+                publicCourses.push(course._id);
             } 
         }
 
-        return publicCourses;
+        const result = await this.getCourseTemplatesByListOfIds(publicCourses);
+
+        return result;
     }
 
     async getUserCourseEnrollments(userId: string) {
-        if (!ObjectId.isValid(userId)) {
-            throw ApiError.BadRequest("Incorrect userId");
-        }
-
-        const user = await User.findOneUserById(new ObjectId(userId));
-        if (!user) {
-            throw ApiError.NotFoundError(`Can't find user with id: ${userId}`);
-        }
+        const user = await userService.getUser(userId);
 
         const courseEnrollments: Array<ObjectId> = user.courseEnrollments;
         const result = await this.getCourseEnrollmentsByListOfIds(courseEnrollments);
@@ -155,14 +154,7 @@ class CourseService {
     }
 
     async getUserCreatedCourseTemplates(userId: string) {
-        if (!ObjectId.isValid(userId)) {
-            throw ApiError.BadRequest("Incorrect userId");
-        }
-
-        const user = await User.findOneUserById(new ObjectId(userId));
-        if (!user) {
-            throw ApiError.NotFoundError(`Can't find user with id: ${userId}`);
-        }
+        const user = await userService.getUser(userId);
 
         const createdCourses: Array<ObjectId> = user.createdCourses;
         const result = await this.getCourseTemplatesByListOfIds(createdCourses);
@@ -193,7 +185,7 @@ class CourseService {
             throw ApiError.NotFoundError(`Can't find courseTemplate with id: ${courseId}. Maybe course wasn't created`);
         }
 
-        return true;
+        return course.public;
     }
 
     /**

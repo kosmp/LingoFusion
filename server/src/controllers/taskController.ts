@@ -14,7 +14,6 @@ const {validationResult} = require('express-validator');
 const ApiError = require('../exceptions/apiError');
 const taskService = require('../services/taskService');
 const courseService = require('../services/courseService');
-const userService = require('../services/userService');
 
 class TaskController {
     async createTaskForCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
@@ -24,12 +23,10 @@ class TaskController {
                 return next(ApiError.BadRequest("Validation error", errors.array()));
             }
 
-            const courseId = req.params.courseId;
-            await courseService.getCourseTemplate(courseId);
-            await courseService.checkPublicFalseInCourseTemplate(courseId);
-
             const userId = req.user._id;
-            await userService.getUser(userId.toString());
+            const courseId = req.params.courseId;
+            await courseService.getCourseTemplate(courseId, userId.toString());
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             let taskTemplateId: ObjectId;
             if (req.body.taskType === TaskType.FillGaps) {
@@ -80,12 +77,10 @@ class TaskController {
                 return next(ApiError.BadRequest("Validation error", errors.array()))
             }
 
-            const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
-            await courseService.checkPublicFalseInCourseTemplate(courseId);
-
             const userId = req.user._id;
-            await userService.getUser(userId.toString());
+            const courseId = req.params.courseId;
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const taskId = req.params.taskId;
             const task = await taskService.getTaskTemplate(taskId);
@@ -137,8 +132,8 @@ class TaskController {
     
     async getCourseTaskEnrollment(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
 
             if (!course.startedAt) {
@@ -170,8 +165,9 @@ class TaskController {
 
     async getAllCourseTaskTemplates(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
+            const userId: ObjectId = req.user._id;
             const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
             await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             return res.status(200).json(await taskService.getTaskTemplatesByListOfIds(course.taskTemplates));
@@ -183,10 +179,8 @@ class TaskController {
     async deleteCourseTask(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const userId = req.user._id;
-            await userService.getUser(userId.toString());
-
             const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
             await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const taskId = req.params.taskId;
@@ -208,10 +202,8 @@ class TaskController {
     async deleteAllCourseTasks(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const userId = req.user._id;
-            await userService.getUser(userId.toString());
-
             const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
             await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const tasks: Array<ObjectId> = course.taskTemplates;
@@ -238,11 +230,9 @@ class TaskController {
                 return next(ApiError.BadRequest("Validation error", errors.array()));
             }
 
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
-            await userService.getUser(userId.toString());
 
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`Course hasn't started`));
@@ -327,11 +317,9 @@ class TaskController {
 
     async getNextTaskEnrollmentOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
-            await userService.getUser(userId.toString());
 
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`Course hasn't started`));
@@ -371,11 +359,9 @@ class TaskController {
 
     async getPrevTaskEnrollmentOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseEnrollmentId;
             const userId: ObjectId = req.user._id;
-
+            const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
-            await userService.getUser(userId.toString());
 
             if (!course.startedAt) {
                 return next(ApiError.AccessForbidden(`Course hasn't started`));
@@ -414,12 +400,10 @@ class TaskController {
 
     async getTaskTemplateOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
-            await courseService.getCourseTemplate(courseId);
-            await courseService.checkPublicFalseInCourseTemplate(courseId);
-                
             const userId = req.user._id;
-            await userService.getUser(userId.toString());
+            const courseId = req.params.courseId;
+            await courseService.getCourseTemplate(courseId, userId.toString());
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const taskId = req.params.taskId;
             const task = await taskService.getTaskTemplate(taskId);
