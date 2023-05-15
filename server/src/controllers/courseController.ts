@@ -1,8 +1,8 @@
 import {Request, Response, NextFunction} from 'express';
 import {CourseEnrollment} from '../models/courseEnrollment';
 import {CourseTemplate} from '../models/courseTemplate';
-import {RequestForCreateCourseTemplate, RequestForUpdateCourse, RequestWithUserFromMiddleware} from '../utils/types';
-import {Document, ObjectId, WithId} from 'mongodb';
+import {RequestWithUserFromMiddleware} from '../utils/types';
+import {ObjectId} from 'mongodb';
 import {TaskTemplate} from '../models/taskTemplate';
 import {TaskEnrollment} from '../models/taskEnrollment';
 import {User} from '../models/user';
@@ -16,7 +16,7 @@ const userService = require('../services/userService');
 const taskService = require('../services/taskService');
 
 class CourseController {
-    async createCourse(req: RequestForCreateCourseTemplate, res: Response, next: NextFunction) {
+    async createCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -29,6 +29,7 @@ class CourseController {
             const profile = await profileService.getUserProfile(userId.toString());
 
             const courseId: ObjectId = await CourseTemplate.initialize({
+                public: false,
                 title: req.body.title,
                 description: req.body.description,
                 englishLvl: req.body.englishLvl,
@@ -52,7 +53,30 @@ class CourseController {
             
             await User.addCourseToUserById(req.user._id, courseId, UserCourseProperty.CreatedCourses);
 
-            return res.status(200).json(await courseService.getCourseTemplate(courseId.toString()));
+            return res.status(200).json(await courseService.getCourseTemplate(courseId.toString(), userId.toString()));
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async publishCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+        try {
+            const courseId = req.params.courseId;
+            const userId: ObjectId = req.user._id;
+
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
+            await userService.getUser(userId.toString());
+    
+            if (course.authorId != req.user._id) {
+                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't publish course he didn't create`));
+            }
+
+            await CourseTemplate.updateCourse({
+                _id: new ObjectId(courseId),
+                public: true
+            })
+
+            return res.status(200).json({success: true});
         } catch (e) {
             return next(e);
         }
@@ -60,22 +84,8 @@ class CourseController {
 
     async getAllAvailableCourses(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseEnrollments = await CourseEnrollment.findAllCourses();
-            if (!courseEnrollments) {
-                return next(ApiError.NotFoundError(`Can't find any courses`));
-            }
-    
-            const result: Array<WithId<Document>> = new Array<WithId<Document>>();
-            const userId = new ObjectId(req.user._id)
-            for (const course of courseEnrollments) {
-                if (!(new ObjectId(course.userId)).equals(userId)) {
-                    continue;
-                }
-
-                result.push(course);
-            }
-
-            const resultCourses = [...(await CourseTemplate.findAllCourses()), ...(result)];
+            const resultCourses = [...(await courseService.getAllPublicCourseTemplates()),
+                 ...(await courseService.getUserCourseEnrollments(req.user._id.toString()))];
 
             return res.status(200).json(resultCourses);
         } catch (e) {
@@ -85,7 +95,7 @@ class CourseController {
 
     async getAllCourseTemplates(req: Request, res: Response, next: NextFunction) {
         try {
-            const courses = await CourseTemplate.findAllCourses();
+            const courses = await courseService.getAllPublicCourseTemplates();
             
             return res.status(200).json(courses);
         } catch (e) {
@@ -95,8 +105,7 @@ class CourseController {
     
     async getRatedCourseTemplates(req: Request, res: Response, next: NextFunction) {
         try {
-            const ratingThreshold = req.params.ratingThreshold;
-            const courses = await courseService.getRatedCourseTemplates(ratingThreshold);
+            const courses = await courseService.getRatedCourseTemplates(req.params.ratingThreshold);
             
             return res.status(200).json(courses);
         } catch (e) {
@@ -106,8 +115,7 @@ class CourseController {
 
     async getCourseTemplatesByEnglishLvl(req: Request, res: Response, next: NextFunction) {
         try {
-            const englishLvl = req.params.englishLvl;
-            const courses = await courseService.getCoursesByEnglishLvl(englishLvl);
+            const courses = await courseService.getCoursesByEnglishLvl(req.params.englishLvl);
             
             return res.status(200).json(courses);
         } catch (e) {
@@ -117,8 +125,7 @@ class CourseController {
 
     async getCourseTemplatesByTag(req: Request, res: Response, next: NextFunction) {
         try {
-            const tag = req.params.tag;
-            const courses = await courseService.getCourseTemplatesByTag(tag);
+            const courses = await courseService.getCourseTemplatesByTag(req.params.tag);
             
             return res.status(200).json(courses);
         } catch (e) {
@@ -128,11 +135,7 @@ class CourseController {
 
     async getAllCourseEnrollmentsOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const userId: ObjectId = req.user._id;
-            const user = await userService.getUser(userId.toString());
-
-            const courseEnrollments: Array<ObjectId> = user.courseEnrollments;
-            const result = await courseService.getCourseEnrollmentsByListOfIds(courseEnrollments);
+            const result = await courseService.getUserCourseEnrollments(req.user._id.toString());
 
             return res.status(200).json(result);
         } catch (e) {
@@ -140,14 +143,9 @@ class CourseController {
         }
     }
 
-    async getAllCourseTemplatesOfUser(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
+    async getUserCreatedCourseTemplates(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const userId: ObjectId = req.user._id;
-            const user = await userService.getUser(userId.toString());
-
-            const createdCourses: Array<ObjectId> = user.createdCourses;
-
-            const result = await courseService.getCourseTemplatesByListOfIds(createdCourses);
+            const result = await courseService.getUserCreatedCourseTemplates(req.user._id.toString());
 
             return res.status(200).json(result);
         } catch (e) {
@@ -155,12 +153,11 @@ class CourseController {
         }
     }
 
-    async getCourseTemplate(req: Request, res: Response, next: NextFunction) {
+    async getCourseTemplate(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
-            const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
-
+            const course = await courseService.getCourseTemplate(req.params.courseId, req.user._id.toString());
             const result = await courseService.getCourseTemplatesByListOfIds([course._id]);
+
             return res.status(200).json(result);
         } catch (e) {
             return next(e);
@@ -171,8 +168,8 @@ class CourseController {
         try {
             const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId);
-
             const result = await courseService.getCourseEnrollmentsByListOfIds([course._id]);
+
             return res.status(200).json(result);
         } catch (e) {
             return next(e);
@@ -182,16 +179,11 @@ class CourseController {
     async removeCourseTemplate(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
-
             const userId: ObjectId = req.user._id;
+
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
             await userService.getUser(userId.toString());
-
-            if (course.authorId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete course he didn't create`));
-            }
-
-            await courseService.checkExistenceOfCourseEnrollmentForCourseTemplate(courseId);
 
             const tasks: Array<ObjectId> = course.taskTemplates;            
             for(const task of tasks) {
@@ -214,7 +206,7 @@ class CourseController {
         }
     }
 
-    async updateCourseTemplate(req: RequestForUpdateCourse, res: Response, next: NextFunction) {
+    async updateCourseTemplate(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const errors = validationResult(req);
             if (!errors.isEmpty()) {
@@ -222,16 +214,12 @@ class CourseController {
             }
 
             const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
-
             const userId: ObjectId = req.user._id;
+
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
+            
             await userService.getUser(userId.toString());
-
-            if (course.authorId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete course he didn't create`));
-            }
-
-            await courseService.checkExistenceOfCourseEnrollmentForCourseTemplate(courseId);
 
             await CourseTemplate.updateCourse({
                 _id: course._id,
@@ -252,9 +240,11 @@ class CourseController {
     async enrollInCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
-
             const userId: ObjectId = req.user._id;
+
+            const course = await courseService.getCourseTemplate(courseId, userId.toString());
+            await courseService.checkPublicTrueInCourseTemplate(courseId);
+            
             const user = await userService.getUser(userId.toString());
 
             const courseEnrollmentsWithUserId = await CourseEnrollment.findCoursesByUserId(req.user._id);
@@ -416,9 +406,10 @@ class CourseController {
             const course = await courseService.getCourseEnrollment(courseId);
 
             const courseTemplateId = course.coursePresentationId;
-            const courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString());
-
             const userId: ObjectId = req.user._id;
+
+            const courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString(), userId.toString()); // public: false can't be
+
             const user = await userService.getUser(userId.toString());
     
             if (course.userId != req.user._id) {
@@ -504,7 +495,7 @@ class CourseController {
             }
 
             const courseTemplateId: ObjectId = course.coursePresentationId;
-            let courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString());
+            let courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString(), userId.toString()); // public: false can't be
             if (!courseTemplate.rating) {
                 await CourseTemplate.updateCourse({
                     _id: courseTemplateId,
@@ -512,7 +503,7 @@ class CourseController {
                     numberOfRatings: 0
                 });
 
-                courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString());
+                courseTemplate = await courseService.getCourseTemplate(courseTemplateId.toString(), userId.toString()); // public: false can't be
             }
 
             const oldNumberOfRatings: number = courseTemplate.numberOfRatings;

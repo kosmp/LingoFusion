@@ -81,6 +81,7 @@ export interface CourseStatistics {
 
 export interface CourseTemplateModelType {
     _id?: ObjectId;
+    public?: boolean;
     title?: string;
     description?: string;
     englishLvl?: EnglishLvl;
@@ -116,16 +117,6 @@ export interface CourseCreateTemplateModelType {
     tags: Set<string>;
 }
 
-export interface RequestForCreateCourseTemplate extends Request {
-    user: UserDtoModelType;
-    course: CourseCreateTemplateModelType;
-}
-
 export interface RequestWithUserFromMiddleware extends Request {
     user: UserDtoModelType;
-}
-
-export interface RequestForUpdateCourse extends Request {
-    user: UserDtoModelType;
-    course: CourseTemplateModelType;
 }

@@ -26,11 +26,10 @@ class TaskController {
 
             const courseId = req.params.courseId;
             await courseService.getCourseTemplate(courseId);
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const userId = req.user._id;
             await userService.getUser(userId.toString());
-
-            await courseService.checkExistenceOfCourseEnrollmentForCourseTemplate(courseId);
 
             let taskTemplateId: ObjectId;
             if (req.body.taskType === TaskType.FillGaps) {
@@ -83,15 +82,10 @@ class TaskController {
 
             const courseId = req.params.courseId;
             const course = await courseService.getCourseTemplate(courseId);
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const userId = req.user._id;
             await userService.getUser(userId.toString());
-
-            if (course.authorId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't update tasks in course he didn't create`));
-            }
-
-            await courseService.checkExistenceOfCourseEnrollmentForCourseTemplate(courseId);
 
             const taskId = req.params.taskId;
             const task = await taskService.getTaskTemplate(taskId);
@@ -181,10 +175,7 @@ class TaskController {
         try {
             const courseId = req.params.courseId;
             const course = await courseService.getCourseTemplate(courseId);
-
-            if (course.authorId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} has not created this course`));
-            }
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             return res.status(200).json(await taskService.getTaskTemplatesByListOfIds(course.taskTemplates));
         } catch (e) {
@@ -199,11 +190,7 @@ class TaskController {
 
             const courseId = req.params.courseId;
             const course = await courseService.getCourseTemplate(courseId);
-            if (course.authorId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete task from course he didn't create`));
-            }
-            
-            await courseService.checkExistenceOfCourseEnrollmentForCourseTemplate(courseId);
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const taskId = req.params.taskId;
             await taskService.getTaskTemplate(taskId);
@@ -228,11 +215,7 @@ class TaskController {
 
             const courseId = req.params.courseId;
             const course = await courseService.getCourseTemplate(courseId);
-            if (course.authorId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't delete tasks from course he didn't create`));
-            }
-
-            await courseService.checkExistenceOfCourseEnrollmentForCourseTemplate(courseId);
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const tasks: Array<ObjectId> = course.taskTemplates;
             for (const task of tasks) {
@@ -447,14 +430,11 @@ class TaskController {
     async getTaskTemplateOfCourse(req: RequestWithUserFromMiddleware, res: Response, next: NextFunction) {
         try {
             const courseId = req.params.courseId;
-            const course = await courseService.getCourseTemplate(courseId);
-    
+            await courseService.getCourseTemplate(courseId);
+            await courseService.checkPublicFalseInCourseTemplate(courseId);
+                
             const userId = req.user._id;
             await userService.getUser(userId.toString());
-    
-            if (course.authorId != req.user._id) {
-                return next(ApiError.AccessForbidden(`User with id: ${req.user._id} can't get taskTemplate from course he hasn't created`));
-            }
 
             const taskId = req.params.taskId;
             const task = await taskService.getTaskTemplate(taskId);

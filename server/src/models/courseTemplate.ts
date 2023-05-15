@@ -7,6 +7,7 @@ export class CourseTemplate {
 
     static async initialize(model: CourseTemplateModelType) {
         const courseTemplateId: ObjectId = await this.collection.insertOne({
+            public: model.public,
             title: model.title,
             description: model.description,
             englishLvl: model.englishLvl,
