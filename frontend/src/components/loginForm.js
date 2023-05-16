@@ -6,7 +6,7 @@ const LoginForm = () => {
     const [login, setLogin] = useState('');
     const [password, setPassword] = useState('');
     const {store} = useContext(Context);
- 
+
     return (
         <div>
             <input

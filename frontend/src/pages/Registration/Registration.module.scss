@@ -1,0 +1,28 @@
+.root {
+  width: 400px;
+  padding: 50px;
+  border: 1px solid #dedede;
+  margin: 50px auto;
+}
+  
+.field {
+  margin-bottom: 20px !important;
+}
+  
+.title {
+  text-align: center !important;
+  font-weight: bold !important;
+  margin-bottom: 30px !important;
+}
+
+.buttons {
+  .button {
+    background-color: rgb(0, 0, 0);
+      color: rgb(255, 255, 255);
+    
+      &:hover {
+        background-color: rgb(54, 216, 228);
+          color: rgb(255, 255, 255);
+      }
+    }
+}

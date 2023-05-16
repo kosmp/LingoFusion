@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import Store from './store/store';
+import {BrowserRouter} from 'react-router-dom';
 
 const store = new Store();
 
@@ -15,6 +16,8 @@ root.render(
   <Context.Provider value={{
     store
   }}>
-    <App />
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
   </Context.Provider>
 );
