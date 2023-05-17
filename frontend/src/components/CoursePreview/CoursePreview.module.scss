@@ -3,9 +3,11 @@
     flex-direction: column;
     align-items: center;
     border: 1px solid #ccc;
-    padding: 1px;
-    border-radius: 5px;
-    width: 200px;
+    padding: 5px;
+    border-radius: 20px;
+    height: 100%; 
+    width: 100%; 
+    transition: transform 0.2s ease-in-out;
   
     .courseImage {
       width: 100%;
@@ -16,6 +18,16 @@
     .courseDetails {
       text-align: center;
       margin-top: 8px;
+      color: rgb(15, 125, 130);;
     }
+
+    .courseLink {
+        text-decoration: none;
+        color: inherit;
+      }     
+}
+
+.coursePreview:hover {
+    transform: scale(1.05);
 }
   
