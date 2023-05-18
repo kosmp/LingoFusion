@@ -4,7 +4,7 @@ import MarkdownIt from 'markdown-it';
 import MdEditor from 'react-markdown-editor-lite';
 import 'react-markdown-editor-lite/lib/index.css';
 
-const CreateUpdateTheoryTask = () => {
+const CreateTheoryTask = () => {
   const [content, setContent] = useState('');
 
   const handleEditorChange = ({ text }) => {
@@ -32,4 +32,4 @@ const CreateUpdateTheoryTask = () => {
 
 const mdParser = new MarkdownIt();
 
-export default CreateUpdateTheoryTask;
+export default CreateTheoryTask;

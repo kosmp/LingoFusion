@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 
-const CreateUpdateTestTask = () => {
+const CreateTestTask = () => {
   const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [correctAnswers, setCorrectAnswers] = useState([]);
@@ -92,4 +92,4 @@ const CreateUpdateTestTask = () => {
   );
 };
 
-export default CreateUpdateTestTask;
+export default CreateTestTask;

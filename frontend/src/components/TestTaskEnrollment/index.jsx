@@ -5,7 +5,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 
-export const TestTaskEnrollment = () => {
+const TestTaskEnrollment = () => {
   const { taskId } = useParams();
   const [selectedOptions, setSelectedOptions] = useState([]);
 
@@ -54,3 +54,5 @@ export const TestTaskEnrollment = () => {
     </Paper>
   );
 };
+
+export default TestTaskEnrollment;

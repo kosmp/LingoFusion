@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 
-export const FillInGapsTaskEnrollment = () => {
+const FillInGapsTaskEnrollment = () => {
   const [content, setContent] = useState('Please {{gap}} the {{gap}} before proceeding.');
   const [answers, setAnswers] = useState([]);
 
@@ -13,7 +13,7 @@ export const FillInGapsTaskEnrollment = () => {
         setContent(data.text);
         setAnswers(Array(data.gaps.length).fill(''));
       })
-      .catch(error => {
+      .catch(error => { 
         console.error('Error:', error);
       });
   }, []);
@@ -67,3 +67,5 @@ export const FillInGapsTaskEnrollment = () => {
     </Paper>
   );
 };
+
+export default FillInGapsTaskEnrollment;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 
-const CreateUpdateFillInGapsTask = () => {
+const CreateFillInGapsTask = () => {
   const [content, setContent] = useState('');
   const gapMarker = '{{gap}}';
   const [answers, setAnswers] = useState([]);
@@ -62,4 +62,4 @@ const CreateUpdateFillInGapsTask = () => {
   );
 };
 
-export default CreateUpdateFillInGapsTask;
+export default CreateFillInGapsTask;

@@ -5,9 +5,9 @@ import Button from '@mui/material/Button';
 import SimpleMDE from 'react-simplemde-editor';
 
 import 'easymde/dist/easymde.min.css';
-import styles from './CreateUpdateCourse.module.scss';
+import styles from './CreateCourse.module.scss';
 
-const CreateUpdateCourse = () => {
+const CreateCourse = () => {
   const imageUrl = '';
   const [value, setValue] = React.useState('');
 
@@ -78,4 +78,4 @@ const CreateUpdateCourse = () => {
   );
 };
 
-export default CreateUpdateCourse;
+export default CreateCourse;
