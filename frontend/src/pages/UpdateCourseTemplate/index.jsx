@@ -1,7 +1,11 @@
+import React from 'react';
+import CreateUpdateCourse from '../../components/CreateUpdateCourse';
+
 export const UpdateCourseTemplate = () => {
-    return (
-        <>
-            
-        </>
-    );
+  return (
+    <div>
+      <h1>Update Course Template</h1>
+      <CreateUpdateCourse />
+    </div>
+  );
 };

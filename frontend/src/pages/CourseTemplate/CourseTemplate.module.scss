@@ -17,12 +17,12 @@
         font-size: 20px;
     }
 
-    .enrollButton {
+    .button {
         background-color: rgb(54, 216, 228);
         color:rgb(255, 255, 255);
         margin-top: 20px;
         font-weight: 1000;
-        margin-bottom: 5px;
+        margin: 5px;
   
         &:hover {
           transform: scale(1.05);
