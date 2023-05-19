@@ -29,6 +29,14 @@ const TestTaskEnrollment = () => {
     console.log('Selected options:', selectedOptions);
   };
 
+  const handlePrevTask = () => {
+
+  };
+
+  const handleNextTask = () => {
+
+  };
+
   return (
     <Paper style={{ padding: 30 }}>
       <h2>Test Task {taskId}</h2>
@@ -48,8 +56,14 @@ const TestTaskEnrollment = () => {
         </div>
       ))}
 
+      <Button variant="contained" color="primary" onClick={handlePrevTask}>
+        Prev task
+      </Button>
       <Button variant="contained" color="primary" onClick={handleSubmitAnswer}>
         Submit Answer
+      </Button>
+      <Button variant="contained" color="primary" onClick={handleNextTask}>
+        Next task
       </Button>
     </Paper>
   );

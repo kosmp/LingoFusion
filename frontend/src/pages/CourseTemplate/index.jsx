@@ -78,13 +78,13 @@ Start your language learning journey with us today!
                 Add task to course
               </Button>
               <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/createTheory`} onClick={() => handleSelectTask('Theory')}>
+                <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/theory`} onClick={() => handleSelectTask('Theory')}>
                   Theory
                 </MenuItem>
-                <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/createTest`} onClick={() => handleSelectTask('Test')}>
+                <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/test`} onClick={() => handleSelectTask('Test')}>
                   Test
                 </MenuItem>
-                <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/createFillInGaps`} onClick={() => handleSelectTask('FillInGaps')}>
+                <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/fillInGaps`} onClick={() => handleSelectTask('FillInGaps')}>
                   Fill in Gaps
                 </MenuItem>
               </Menu>

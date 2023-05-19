@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
+import { useNavigate } from 'react-router-dom';
 
 const CreateFillInGapsTask = () => {
+  const navigate = useNavigate();
   const [content, setContent] = useState('');
   const gapMarker = '{{gap}}';
   const [answers, setAnswers] = useState([]);
@@ -26,6 +28,7 @@ const CreateFillInGapsTask = () => {
     }
 
     if (answers.length === gaps.length && answers.every(answer => answer.trim() !== '')) {
+      navigate(`/courseTemplate/:courseId`);
       console.log('Savevd:', content, answers);
     } else {
       console.log('Fill in all gaps!');

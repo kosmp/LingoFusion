@@ -30,6 +30,14 @@ const FillInGapsTaskEnrollment = () => {
     console.log('Answers:', answers);
   };
 
+  const handlePrevTask = () => {
+
+  };
+
+  const handleNextTask = () => {
+
+  };
+
   const renderContentWithGaps = () => {
     const gapRegex = /{{gap}}/g;
     const gapsCount = (content.match(gapRegex) || []).length;
@@ -40,19 +48,23 @@ const FillInGapsTaskEnrollment = () => {
 
     const contentParts = content.split(gapRegex);
 
-    return contentParts.map((part, index) => (
-      <React.Fragment key={index}>
-        {part}
-        {index !== contentParts.length - 1 && (
-          <input
-            type="text"
-            value={answers[index] || ''}
-            onChange={(event) => handleAnswerChange(index, event)}
-            placeholder={`Enter answer for gap ${index + 1}`}
-          />
-        )}
-      </React.Fragment>
-    ));
+    return (
+      <>
+        {contentParts.map((part, index) => (
+          <React.Fragment key={index}>
+            {part}
+            {index !== contentParts.length - 1 && (
+              <input
+                type="text"
+                value={answers[index] || ''}
+                onChange={(event) => handleAnswerChange(index, event)}
+                placeholder={`Enter answer for gap ${index + 1}`}
+              />
+            )}
+          </React.Fragment>
+        ))}
+      </>
+    );
   };
 
   return (
@@ -60,9 +72,17 @@ const FillInGapsTaskEnrollment = () => {
       <h3>Fill in Gaps Task</h3>
       <form onSubmit={handleSubmit}>
         {renderContentWithGaps()}
-        <Button variant="contained" onClick={handleSubmit}>
-          Submit
-        </Button>
+        <div style={{ marginTop: 20 }}>
+          <Button variant="contained" color="primary" onClick={handlePrevTask}>
+            Prev task
+          </Button>
+          <Button variant="contained" onClick={handleSubmit}>
+            Submit
+          </Button>
+          <Button variant="contained" color="primary" onClick={handleNextTask}>
+            Next task
+          </Button>
+        </div>
       </form>
     </Paper>
   );
