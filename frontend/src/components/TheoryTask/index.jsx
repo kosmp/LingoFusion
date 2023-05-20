@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { useParams } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
+import TaskButtons from '../TaskButtons';
 
 const TheoryTask = (props) => {
   const { taskId } = useParams();
@@ -14,8 +14,9 @@ const TheoryTask = (props) => {
     setContent(taskContent);
   }, [taskId]);
 
-  const handleSubmit = () => {
-
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    
   };
 
   const handlePrevTask = () => {
@@ -23,6 +24,14 @@ const TheoryTask = (props) => {
   };
 
   const handleNextTask = () => {
+
+  };
+
+  const handleChangeTask = () => {;
+
+  };
+
+  const handleDeleteTask = () => {
 
   };
 
@@ -35,24 +44,16 @@ const TheoryTask = (props) => {
       <h3>Theory Task</h3>
       <ReactMarkdown>{content}</ReactMarkdown>
 
-      {!isFirstTask && (
-        <Button variant="contained" color="primary" onClick={handlePrevTask}>
-          Prev task
-        </Button>
-      )}
-      <Button variant="contained" color="primary" onClick={handleSubmit}>
-        Submit
-      </Button>
-      {!isLastTask && (
-        <Button variant="contained" color="primary" onClick={handleNextTask}>
-          Next task
-        </Button>
-      )}
-      {isLastTask && (
-        <Button variant="contained" color="primary">
-          Complete
-        </Button>
-      )}
+      <TaskButtons
+        isFirstTask={isFirstTask}
+        isLastTask={isLastTask}
+        handleSubmit={handleSubmit}
+        handleChangeTask={handleChangeTask}
+        handleDeleteTask={handleDeleteTask}
+        handleNextTask={handleNextTask}
+        handlePrevTask={handlePrevTask}
+        courseType={props.courseType}
+      />
     </Paper>
   );
 };

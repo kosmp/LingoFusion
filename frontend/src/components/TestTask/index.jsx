@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Button from '@mui/material/Button';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
+import TaskButtons from '../TaskButtons';
 
 const TestTask = (props) => {
   const { taskId } = useParams();
@@ -25,8 +25,9 @@ const TestTask = (props) => {
     }
   };
 
-  const handleSubmitAnswer = () => {
-    console.log('Selected options:', selectedOptions);
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    
   };
 
   const handlePrevTask = () => {
@@ -34,6 +35,14 @@ const TestTask = (props) => {
   };
 
   const handleNextTask = () => {
+
+  };
+
+  const handleChangeTask = () => {;
+
+  };
+
+  const handleDeleteTask = () => {
 
   };
 
@@ -60,24 +69,16 @@ const TestTask = (props) => {
         </div>
       ))}
 
-      {!isFirstTask && (
-        <Button variant="contained" color="primary" onClick={handlePrevTask}>
-          Prev task
-        </Button>
-      )}
-      <Button variant="contained" color="primary" onClick={handleSubmitAnswer}>
-        Submit Answer
-      </Button>
-      {!isLastTask && (
-        <Button variant="contained" color="primary" onClick={handleNextTask}>
-          Next task
-        </Button>
-      )}
-      {isLastTask && (
-        <Button variant="contained" color="primary">
-          Complete
-        </Button>
-      )}
+      <TaskButtons
+        isFirstTask={isFirstTask}
+        isLastTask={isLastTask}
+        handleSubmit={handleSubmit}
+        handleChangeTask={handleChangeTask}
+        handleDeleteTask={handleDeleteTask}
+        handleNextTask={handleNextTask}
+        handlePrevTask={handlePrevTask}
+        courseType={props.courseType}
+      />
     </Paper>
   );
 };

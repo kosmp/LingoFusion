@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
-import Button from '@mui/material/Button';
 import { useParams } from 'react-router-dom';
+import TaskButtons from '../TaskButtons';
 
 const FillInGapsTask = (props) => {
   const { taskId } = useParams();
@@ -20,15 +20,9 @@ const FillInGapsTask = (props) => {
       });
   }, [taskId]);
 
-  const handleAnswerChange = (index, event) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = event.target.value;
-    setAnswers(newAnswers);
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
-    console.log('Answers:', answers);
+    
   };
 
   const handlePrevTask = () => {
@@ -37,6 +31,20 @@ const FillInGapsTask = (props) => {
 
   const handleNextTask = () => {
 
+  };
+
+  const handleChangeTask = () => {;
+
+  };
+
+  const handleDeleteTask = () => {
+
+  };
+
+  const handleAnswerChange = (index, event) => {
+    const newAnswers = [...answers];
+    newAnswers[index] = event.target.value;
+    setAnswers(newAnswers);
   };
 
   const renderContentWithGaps = () => {
@@ -78,24 +86,16 @@ const FillInGapsTask = (props) => {
       <form onSubmit={handleSubmit}>
         {renderContentWithGaps()}
         <div style={{ marginTop: 20 }}>
-          {!isFirstTask && (
-            <Button variant="contained" color="primary" onClick={handlePrevTask}>
-              Prev task
-            </Button>
-          )}
-          <Button variant="contained" onClick={handleSubmit}>
-            Submit
-          </Button>
-          {!isLastTask && (
-            <Button variant="contained" color="primary" onClick={handleNextTask}>
-              Next task
-            </Button>
-          )}
-          {isLastTask && (
-            <Button variant="contained" color="primary">
-              Complete
-            </Button>
-          )}
+          <TaskButtons
+            isFirstTask={isFirstTask}
+            isLastTask={isLastTask}
+            handleSubmit={handleSubmit}
+            handleChangeTask={handleChangeTask}
+            handleDeleteTask={handleDeleteTask}
+            handleNextTask={handleNextTask}
+            handlePrevTask={handlePrevTask}
+            courseType={props.courseType}
+          />
         </div>
       </form>
     </Paper>
