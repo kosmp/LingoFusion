@@ -7,14 +7,12 @@ import { Home } from './pages/Home';
 import { Registration } from './pages/Registration';
 import { Login } from './pages/Login';
 import { CourseCatalog } from './pages/CourseCatalog';
-import { CourseTemplate } from './pages/CourseTemplate';
 import { CreateCourseTemplate } from './pages/CreateCourseTemplate';
 import { UpdateCourseTemplate } from './pages/UpdateCourseTemplate';
-import { TaskTemplate } from './pages/TaskTemplate';
 import { UpdateTaskTemplate } from './pages/UpdateTaskTemplate';
-import { CourseEnrollment } from './pages/CourseEnrollment';
+import { CoursePage } from './pages/CoursePage';
 import { CreateTaskTemplate } from './pages/CreateTaskTemplate';
-import { TaskEnrollment } from './pages/TaskEnrollment';
+import { TaskPage } from './pages/TaskPage';
 
 function App() {
   return (
@@ -26,14 +24,12 @@ function App() {
           <Route path="/register" element={<Registration />} />
           <Route path="/login" element={<Login />} />
           <Route path="/catalog" element={<CourseCatalog />} />
-          <Route path="/courseTemplate/:courseId" element={<CourseTemplate />} />
+          <Route path="/:courseType/:courseId" element={<CoursePage />} />
           <Route path="/courseTemplate/create" element={<CreateCourseTemplate />} />
           <Route path="/courseTemplate/:courseId/update" element={<UpdateCourseTemplate />} />
-          <Route path="/courseTemplate/:courseId/taskTemplate/:taskId" element={<TaskTemplate />} />
           <Route path="/courseTemplate/:courseId/taskTemplate/create/:taskType" element={<CreateTaskTemplate />} />    
           <Route path="/courseTemplate/:courseId/taskTemplate/:taskId/update" element={<UpdateTaskTemplate />} />  
-          <Route path="/courseEnrollment/:courseId/" element={<CourseEnrollment />} />
-          <Route path="/courseEnrollment/:courseId/:taskTypeEnrollment/:taskId" element={<TaskEnrollment />} />
+          <Route path="/:courseType/:courseId/:taskType/:taskId" element={<TaskPage />} />
         </Routes>
       </Container>
     </div>

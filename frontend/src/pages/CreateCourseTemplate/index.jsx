@@ -1,11 +1,11 @@
 import React from 'react';
-import CreateCourse from '../../components/CreateCourse';
+import CreateUpdateCourse from '../../components/CreateUpdateCourse';
 
 export const CreateCourseTemplate = () => {
   return (
     <div>
       <h1>Create Course Template</h1>
-      <CreateCourse />
+      <CreateUpdateCourse action='create' />
     </div>
   );
 };

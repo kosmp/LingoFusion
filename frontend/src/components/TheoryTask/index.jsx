@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 
-const TheoryTaskEnrollment = () => {
+const TheoryTask = (props) => {
   const { taskId } = useParams();
   const [content, setContent] = useState('');
 
@@ -26,21 +26,35 @@ const TheoryTaskEnrollment = () => {
 
   };
 
+  const { taskIds } = props;
+  const isLastTask = taskIds[taskIds.length - 1] === taskId;
+  const isFirstTask = taskIds[0] === taskId;
+
   return (
     <Paper style={{ padding: 30 }}>
       <h3>Theory Task</h3>
       <ReactMarkdown>{content}</ReactMarkdown>
-      <Button variant="contained" color="primary" onClick={handlePrevTask}>
-        Prev task
-      </Button>
+
+      {!isFirstTask && (
+        <Button variant="contained" color="primary" onClick={handlePrevTask}>
+          Prev task
+        </Button>
+      )}
       <Button variant="contained" color="primary" onClick={handleSubmit}>
         Submit
       </Button>
-      <Button variant="contained" color="primary" onClick={handleNextTask}>
-        Next task
-      </Button>
-      </Paper>
+      {!isLastTask && (
+        <Button variant="contained" color="primary" onClick={handleNextTask}>
+          Next task
+        </Button>
+      )}
+      {isLastTask && (
+        <Button variant="contained" color="primary">
+          Complete
+        </Button>
+      )}
+    </Paper>
   );
 };
 
-export default TheoryTaskEnrollment;
+export default TheoryTask;

@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import { useParams } from 'react-router-dom';
 
-const FillInGapsTaskEnrollment = () => {
+const FillInGapsTask = (props) => {
+  const { taskId } = useParams();
   const [content, setContent] = useState('Please {{gap}} the {{gap}} before proceeding.');
   const [answers, setAnswers] = useState([]);
 
   useEffect(() => {
-    fetch('')
+    fetch(``)
       .then(response => response.json())
       .then(data => {
         setContent(data.text);
@@ -16,7 +18,7 @@ const FillInGapsTaskEnrollment = () => {
       .catch(error => { 
         console.error('Error:', error);
       });
-  }, []);
+  }, [taskId]);
 
   const handleAnswerChange = (index, event) => {
     const newAnswers = [...answers];
@@ -26,7 +28,6 @@ const FillInGapsTaskEnrollment = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
     console.log('Answers:', answers);
   };
 
@@ -67,25 +68,38 @@ const FillInGapsTaskEnrollment = () => {
     );
   };
 
+  const { taskIds } = props;
+  const isFirstTask = taskIds[0] === taskId;
+  const isLastTask = taskIds[taskIds.length - 1] === taskId;
+
   return (
     <Paper style={{ padding: 30 }}>
       <h3>Fill in Gaps Task</h3>
       <form onSubmit={handleSubmit}>
         {renderContentWithGaps()}
         <div style={{ marginTop: 20 }}>
-          <Button variant="contained" color="primary" onClick={handlePrevTask}>
-            Prev task
-          </Button>
+          {!isFirstTask && (
+            <Button variant="contained" color="primary" onClick={handlePrevTask}>
+              Prev task
+            </Button>
+          )}
           <Button variant="contained" onClick={handleSubmit}>
             Submit
           </Button>
-          <Button variant="contained" color="primary" onClick={handleNextTask}>
-            Next task
-          </Button>
+          {!isLastTask && (
+            <Button variant="contained" color="primary" onClick={handleNextTask}>
+              Next task
+            </Button>
+          )}
+          {isLastTask && (
+            <Button variant="contained" color="primary">
+              Complete
+            </Button>
+          )}
         </div>
       </form>
     </Paper>
   );
 };
 
-export default FillInGapsTaskEnrollment;
+export default FillInGapsTask;

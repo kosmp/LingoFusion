@@ -5,7 +5,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 
-const TestTaskEnrollment = () => {
+const TestTask = (props) => {
   const { taskId } = useParams();
   const [selectedOptions, setSelectedOptions] = useState([]);
 
@@ -37,6 +37,10 @@ const TestTaskEnrollment = () => {
 
   };
 
+  const { taskIds } = props;
+  const isLastTask = taskIds[taskIds.length - 1] === taskId;
+  const isFirstTask = taskIds[0] === taskId;
+
   return (
     <Paper style={{ padding: 30 }}>
       <h2>Test Task {taskId}</h2>
@@ -56,17 +60,26 @@ const TestTaskEnrollment = () => {
         </div>
       ))}
 
-      <Button variant="contained" color="primary" onClick={handlePrevTask}>
-        Prev task
-      </Button>
+      {!isFirstTask && (
+        <Button variant="contained" color="primary" onClick={handlePrevTask}>
+          Prev task
+        </Button>
+      )}
       <Button variant="contained" color="primary" onClick={handleSubmitAnswer}>
         Submit Answer
       </Button>
-      <Button variant="contained" color="primary" onClick={handleNextTask}>
-        Next task
-      </Button>
+      {!isLastTask && (
+        <Button variant="contained" color="primary" onClick={handleNextTask}>
+          Next task
+        </Button>
+      )}
+      {isLastTask && (
+        <Button variant="contained" color="primary">
+          Complete
+        </Button>
+      )}
     </Paper>
   );
 };
 
-export default TestTaskEnrollment;
+export default TestTask;

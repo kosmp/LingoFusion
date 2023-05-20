@@ -3,17 +3,33 @@ import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
 import SimpleMDE from 'react-simplemde-editor';
+import { useNavigate } from 'react-router-dom';
 
 import 'easymde/dist/easymde.min.css';
-import styles from './CreateCourse.module.scss';
+import styles from './CreateUpdateCourse.module.scss';
 
-const CreateCourse = () => {
+const CreateUpdateCourse = (props) => {
+  const navigate = useNavigate();
   const imageUrl = '';
   const [value, setValue] = React.useState('');
 
   const handleChangeFile = () => {};
 
   const onClickRemoveImage = () => {};
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (props.action === 'create') {
+
+
+      navigate('/courseTemplate/:courseId');
+    } else if (props.action === 'update') {
+
+
+      navigate('/courseTemplate/:courseId');
+    }
+  };
 
   const onChange = React.useCallback((value) => {
     setValue(value);
@@ -63,11 +79,9 @@ const CreateCourse = () => {
       <TextField classes={{ root: styles.tags }} variant="standard" placeholder="Tags" fullWidth />
       <SimpleMDE className={styles.editor} value={value} onChange={onChange} options={options} />
       <div className={styles.buttons}>
-        <a href="/courseTemplate/:courseId/taskTemplate/create">
-            <Button size="large" variant="contained">
-                Submit
-            </Button>
-        </a>
+        <Button size="large" variant="contained" onClick={handleSubmit}>
+          Submit
+        </Button>
         <a href="/">
             <Button size="large" variant="contained">
                 Cancel
@@ -78,4 +92,4 @@ const CreateCourse = () => {
   );
 };
 
-export default CreateCourse;
+export default CreateUpdateCourse;
