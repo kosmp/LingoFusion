@@ -15,7 +15,7 @@ export const Profile = () => {
   const [inProgressCoursesCount, setInProgressCoursesCount] = useState(0);
   const [createdCoursesCount, setCreatedCoursesCount] = useState(0);
 
-  const [isDataLoaded, setDataLoaded] = useState(false);
+  const [isDataLoaded, setDataLoaded] = useState(true);
 
   useEffect(() => {
     fetchData();

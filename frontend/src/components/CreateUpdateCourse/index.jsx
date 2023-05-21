@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
-import SimpleMDE from 'react-simplemde-editor';
+import MarkdownIt from 'markdown-it';
+import MdEditor from 'react-markdown-editor-lite';
 import { useNavigate } from 'react-router-dom';
 
 import 'easymde/dist/easymde.min.css';
@@ -12,6 +13,7 @@ const CreateUpdateCourse = (props) => {
   const navigate = useNavigate();
   const imageUrl = '';
   const [value, setValue] = React.useState('');
+  const [content, setContent] = useState('');
 
   const handleChangeFile = () => {};
 
@@ -29,6 +31,10 @@ const CreateUpdateCourse = (props) => {
 
       navigate('/courseTemplate/:courseId');
     }
+  };
+
+  const handleEditorChange = ({ text }) => {
+    setContent(text);
   };
 
   const onChange = React.useCallback((value) => {
@@ -77,7 +83,12 @@ const CreateUpdateCourse = (props) => {
       <br />
       <br />
       <TextField classes={{ root: styles.tags }} variant="standard" placeholder="Tags" fullWidth />
-      <SimpleMDE className={styles.editor} value={value} onChange={onChange} options={options} />
+      <MdEditor
+        value={content}
+        renderHTML={(text) => mdParser.render(text)}
+        onChange={handleEditorChange}
+        className={styles.editor}
+      />
       <div className={styles.buttons}>
         <Button size="large" variant="contained" onClick={handleSubmit}>
           Submit
@@ -91,5 +102,7 @@ const CreateUpdateCourse = (props) => {
     </Paper>
   );
 };
+
+const mdParser = new MarkdownIt();
 
 export default CreateUpdateCourse;

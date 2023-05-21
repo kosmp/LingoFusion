@@ -64,8 +64,8 @@ export const Header = () => {
               }}
               getContentAnchorEl={null}
             >
-              <MenuItem onClick={handleProfile}>Profile</MenuItem>
-              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              <MenuItem onClick={handleProfile} style={{ display: 'block',  padding: '8px 16px'}}>Profile</MenuItem>
+              <MenuItem onClick={handleLogout} style={{ display: 'block',  padding: '8px 16px'}}>Logout</MenuItem>
             </Menu>
           </div>
         </div>
