@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
 
-const CreateFillInGapsTask = () => {
+const CreateUpdateFillInGapsTask = (props) => {
   const navigate = useNavigate();
   const [content, setContent] = useState('');
   const gapMarker = '{{gap}}';
@@ -28,6 +28,14 @@ const CreateFillInGapsTask = () => {
     }
 
     if (answers.length === gaps.length && answers.every(answer => answer.trim() !== '')) {
+      if (props.action === 'create') {
+
+
+      } else if (props.action === 'update') {
+  
+  
+      }
+
       navigate(`/courseTemplate/:courseId`);
       console.log('Savevd:', content, answers);
     } else {
@@ -65,4 +73,4 @@ const CreateFillInGapsTask = () => {
   );
 };
 
-export default CreateFillInGapsTask;
+export default CreateUpdateFillInGapsTask;

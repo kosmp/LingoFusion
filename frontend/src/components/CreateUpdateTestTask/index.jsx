@@ -5,7 +5,7 @@
   import FormControlLabel from '@mui/material/FormControlLabel';
   import { useNavigate } from 'react-router-dom';
 
-  const CreateTestTask = () => {
+  const CreateUpdateTestTask = (props) => {
     const navigate = useNavigate();
     const [question, setQuestion] = useState('');
     const [options, setOptions] = useState(['', '']);
@@ -44,6 +44,15 @@
         alert('Must be at least 1 true answer!');
         return;
       }
+
+      if (props.action === 'create') {
+
+
+      } else if (props.action === 'update') {
+  
+  
+      }
+      
       navigate(`/courseTemplate/:courseId`);
       console.log('Submitted', question, options, correctAnswers);
     };
@@ -95,4 +104,4 @@
     );
   };
 
-  export default CreateTestTask;
+  export default CreateUpdateTestTask;

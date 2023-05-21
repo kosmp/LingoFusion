@@ -5,7 +5,7 @@ import MdEditor from 'react-markdown-editor-lite';
 import 'react-markdown-editor-lite/lib/index.css';
 import { useNavigate } from 'react-router-dom';
 
-const CreateTheoryTask = () => {
+const CreateUpdateTheoryTask = (props) => {
   const navigate = useNavigate();
   const [content, setContent] = useState('');
 
@@ -14,6 +14,14 @@ const CreateTheoryTask = () => {
   };
 
   const handleSubmit = () => {
+    if (props.action === 'create') {
+
+
+    } else if (props.action === 'update') {
+
+
+    }
+
     navigate(`/courseTemplate/:courseId`);
     console.log('Saved:', content);
   };
@@ -35,4 +43,4 @@ const CreateTheoryTask = () => {
 
 const mdParser = new MarkdownIt();
 
-export default CreateTheoryTask;
+export default CreateUpdateTheoryTask;
