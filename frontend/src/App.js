@@ -11,6 +11,7 @@ import { CreateUpdateCourseTemplate } from './pages/CreateUpdateCourseTemplate';
 import { CreateUpdateTaskTemplate } from './pages/CreateUpdateTaskTemplate';
 import { CoursePage } from './pages/CoursePage';
 import { TaskPage } from './pages/TaskPage';
+import { Profile } from './pages/Profile';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Registration />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/profile/:userId" element={<Profile />} />
           <Route path="/catalog" element={<CourseCatalog />} />
           <Route path="/:courseType/:courseId" element={<CoursePage />} />
           <Route path="/courseTemplate/:action" element={<CreateUpdateCourseTemplate />} />
