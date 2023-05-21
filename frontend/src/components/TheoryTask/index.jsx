@@ -52,6 +52,7 @@ const TheoryTask = (props) => {
         handleDeleteTask={handleDeleteTask}
         handleNextTask={handleNextTask}
         handlePrevTask={handlePrevTask}
+        taskStatus={props.taskStatus}
         courseType={props.courseType}
       />
     </Paper>

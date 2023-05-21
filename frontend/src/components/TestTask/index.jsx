@@ -8,6 +8,9 @@ import TaskButtons from '../TaskButtons';
 const TestTask = (props) => {
   const { taskId } = useParams();
   const [selectedOptions, setSelectedOptions] = useState([]);
+  const [trueAnswers, setTrueAnswers] = useState([]);
+  const [gainedExp, setGainedExp] = useState(0);
+  const [userAnswers, setUserAnswers] = useState([]);
 
   const data = [
     { id: '1', label: 'Option 1' },
@@ -27,6 +30,26 @@ const TestTask = (props) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    
+    if (props.taskStatus === 'InProgress') {
+        // get task Template
+        fetch('')
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.taskType !== 'theory') {
+            setTrueAnswers(data.trueAnswers || []);
+          } else {
+            setTrueAnswers([]);
+          }
+        })
+        .catch((error) => {
+          console.error('Error fetching single task:', error);
+        });
+
+        // submit task request
+
+    }
+
     
   };
 
@@ -62,12 +85,30 @@ const TestTask = (props) => {
               <Checkbox
                 checked={selectedOptions.includes(option.id)}
                 onChange={() => handleOptionChange(option.id)}
+                disabled={props.taskStatus === 'Completed'}
               />
             }
             label={option.label}
           />
         </div>
       ))}
+
+      {props.taskStatus === 'Completed' && (
+        <div>
+          <h4>
+            This task already completed
+          </h4>
+          <h4>
+            Gained experience for task: {gainedExp}
+          </h4>
+          <h4>
+            Your Answers: {userAnswers}
+          </h4>
+          <h4>
+            Correct Answers: {trueAnswers.join(', ')}
+          </h4>
+        </div>
+      )}
 
       <TaskButtons
         isFirstTask={isFirstTask}
@@ -77,6 +118,7 @@ const TestTask = (props) => {
         handleDeleteTask={handleDeleteTask}
         handleNextTask={handleNextTask}
         handlePrevTask={handlePrevTask}
+        taskStatus={props.taskStatus}
         courseType={props.courseType}
       />
     </Paper>

@@ -7,6 +7,9 @@ const FillInGapsTask = (props) => {
   const { taskId } = useParams();
   const [content, setContent] = useState('Please {{gap}} the {{gap}} before proceeding.');
   const [answers, setAnswers] = useState([]);
+  const [trueAnswers, setTrueAnswers] = useState([]);
+  const [gainedExp, setGainedExp] = useState(0);
+  const [userAnswers, setUserAnswers] = useState([]);
 
   useEffect(() => {
     fetch(``)
@@ -22,6 +25,25 @@ const FillInGapsTask = (props) => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    if (props.taskStatus === 'InProgress') {
+      // get task Template
+      fetch('')
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.taskType !== 'theory') {
+          setTrueAnswers(data.trueAnswers || []);
+        } else {
+          setTrueAnswers([]);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching single task:', error);
+      });
+
+      // submit task request
+
+  }
     
   };
 
@@ -68,6 +90,7 @@ const FillInGapsTask = (props) => {
                 value={answers[index] || ''}
                 onChange={(event) => handleAnswerChange(index, event)}
                 placeholder={`Enter answer for gap ${index + 1}`}
+                disabled={props.taskStatus === 'Completed'}
               />
             )}
           </React.Fragment>
@@ -86,6 +109,23 @@ const FillInGapsTask = (props) => {
       <form onSubmit={handleSubmit}>
         {renderContentWithGaps()}
         <div style={{ marginTop: 20 }}>
+          {props.taskStatus === 'Completed' && (
+            <div>
+              <h4>
+                This task already completed
+              </h4>
+              <h4>
+                Gained experience for task: {gainedExp}
+              </h4>
+              <h4>
+                Your Answers: {userAnswers}
+              </h4>
+              <h4>
+                Correct Answers: {trueAnswers.join(', ')}
+              </h4>
+            </div>
+          )}
+
           <TaskButtons
             isFirstTask={isFirstTask}
             isLastTask={isLastTask}
@@ -94,6 +134,7 @@ const FillInGapsTask = (props) => {
             handleDeleteTask={handleDeleteTask}
             handleNextTask={handleNextTask}
             handlePrevTask={handlePrevTask}
+            taskStatus={props.taskStatus}
             courseType={props.courseType}
           />
         </div>

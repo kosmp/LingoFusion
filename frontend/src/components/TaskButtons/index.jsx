@@ -10,6 +10,7 @@ const TaskButtons = (props) => {
     handleSubmit,
     handleChangeTask,
     handleDeleteTask,
+    taskStatus,
     courseType
   } = props;
 
@@ -22,7 +23,7 @@ const TaskButtons = (props) => {
       )}
 
       {courseType === 'courseEnrollment' && (
-        <Button variant="contained" color="primary" onClick={handleSubmit}>
+        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={taskStatus === 'Completed'}>
           Submit Answer
         </Button>
       )}
