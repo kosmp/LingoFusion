@@ -26,6 +26,8 @@ const Header = () => {
     const isSuccess = await store.logout();
     if (isSuccess) {
       navigate('/login');
+    } else {
+      
     }
   };
 

@@ -7,6 +7,7 @@ export default class Store {
     user = {};
     isAuth = false;
     isLoading = false;
+    errorCallback = null;
 
     constructor() {
         makeAutoObservable(this);
@@ -24,6 +25,10 @@ export default class Store {
         this.isLoading = bool;
     }
 
+    setErrorCallback(callback) {
+        this.errorCallback = callback;
+      }
+
     async login(login, password) {
         try {
             const response = await AuthService.login(login, password);
@@ -33,7 +38,7 @@ export default class Store {
             this.setUser(response.data.user);
             return true;
         } catch (e) {
-            console.log(e.response?.data?.message);
+            this.errorCallback(e.response?.data?.message);
             return false;
         }
     }
@@ -47,7 +52,7 @@ export default class Store {
             this.setUser(response.data.user);
             return true;
         } catch (e) {
-            console.log(e.response?.data?.message);
+            this.errorCallback(e.response?.data?.message);
             return false;
         }
     }

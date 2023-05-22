@@ -7,10 +7,13 @@ import Button from "@mui/material/Button";
 import styles from "./Login.module.scss";
 import { Context } from '../../index';
 import { useNavigate } from 'react-router-dom';
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 
 const Login = () => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
   const {store} = useContext(Context);
   const navigate = useNavigate();
 
@@ -22,19 +25,42 @@ const Login = () => {
     }
   }
 
+  const handleError = (errorMessage) => {
+    setError(errorMessage);
+  };
+
+  const handleCloseError = () => {
+    setError(null);
+  };
+
+  React.useEffect(() => {
+    store.setErrorCallback(handleError);
+    return () => {
+      // Очистка коллбэка при размонтировании компонента
+      store.setErrorCallback(null);
+    };
+  }, [store]);
+
   return (
-    <Paper classes={{ root: styles.root }}>
-      <Typography classes={{ root: styles.title }} variant="h5">
-        Login
-      </Typography>
-      <TextField className={styles.field} value={login} onChange={e => setLogin(e.target.value)} label="Login" fullWidth />
-      <TextField className={styles.field} value={password} onChange={e => setPassword(e.target.value)} type = 'password' label="Password" fullWidth />
-      <div className={styles.buttons}>
-        <Button className={styles.button} onClick={handleSubmit} size="large" variant="contained" fullWidth>
-          LogIn
-        </Button>
-      </div>
-    </Paper>
+    <>
+      <Paper classes={{ root: styles.root }}>
+        <Typography classes={{ root: styles.title }} variant="h5">
+          Login
+        </Typography>
+        <TextField className={styles.field} value={login} onChange={e => setLogin(e.target.value)} label="Login" fullWidth />
+        <TextField className={styles.field} value={password} onChange={e => setPassword(e.target.value)} type = 'password' label="Password" fullWidth />
+        <div className={styles.buttons}>
+          <Button className={styles.button} onClick={handleSubmit} size="large" variant="contained" fullWidth>
+            LogIn
+          </Button>
+        </div>
+      </Paper>
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError}>
+        <MuiAlert onClose={handleCloseError} severity="error" className={styles.popup}>
+          {error}
+        </MuiAlert>
+      </Snackbar>
+    </>
   );
 };
 
