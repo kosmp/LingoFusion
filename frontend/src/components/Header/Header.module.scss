@@ -44,3 +44,13 @@
       text-decoration: none;
     }
 }
+
+.activeLink {
+  text-decoration: none !important;
+  color: black;
+  font-weight: bold;
+  
+  &:visited {
+    color: black;
+  }
+}
