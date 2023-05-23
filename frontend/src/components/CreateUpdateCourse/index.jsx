@@ -5,20 +5,24 @@ import Button from '@mui/material/Button';
 import NativeSelect from '@mui/material/NativeSelect';
 import MarkdownIt from 'markdown-it';
 import MdEditor from 'react-markdown-editor-lite';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FormControl, FormHelperText } from '@mui/material';
 import 'easymde/dist/easymde.min.css';
 import styles from './CreateUpdateCourse.module.scss';
+import $api from "../../http/index";
+import Spinner from '../../components/Spinner';
 
 const CreateUpdateCourse = (props) => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [title, setTitle] = useState('');
   const [imageUrl, setImageUrl] = useState('');
-  const [content, setContent] = useState('');
-  const [englishLevel, setEnglishLevel] = useState('');
+  const [description, setDescription] = useState('');
+  const [englishLvl, setEnglishLvl] = useState('');
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
+  const [isDataLoaded, setDataLoaded] = useState(true);
+  const { courseId } = useParams();
   const fileInputRef = useRef(null);
 
   const handleOpenFilePicker = () => {
@@ -41,7 +45,7 @@ const CreateUpdateCourse = (props) => {
     setImageUrl('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const formErrors = {};
@@ -50,12 +54,12 @@ const CreateUpdateCourse = (props) => {
       formErrors.title = 'Please fill in the title field.';
     }
 
-    if (englishLevel === '') {
-      formErrors.englishLevel = 'Please select an English level.';
+    if (englishLvl === '') {
+      formErrors.englishLvl = 'Please select an English level.';
     }
 
-    if (content === '') {
-      formErrors.content = 'Description cant be empty.';
+    if (description === '') {
+      formErrors.description = 'Description cant be empty.';
     }
 
     if (Object.keys(formErrors).length > 0) {
@@ -64,12 +68,40 @@ const CreateUpdateCourse = (props) => {
     }
 
     if (props.action === 'create') {
-
+      try {
+        setDataLoaded(false);
+        const response = await $api.post(`/courses`, {title, description, englishLvl, imageUrl, tags});
+        setDataLoaded(true);
+        console.log(response)
+        if (response.status !== 200) {
+          console.log(response.response?.data?.message);
+          //handleError(response.response?.data?.message);
+          navigate(`/courseTemplate/create`);
+        }
+        navigate(`/courseTemplate/${response.data._id}`);
+      } catch (error) {
+        console.log('Error with creating course');
+        //handleError('Error with creating course');
+        navigate(`/courseTemplate/create`);
+      }
     } else if (props.action === 'update') {
-
+      try {
+        setDataLoaded(false);
+        const rating = 0;
+        const response = await $api.put(`/courses/${courseId}`, {title, description, englishLvl, imageUrl, tags, rating});
+        setDataLoaded(true);
+        if (response.status !== 200) {
+          console.log(response.response?.data?.message);
+          //handleError(response.response?.data?.message);
+          navigate(`/courseTemplate/${courseId}`);
+        }
+        navigate(`/courseTemplate/${courseId}`);
+      } catch (error) {
+        console.log('Error with updating course');
+        //handleError('Error with updating course');
+        navigate(`/courseTemplate/${courseId}`);
+      }
     }
-
-    navigate('/courseTemplate/:courseId');
   };
 
   const handleChangeTitle = (event) => {
@@ -77,11 +109,11 @@ const CreateUpdateCourse = (props) => {
   }
 
   const handleEditorChange = ({ text }) => {
-    setContent(text);
+    setDescription(text);
   };
 
-  const handleEnglishLevelChange = (event) => {
-    setEnglishLevel(event.target.value);
+  const handleEnglishLvlChange = (event) => {
+    setEnglishLvl(event.target.value);
   };
 
   const handleTagInputChange = (event) => {
@@ -99,6 +131,12 @@ const CreateUpdateCourse = (props) => {
     const updatedTags = tags.filter((t) => t !== tag);
     setTags(updatedTags);
   };
+
+  if (!isDataLoaded) {
+    return (
+      <Spinner />
+    );
+  }
 
   return (
     <>
@@ -140,12 +178,12 @@ const CreateUpdateCourse = (props) => {
           />
           {errors.title && <FormHelperText>{errors.title}</FormHelperText>}
         </FormControl>
-        <FormControl error={!!errors.englishLevel} fullWidth>
+        <FormControl error={!!errors.englishLvl} fullWidth>
           <NativeSelect
             classes={{ root: styles.englishLvl }}
             variant="standard"
-            value={englishLevel}
-            onChange={handleEnglishLevelChange}
+            value={englishLvl}
+            onChange={handleEnglishLvlChange}
             fullWidth
           >
             <option value="" disabled>Select English Level</option>
@@ -156,7 +194,7 @@ const CreateUpdateCourse = (props) => {
             <option value="C1">C1</option>
             <option value="C2">C2</option>
           </NativeSelect>
-          {errors.englishLevel && <FormHelperText>{errors.englishLevel}</FormHelperText>}
+          {errors.englishLvl && <FormHelperText>{errors.englishLvl}</FormHelperText>}
         </FormControl>
        <br />
         <br />
@@ -190,13 +228,13 @@ const CreateUpdateCourse = (props) => {
             ))}
           </div>
         )}
-        <FormControl error={!!errors.content} fullWidth>
-          {errors.content && <FormHelperText>{errors.content}</FormHelperText>}
+        <FormControl error={!!errors.description} fullWidth>
+          {errors.description && <FormHelperText>{errors.description}</FormHelperText>}
           <MdEditor
-            value={content}
+            value={description}
             renderHTML={(text) => mdParser.render(text)}
             onChange={handleEditorChange}
-            placeholder={content ? undefined : 'Enter description...'}
+            placeholder={description ? undefined : 'Enter description...'}
             className={styles.editor}
           />
         </FormControl>
