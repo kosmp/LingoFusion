@@ -38,7 +38,8 @@ export default class Store {
             this.setUser(response.data.user);
             return true;
         } catch (e) {
-            this.errorCallback(e.response?.data?.message);
+            const errorMessages = e.response.data.errors.map(error => error.msg);
+            this.errorCallback(e.response?.data?.message + '. ' + errorMessages);
             return false;
         }
     }
@@ -52,7 +53,8 @@ export default class Store {
             this.setUser(response.data.user);
             return true;
         } catch (e) {
-            this.errorCallback(e.response?.data?.message);
+            const errorMessages = e.response.data.errors.map(error => error.msg);
+            this.errorCallback(e.response?.data?.message + '. ' + errorMessages);
             return false;
         }
     }

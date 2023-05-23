@@ -1,5 +1,5 @@
 import './App.css';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {observer} from "mobx-react-lite";
 import Header from "./components/Header";
 import { Container } from '@mui/material';
@@ -14,29 +14,28 @@ import { CoursePage } from './pages/CoursePage';
 import { TaskPage } from './pages/TaskPage';
 import { Profile } from './pages/Profile';
 import { Context } from '.';
-import { CircularProgress } from '@material-ui/core';
 import PrivateRoute from './utils/privateRoute';
-import Box from '@mui/material/Box';
+import Spinner from './components/Spinner';
 
 function App() {
   const {store} = useContext(Context);
+  const [checkAuthStatus, setCheckAuthStatus] = useState(null);
 
   useEffect(() => {
-    if (localStorage.getItem('token')) {
-        store.checkAuth()
+    const checkAuth = async () => {
+      if (localStorage.getItem('token')) {
+        await store.checkAuth()
+        
+        setCheckAuthStatus('checked');
+      } 
     }
+    
+    checkAuth();
   }, []);
-
-  if (store.isLoading) {
+  
+  if (store.isLoading || !checkAuthStatus) {
     return (
-      <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      height="100vh"
-    >
-      <CircularProgress size={80} />
-    </Box>
+      <Spinner />
     );
   }
 
@@ -51,12 +50,12 @@ function App() {
 
           <Route element={<PrivateRoute />}>
             <Route path="/catalog" element={<CourseCatalog />} />
-            <Route path="/profile/:userId" element={<Profile />} />
-            <Route path="/:courseType/:courseId" element={<CoursePage />} />
+            <Route path={`/profile/${store.user._id}`} element={<Profile />} />
             <Route path="/courseTemplate/:action" element={<CreateUpdateCourseTemplate />} />
             <Route path="/courseTemplate/:courseId/:action" element={<CreateUpdateCourseTemplate />} />
             <Route path="/courseTemplate/:courseId/taskTemplate/:action/:taskType" element={<CreateUpdateTaskTemplate />} />
             <Route path="/courseTemplate/:courseId/taskTemplate/:taskId/:action/:taskType" element={<CreateUpdateTaskTemplate />} />
+            <Route path="/:courseType/:courseId" element={<CoursePage />} />
             <Route path="/:courseType/:courseId/:taskType/:taskId" element={<TaskPage />} />
           </Route>
 

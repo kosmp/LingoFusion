@@ -72,7 +72,7 @@ const Header = () => {
                 }}
                 getcontentanchorel={null}
               >
-                <NavLink to="/profile/:userId" className={styles.activeLink}>
+                <NavLink to={`/profile/${store.user._id}`} className={styles.activeLink}>
                   <MenuItem onClick={handleProfile} style={{ display: 'block',  padding: '8px 16px'}}>
                     Profile
                   </MenuItem>

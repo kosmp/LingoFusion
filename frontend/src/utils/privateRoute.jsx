@@ -5,7 +5,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 const PrivateRoute = ({...props }) => {
   const { store } = useContext(Context);
 
-  if (store.isAuth) {
+  if (store.isAuth && !store.isLoading) {
     return <Outlet {...props} />;
   } else {
     return <Navigate to="/login" />;
