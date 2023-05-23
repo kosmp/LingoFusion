@@ -8,17 +8,21 @@ import styles from "./Login.module.scss";
 import { Context } from '../../index';
 import { useNavigate } from 'react-router-dom';
 import PopUpWindow from '../../components/PopUpWindow';
+import Spinner from '../../components/Spinner';
 
 const Login = () => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
   const {store} = useContext(Context);
+  const [isDataLoaded, setDataLoaded] = useState(true);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setDataLoaded(false);
     const isSuccess = await store.login(login, password);
+    setDataLoaded(true);
     if (isSuccess) {
       navigate('/');
     }
@@ -39,6 +43,12 @@ const Login = () => {
       store.setErrorCallback(null);
     };
   }, [store]);
+
+  if (!isDataLoaded) {
+    return (
+      <Spinner />
+    );
+  }
 
   return (
     <>
