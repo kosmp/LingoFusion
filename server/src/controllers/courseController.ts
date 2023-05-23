@@ -114,7 +114,7 @@ class CourseController {
 
     async getCourseTemplatesByEnglishLvl(req: Request, res: Response, next: NextFunction) {
         try {
-            const courses = await courseService.getCoursesByEnglishLvl(req.params.englishLvl);
+            const courses = await courseService.getCourseTemplatesByEnglishLvl(req.params.englishLvl);
             
             return res.status(200).json(courses);
         } catch (e) {

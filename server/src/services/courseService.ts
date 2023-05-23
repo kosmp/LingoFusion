@@ -220,7 +220,7 @@ class CourseService {
     async getRatedCourseTemplates(ratingThreshold: string) {
         const pipeline = [
             {
-              $match: { public: true, rating: { $ne: null, $gt: Number(ratingThreshold) } }
+              $match: { public: true, rating: { $ne: null, $gte: Number(ratingThreshold) } }
             },
             {
               $sort: { rating: -1 }
