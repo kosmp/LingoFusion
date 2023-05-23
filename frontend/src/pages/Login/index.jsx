@@ -7,8 +7,7 @@ import Button from "@mui/material/Button";
 import styles from "./Login.module.scss";
 import { Context } from '../../index';
 import { useNavigate } from 'react-router-dom';
-import Snackbar from '@material-ui/core/Snackbar';
-import MuiAlert from '@material-ui/lab/Alert';
+import PopUpWindow from '../../components/PopUpWindow';
 
 const Login = () => {
   const [login, setLogin] = useState('');
@@ -55,11 +54,7 @@ const Login = () => {
           </Button>
         </div>
       </Paper>
-      <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError}>
-        <MuiAlert onClose={handleCloseError} severity="error" className={styles.popup}>
-          {error}
-        </MuiAlert>
-      </Snackbar>
+      <PopUpWindow error={error} handleCloseError={handleCloseError} />
     </>
   );
 };

@@ -4,8 +4,7 @@ import CoursePreview from '../../components/CoursePreview';
 import Spinner from '../../components/Spinner';
 import $api from "../../http/index";
 import styles from './CourseCatalog.module.scss';
-import Snackbar from '@material-ui/core/Snackbar';
-import MuiAlert from '@material-ui/lab/Alert';
+import PopUpWindow from '../../components/PopUpWindow';
 
 export const CourseCatalog = () => {
   const [ratingFilter, setRatingFilter] = useState('');
@@ -37,7 +36,6 @@ export const CourseCatalog = () => {
     try {
       setDataLoaded(false);
       const response = await $api.get(`/courses/templates/all`);
-      console.log(response);
       if (response.status === 200) {
         const data = await response.data;
         setPublicCourses(data);
@@ -81,7 +79,6 @@ export const CourseCatalog = () => {
     try {
       setDataLoaded(false);
       const response = await $api.get(`/courses/templates/mine`);
-      console.log(response);
       if (response.status === 200) {
         const data = await response.data;
         setCreatedCourses(data);
@@ -145,7 +142,6 @@ export const CourseCatalog = () => {
     try {
       setDataLoaded(false);
       const response = await $api.get(`/courses/templates/search-by-tag/${tagFilter}`);
-      console.log(response.data)
       if (response.status === 200) {
         const data = await response.data;
         setPublicCourses(data);
@@ -239,7 +235,7 @@ export const CourseCatalog = () => {
                   EngLvl
                 </option>
                 <option value="A0">A0</option>
-                <option option value="A1">A1</option>
+                <option value="A1">A1</option>
                 <option value="A2">A2</option>
                 <option value="B1">B1</option>
                 <option value="B2">B2</option>
@@ -302,11 +298,7 @@ export const CourseCatalog = () => {
           </Button>
         )}
       </Container>
-    <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError}>
-        <MuiAlert onClose={handleCloseError} severity="error">
-          {error}
-        </MuiAlert>
-    </Snackbar>
+      <PopUpWindow error={error} handleCloseError={handleCloseError} />
     </>
   );
 };

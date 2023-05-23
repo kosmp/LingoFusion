@@ -4,8 +4,7 @@ import Paper from '@mui/material/Paper';
 import { Context } from '../../index';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
-import Snackbar from '@material-ui/core/Snackbar';
-import MuiAlert from '@material-ui/lab/Alert';
+import PopUpWindow from '../../components/PopUpWindow';
 
 export const Profile = () => {
   const {store} = useContext(Context);
@@ -204,11 +203,7 @@ export const Profile = () => {
 
         </Container>
       </Paper>
-      <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError}>
-        <MuiAlert onClose={handleCloseError} severity="error">
-          {error}
-        </MuiAlert>
-      </Snackbar>
+      <PopUpWindow error={error} handleCloseError={handleCloseError} />
     </>
   );
 };
