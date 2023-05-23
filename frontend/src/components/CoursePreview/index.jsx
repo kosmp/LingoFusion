@@ -4,12 +4,12 @@ import { Link } from 'react-router-dom';
 import styles from './CoursePreview.module.scss';
 
 const CoursePreview = ({ course }) => {
-  const { id, title, englishLvl, rating, image } = course;
+  const { _id, title, englishLvl, rating, imageUrl } = course;
 
   return (
-    <Link to={`/courses/${id}`} className={styles.courseLink}>
+    <Link to={`/courses/${_id}`} className={styles.courseLink}>
       <div className={styles.coursePreview}>
-        <img src={image} alt={title} className={styles.courseImage} />
+        <img src={(imageUrl.length !== 0 && imageUrl !== null) ? imageUrl : 'https://expressenglish.ae/wp-content/uploads/2022/02/tips-improve-english.jpg'} alt={"No image"} className={styles.courseImage} />
         <Typography variant="h6" component="h3" className={styles.courseDetails}>
           {title}
         </Typography>

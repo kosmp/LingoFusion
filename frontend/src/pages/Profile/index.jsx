@@ -204,11 +204,11 @@ export const Profile = () => {
 
         </Container>
       </Paper>
-        <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError}>
-          <MuiAlert onClose={handleCloseError} severity="error">
-            {error}
-          </MuiAlert>
-        </Snackbar>
-      </>
+      <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseError}>
+        <MuiAlert onClose={handleCloseError} severity="error">
+          {error}
+        </MuiAlert>
+      </Snackbar>
+    </>
   );
 };
