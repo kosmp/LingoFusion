@@ -24,12 +24,11 @@ function App() {
   useEffect(() => {
     const checkAuth = async () => {
       if (localStorage.getItem('token')) {
-        await store.checkAuth()
-        
-        setCheckAuthStatus('checked');
+        await store.checkAuth();
       } 
+      setCheckAuthStatus('checked');
     }
-    
+
     checkAuth();
   }, []);
   
