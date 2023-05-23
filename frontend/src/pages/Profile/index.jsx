@@ -48,11 +48,11 @@ export const Profile = () => {
         setDataLoaded(true);
       } else {
         handleError(response?.data?.message);
-        console.error('Failed to fetch profile data');
+        setDataLoaded(true);
       }
     } catch (error) {
       handleError('Error fetching profile data');
-      console.error('Error fetching profile data:', error);
+      setDataLoaded(true);
     }
   };
 
@@ -80,11 +80,12 @@ export const Profile = () => {
       setDataLoaded(true);
       if (response.status !== 200) {
         handleError(response.response?.data?.message);
+        setDataLoaded(true);
       }
 
       setUsername(inputText);
     } catch (error) {
-      handleError(error.response.data.message + ". " + error.response.data.errors[0].msg);
+      handleError(error.response.data.message + ". " + error.response.data.errors.map((error) => error.msg).join(" "));
       setDataLoaded(true);
     } 
 
@@ -98,9 +99,10 @@ export const Profile = () => {
       setDataLoaded(true);
       if (response.status !== 200) {
         handleError(response.response?.data?.message);
+        setDataLoaded(true);
       }
     } catch (error) {
-      handleError(error.response.data.message + ". " + error.response.data.errors[0].msg);
+      handleError(error.response.data.message + ". " + error.response.data.errors.map((error) => error.msg).join(" "));
       setDataLoaded(true);
     } 
 

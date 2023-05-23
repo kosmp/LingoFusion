@@ -11,6 +11,7 @@ import 'easymde/dist/easymde.min.css';
 import styles from './CreateUpdateCourse.module.scss';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
+import PopUpWindow from '../../components/PopUpWindow';
 
 const CreateUpdateCourse = (props) => {
   const navigate = useNavigate();
@@ -22,8 +23,17 @@ const CreateUpdateCourse = (props) => {
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
   const [isDataLoaded, setDataLoaded] = useState(true);
+  const [error, setError] = useState(null);
   const { courseId } = useParams();
   const fileInputRef = useRef(null);
+
+  const handleError = (errorMessage) => {
+    setError(errorMessage);
+  };
+
+  const handleCloseError = () => {
+    setError(null);
+  };
 
   const handleOpenFilePicker = () => {
     fileInputRef.current.click();
@@ -68,20 +78,23 @@ const CreateUpdateCourse = (props) => {
     }
 
     if (props.action === 'create') {
+      let response;
       try {
         setDataLoaded(false);
-        const response = await $api.post(`/courses`, {title, description, englishLvl, imageUrl, tags});
+        response = await $api.post(`/courses`, {title, description, englishLvl, imageUrl, tags});
         setDataLoaded(true);
+        console.log('tags');
+        console.log(tags)
         console.log(response)
         if (response.status !== 200) {
-          console.log(response.response?.data?.message);
-          //handleError(response.response?.data?.message);
+          handleError(response.response?.data?.message);
+          setDataLoaded(true);
           navigate(`/courseTemplate/create`);
         }
         navigate(`/courseTemplate/${response.data._id}`);
       } catch (error) {
-        console.log('Error with creating course');
-        //handleError('Error with creating course');
+        handleError(error.response.data.message + ". " + error.response.data.errors.map((error) => error.msg).join(" "));
+        setDataLoaded(true);
         navigate(`/courseTemplate/create`);
       }
     } else if (props.action === 'update') {
@@ -91,14 +104,14 @@ const CreateUpdateCourse = (props) => {
         const response = await $api.put(`/courses/${courseId}`, {title, description, englishLvl, imageUrl, tags, rating});
         setDataLoaded(true);
         if (response.status !== 200) {
-          console.log(response.response?.data?.message);
-          //handleError(response.response?.data?.message);
+          handleError(response.response?.data?.message);
+          setDataLoaded(true);
           navigate(`/courseTemplate/${courseId}`);
         }
         navigate(`/courseTemplate/${courseId}`);
       } catch (error) {
-        console.log('Error with updating course');
-        //handleError('Error with updating course');
+        handleError(error.response.data.message + ". " + error.response.data.errors.map((error) => error.msg).join(" "));
+        setDataLoaded(true);
         navigate(`/courseTemplate/${courseId}`);
       }
     }
@@ -249,6 +262,7 @@ const CreateUpdateCourse = (props) => {
           </a>
         </div>
       </Paper>
+      <PopUpWindow error={error} handleCloseError={handleCloseError} />
     </>
   );
 };
