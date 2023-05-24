@@ -6,13 +6,15 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import styles from './Course.module.scss';
 
-const Course = (props) => {
+const Course = ({courseType, courseId}) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedTask, setSelectedTask] = useState('');
 
     const handleOpenMenu = (event) => {
       setAnchorEl(event.currentTarget);
     };
+
+    console.log('TTTTTTTTTTTESSSSSSSSSSSSSSSSTTT')
   
     const handleCloseMenu = () => {
       setAnchorEl(null);
@@ -65,7 +67,7 @@ const Course = (props) => {
         </div>
         <ReactMarkdown>{description}</ReactMarkdown>
 
-        {(props.courseType === 'courseTemplate') ? <>
+        {(courseType === 'courseTemplate') ? <>
             {isPublic ? (
               <Button variant="contained" color="primary" className={styles.button}>
                 Enroll in course

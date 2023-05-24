@@ -50,12 +50,15 @@ function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/catalog" element={<CourseCatalog />} />
             <Route path={`/profile/${store.user._id}`} element={<Profile />} />
-            <Route path="/courseTemplate/:action" element={<CreateUpdateCourseTemplate />} />
+            <Route path="/courseTemplate/create" element={<CreateUpdateCourseTemplate action='create' />} />
+            <Route path="/courseTemplate/update" element={<CreateUpdateCourseTemplate action='update' />} />
             <Route path="/courseTemplate/:courseId/:action" element={<CreateUpdateCourseTemplate />} />
-            <Route path="/courseTemplate/:courseId/taskTemplate/:action/:taskType" element={<CreateUpdateTaskTemplate />} />
-            <Route path="/courseTemplate/:courseId/taskTemplate/:taskId/:action/:taskType" element={<CreateUpdateTaskTemplate />} />
-            <Route path="/:courseType/:courseId" element={<CoursePage />} />
-            <Route path="/:courseType/:courseId/:taskType/:taskId" element={<TaskPage />} />
+            <Route path="/courseTemplate/:courseId/taskTemplate/create/:taskType" element={<CreateUpdateTaskTemplate action='create' />} />
+            <Route path="/courseTemplate/:courseId/taskTemplate/:taskId/update/:taskType" element={<CreateUpdateTaskTemplate action='update' />} />
+            <Route path="/courseTemplate/:courseId" element={<CoursePage courseType='courseTemplate' />} />
+            <Route path="/courseEnrollment/:courseId" element={<CoursePage courseType='courseEnrollment' />} />
+            <Route path="/courseTemplate/:courseId/:taskType/:taskId" element={<TaskPage courseType='courseTemplate' />} />
+            <Route path="/courseEnrollment/:courseId/:taskType/:taskId" element={<TaskPage courseType='courseEnrollment' />} />
           </Route>
 
         </Routes>
