@@ -153,7 +153,11 @@ const CreateUpdateCourse = (props) => {
 
   const handleAddTag = () => {
     if (tagInput.trim() !== '' && !tags.includes(tagInput.trim())) {
-      setTags([...tags, tagInput.trim()]);
+      if (validTags.includes(tagInput.trim())) {
+        setTags([...tags, tagInput.trim()]); 
+      } else {
+        handleError('Tag is not valid.');
+      }
       setTagInput('');
     }
   };
@@ -244,8 +248,8 @@ const CreateUpdateCourse = (props) => {
           <Button variant="contained" color="primary" onClick={handleAddTag}>
             Add tag
           </Button>
-          <Button onClick={toggleTags}>
-            {showTags ? 'Hide Tags' : 'Show Tags'}
+          <Button onClick={toggleTags} variant="contained">
+            {showTags ? 'Hide Valid Tags' : 'Show Valid Tags'}
           </Button>
         </div>
         {tags.length > 0 && (

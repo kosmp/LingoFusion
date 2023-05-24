@@ -41,7 +41,7 @@ function App() {
   return (
     <div className="App">
       <Header />
-      <Container maxWidth='lg'>
+      <Container>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/register" element={<Registration />} />
