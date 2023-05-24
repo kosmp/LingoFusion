@@ -1,7 +1,9 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import TextField from '@mui/material/TextField';
 import Paper from '@mui/material/Paper';
 import Button from '@mui/material/Button';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
 import NativeSelect from '@mui/material/NativeSelect';
 import MarkdownIt from 'markdown-it';
 import MdEditor from 'react-markdown-editor-lite';
@@ -22,10 +24,29 @@ const CreateUpdateCourse = (props) => {
   const [englishLvl, setEnglishLvl] = useState('');
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState('');
+  const [showTags, setShowTags] = useState(false);
+  const [validTags, setValidTags] = useState([]);
   const [isDataLoaded, setDataLoaded] = useState(true);
   const [error, setError] = useState(null);
   const { courseId } = useParams();
   const fileInputRef = useRef(null);
+
+  const fetchTags = async () => {
+    try {
+      setDataLoaded(false);
+      const response = await $api.get(`/courses/templates/tags`); 
+      if (response.status === 200) {
+        setValidTags(response.data);
+        setDataLoaded(true);
+      }
+    } catch (error) {
+      setDataLoaded(true);
+    }
+  }
+
+  useEffect(() => {
+    fetchTags();
+  }, []);
 
   const handleError = (errorMessage) => {
     setError(errorMessage);
@@ -83,9 +104,6 @@ const CreateUpdateCourse = (props) => {
         setDataLoaded(false);
         response = await $api.post(`/courses`, {title, description, englishLvl, imageUrl, tags});
         setDataLoaded(true);
-        console.log('tags');
-        console.log(tags)
-        console.log(response)
         if (response.status !== 200) {
           handleError(response.response?.data?.message);
           setDataLoaded(true);
@@ -150,6 +168,10 @@ const CreateUpdateCourse = (props) => {
       <Spinner />
     );
   }
+
+  const toggleTags = () => {
+    setShowTags(!showTags);
+  };
 
   return (
     <>
@@ -222,6 +244,9 @@ const CreateUpdateCourse = (props) => {
           <Button variant="contained" color="primary" onClick={handleAddTag}>
             Add tag
           </Button>
+          <Button onClick={toggleTags}>
+            {showTags ? 'Hide Tags' : 'Show Tags'}
+          </Button>
         </div>
         {tags.length > 0 && (
           <div className={styles.tagList}>
@@ -239,6 +264,15 @@ const CreateUpdateCourse = (props) => {
                 </button>
               </span>
             ))}
+          </div>
+        )}
+        {showTags && (
+          <div className={showTags ? styles.showTags : styles.hideTagList}>
+            <List style={{ display: 'flex', flexDirection: 'column' }}>
+              {validTags.map((tag, index) => (
+                <ListItem key={index}>{tag}</ListItem>
+              ))}
+            </List>
           </div>
         )}
         <FormControl error={!!errors.description} fullWidth>
