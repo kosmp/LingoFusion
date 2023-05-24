@@ -34,12 +34,10 @@ export const CourseCatalog = () => {
 
   const fetchPublicCourses = async () => {
     try {
-      setDataLoaded(false);
       const response = await $api.get(`/courses/templates/all`);
       if (response.status === 200) {
         const data = await response.data;
         setPublicCourses(data);
-        setDataLoaded(true);
         return data;
       } else {
         handleError(response?.data?.message);
@@ -51,9 +49,7 @@ export const CourseCatalog = () => {
 
   const fetchCourseEnrollments = async () => {
     try {
-      setDataLoaded(false);
       const response = await $api.get(`/courses/enrollments`);
-      
       if (response.status === 200) {
         // need to get course Templates with id from fields 'coursePresentationId' of course Enrollments 
         const courseTemplateIds = response.data.map((course) => course.coursePresentationId);
@@ -64,40 +60,34 @@ export const CourseCatalog = () => {
           courseTemplateIds.includes(template._id)
         );    
         setCourseTemplatesOfEnrollments(finalArrayOfTemplates);;
-        setDataLoaded(true);
       } else {
-        setDataLoaded(true);
         handleError(response?.data?.message);
       } 
     } catch (error) {
-      setDataLoaded(true);
       handleError('Error fetching course Enrollments');
     }
   }
 
   const fetchCreatedCourses = async () => {
     try {
-      setDataLoaded(false);
       const response = await $api.get(`/courses/templates/mine`);
       if (response.status === 200) {
         const data = await response.data;
         setCreatedCourses(data);
-        setDataLoaded(true);
         return data;
       } else {
-        setDataLoaded(true);
         handleError(response?.data?.message);
       }
     } catch (error) {
-      setDataLoaded(true);
       handleError('Error fetching user created courses');
     }
   }
 
-  const fetchData = async () => {
-    await fetchPublicCourses();
-    await fetchCourseEnrollments();
-    await fetchCreatedCourses();
+  const fetchData = async() => {
+    setDataLoaded(false);
+    Promise.all([fetchPublicCourses(), fetchCourseEnrollments(), fetchCreatedCourses()]).then(() => {
+      setDataLoaded(true);
+    });
   }
 
   const fetchPublicCoursesByEnglishLvl = async () => {

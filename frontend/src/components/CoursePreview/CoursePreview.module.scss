@@ -18,7 +18,10 @@
     .courseDetails {
       text-align: center;
       margin-top: 8px;
-      color: rgb(15, 125, 130);;
+      color: rgb(15, 125, 130);
+      text-overflow: ellipsis;
+      overflow: hidden;
+      max-width: 100%;
     }
 
     .courseLink {
