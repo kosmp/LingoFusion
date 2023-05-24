@@ -76,7 +76,7 @@ export const Profile = () => {
     let response;
     try {
       setDataLoaded(false);
-      response = await $api.put(`/users/${store.user._id}/profile/username`, {inputText});
+      response = await $api.put(`/users/${store.user._id}/profile/username`, {username: inputText});
       setDataLoaded(true);
       if (response.status !== 200) {
         handleError(response.response?.data?.message);
@@ -130,7 +130,7 @@ export const Profile = () => {
             {isUsernameEditMode ? (
               <div>
                 <TextField
-                  value={username}
+                  value={inputText}
                   onChange={handleUsernameChange}
                   label="Username"
                   variant="outlined"
