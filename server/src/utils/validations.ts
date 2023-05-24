@@ -2,8 +2,9 @@ import {body} from 'express-validator';
 import validator from 'validator';
 import {isArray, isString} from 'class-validator';
 import {EnglishLvl} from '../utils/enums';
+import tagsConfig from '../config/tags.json';
 
-const validTags = new Set(['tag1', 'tag2', 'tag3']);
+const validTags = tagsConfig.tags;
 
 export const authValidation = [
     body('login', "Login can't be empty.").notEmpty(),

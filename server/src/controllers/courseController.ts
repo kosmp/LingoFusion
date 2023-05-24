@@ -8,6 +8,7 @@ import {TaskEnrollment} from '../models/taskEnrollment';
 import {User} from '../models/user';
 import {CourseStatusType, TaskStatusType, UserCourseProperty} from '../utils/enums';
 import {Profile} from '../models/profile';
+import tagsConfig from '../config/tags.json';
 const {validationResult} = require('express-validator');
 const ApiError = require('../exceptions/apiError');
 const profileService = require('../services/profileService');
@@ -499,6 +500,14 @@ class CourseController {
             });
 
             return res.status(200).json({success: true});
+        } catch (e) {
+            return next(e);
+        }
+    }
+
+    async getTags(req: Request, res: Response, next: NextFunction) {
+        try {
+            return res.status(200).json(tagsConfig.tags);
         } catch (e) {
             return next(e);
         }
