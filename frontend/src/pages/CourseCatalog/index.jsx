@@ -15,6 +15,7 @@ export const CourseCatalog = () => {
   const [createdVisibleCourseCount, setCreatedVisibleCourseCount] = useState(8);
   const [publicCourses, setPublicCourses] = useState([]);
   const [courseTemplatesOfEnrollments, setCourseTemplatesOfEnrollments] = useState([]);
+  const [courseEnrollments, setCourseEnrollments] = useState([]);
   const [createdCourses, setCreatedCourses] = useState([]);
   const [lastFilter, setLastFilter] = useState(null);
   const [isDataLoaded, setDataLoaded] = useState(true);
@@ -51,9 +52,10 @@ export const CourseCatalog = () => {
     try {
       const response = await $api.get(`/courses/enrollments`);
       if (response.status === 200) {
+        setCourseEnrollments(response.data);
         // need to get course Templates with id from fields 'coursePresentationId' of course Enrollments 
         const courseTemplateIds = response.data.map((course) => course.coursePresentationId);
-
+        
         const arrayOfAllPublicTemplates = await fetchPublicCourses();
       
         const finalArrayOfTemplates = arrayOfAllPublicTemplates.filter((template) =>
@@ -191,13 +193,26 @@ export const CourseCatalog = () => {
   const handleCreatedShowMore = () => {
     setCreatedVisibleCourseCount((prevCount) => prevCount + 8);
   };
+  
+  const renderCoursePreviews = (courses, visibleCourseCount, renderCourseTypes, courseEnrollments = null) => {
+    return courses.slice(0, visibleCourseCount).map((course) => {
+      let currentCourseEnrollment = null; 
+      // if currentCoursePreview is courseEnrollment then need to get current courseEnrollment, so as to use correct id for enrollment in site url
+      if (renderCourseTypes === 'courseEnrollment' && courseEnrollments !== null) {
+        for (const courseEnrollment of courseEnrollments) {
+          if (courseEnrollment.coursePresentationId === course._id) {
+            currentCourseEnrollment = courseEnrollment;
+            break;
+          }
+        }
+      }
 
-  const renderCoursePreviews = (courses, visibleCourseCount) => {
-    return courses.slice(0, visibleCourseCount).map((course) => (
-      <Grid item xs={12} sm={6} md={4} lg={3} key={course._id}>
-        <CoursePreview course={course} />
-      </Grid>
-    ));
+      return (
+        <Grid item xs={12} sm={6} md={4} lg={3} key={course._id}>
+          <CoursePreview course={course} courseType={renderCourseTypes} courseEnrollment={currentCourseEnrollment}/>
+        </Grid>
+      );
+    });
   };
 
   if (!isDataLoaded) {
@@ -245,14 +260,14 @@ export const CourseCatalog = () => {
                 <option value="4">4</option>
               </NativeSelect>
             </FormControl>
-            <Button variant="contained" color="primary" onClick={searchByOneFilter}>
+            <Button variant="contained" color="primary" onClick={searchByOneFilter} className={styles.buttons}>
               Search by last
             </Button>
           </div>
         </div>
 
         <Grid container spacing={3} className={styles.courseContainer}>
-          {renderCoursePreviews(publicCourses, publicVisibleCourseCount)}
+          {renderCoursePreviews(publicCourses, publicVisibleCourseCount, 'courseTemplate')}
         </Grid>
         {publicVisibleCourseCount < publicCourses.length && (
           <Button variant="contained" color="default" onClick={handlePublicShowMore} className={styles.showMoreButton}>
@@ -266,7 +281,7 @@ export const CourseCatalog = () => {
               Your course enrollments:
             </Typography>
           </Grid>
-          {renderCoursePreviews(courseTemplatesOfEnrollments, enrollmentVisibleCourseCount)}
+          {renderCoursePreviews(courseTemplatesOfEnrollments, enrollmentVisibleCourseCount, 'courseEnrollment', courseEnrollments)}
         </Grid>
         {enrollmentVisibleCourseCount < courseTemplatesOfEnrollments.length && (
           <Button variant="contained" color="default" onClick={handleEnrollmentShowMore} className={styles.showMoreButton}>
@@ -280,7 +295,7 @@ export const CourseCatalog = () => {
               Your created courses:
             </Typography>
           </Grid>
-          {renderCoursePreviews(createdCourses, createdVisibleCourseCount)}
+          {renderCoursePreviews(createdCourses, createdVisibleCourseCount, 'courseTemplate')}
         </Grid>
         {createdVisibleCourseCount < createdCourses.length && (
           <Button variant="contained" color="default" onClick={handleCreatedShowMore} className={styles.showMoreButton}>

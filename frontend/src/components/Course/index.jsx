@@ -1,20 +1,87 @@
 import ReactMarkdown from 'react-markdown';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import PopUpWindow from '../../components/PopUpWindow';
 import styles from './Course.module.scss';
+import $api from "../../http/index";
+import Spinner from '../../components/Spinner';
 
 const Course = ({courseType, courseId}) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedTask, setSelectedTask] = useState('');
+    const [courseTemplate, setCourseTemplate] = useState(null);
+    const [courseEnrollment, setCourseEnrollment] = useState(null);
+    const [error, setError] = useState(null);
+    const [isDataLoaded, setDataLoaded] = useState(true);
+    const [isAuthor, isAuthorSet] = useState(false);
+
+    useEffect(() => { 
+      fetchCourse();
+    }, []);
+
+    const checkIsAuthor = async () => {
+
+    }
+
+    const fetchCourse = async () => {
+      setDataLoaded(false);
+      try {
+        let response;
+        if (courseType === 'courseTemplate') {
+          response = await $api.get(`/courses/${courseId}`);
+
+          if (response.status === 200) {
+            setCourseTemplate(response.data[0]);
+            setDataLoaded(true);
+          } else {
+            setDataLoaded(true);
+            handleError(response?.data?.message);
+          }
+        } else if (courseType === 'courseEnrollment') {
+          response = await $api.get(`/courses/${courseId}/enrollment`);
+
+          setCourseEnrollment(response.data[0]);
+
+          if (response.status === 200) {
+            const coursePresentationId = response.data[0].coursePresentationId;
+            
+            response = await $api.get(`/courses/${coursePresentationId}`);
+
+            if (response.status === 200) {
+                setCourseTemplate(response.data[0]);
+                setDataLoaded(true);
+            } else {
+              setDataLoaded(true);
+              handleError(response?.data?.message);
+            }
+          } else {
+            setDataLoaded(true);
+            handleError(response?.data?.message);
+          }
+        } else {
+          setDataLoaded(true);
+          handleError('Incorrect courseType.');
+        }
+      } catch (error) {
+        setDataLoaded(true);
+        handleError(`Error fetching ${courseType} with id ${courseId}.`);
+      }
+    };
+
+    const handleError = (errorMessage) => {
+      setError(errorMessage);
+    };
+  
+    const handleCloseError = () => {
+      setError(null);
+    };
 
     const handleOpenMenu = (event) => {
       setAnchorEl(event.currentTarget);
     };
-
-    console.log('TTTTTTTTTTTESSSSSSSSSSSSSSSSTTT')
   
     const handleCloseMenu = () => {
       setAnchorEl(null);
@@ -24,94 +91,88 @@ const Course = ({courseType, courseId}) => {
       setSelectedTask(task);
       setAnchorEl(null);
     };
-  
-    const isAuthor = true;
-    const isPublic = false;
 
-    const isStarted = false;
-    const isCompleted = false;
-    let startedDate = 'date';
-    let completedDate = 'date';
-    let maxPossibleExpAmount = 0;
-    let gainedExp = 0;
-  
-    const title = 'Course Title';
-    const englishLevel = 'A1';
-    const tags = ['English', 'Education'];
-    const description = `
-  # Course Description
-  
-  This course is designed for students who want to improve their English language skills. 
-  It covers various topics such as grammar, vocabulary, speaking, and listening.
-  
-  ![Course Image](https://cdn-bkikh.nitrocdn.com/vOtJCTyFwWHsZwlSReXcDKCRbYmMlljF/assets/static/optimized/wp-content/uploads/2017/05/f42dd7af890b67f4ac8c5ea8a600117d.url-web-address-300x300.png)
-  
-  ### Key Features:
-  
-  - Interactive lessons
-  - Engaging exercises
-  - Real-life examples
-  
-  Start your language learning journey with us today!
-  `;
+    const handlePublishCourse = () => {
+      
+    }
+
+    const handleChangeCourse = () => {
+      
+    }
+
+    const handleDeleteCourse = () => {
+
+    }
+
+    const handleOpenFirstTask = () => {
+
+    }
+
+    if (!isDataLoaded) {
+      return (
+        <Spinner />
+      );
+    }
   
     return (
       <div className={styles.container}>
-        <h1 className={styles.title}>{title}</h1>
-        <p className={styles.englishLevel}>English Level: {englishLevel}</p>
-        <div className={styles.tags}>
-          {"Tags: "}
-          {tags.map((tag) => (
-            <span key={tag}>{`#${tag} `}</span>
-          ))}
-        </div>
-        <ReactMarkdown>{description}</ReactMarkdown>
+        <h1 className={styles.title}>{(courseTemplate) && courseTemplate.title}</h1>
+        {courseTemplate && <p className={styles.englishLevel}>English Level: {(courseTemplate) && courseTemplate.englishLvl}</p>}
+        {courseTemplate && (
+          <div className={styles.tags}>
+            {"Tags: "}
+            {courseTemplate.tags.map((tag) => (
+              <span key={tag}>{`#${tag} `}</span>
+            ))}
+          </div>
+        )}
+        <ReactMarkdown>{(courseTemplate) && courseTemplate.description}</ReactMarkdown>
 
         {(courseType === 'courseTemplate') ? <>
-            {isPublic ? (
+            {(courseTemplate && courseTemplate.public) ? (
               <Button variant="contained" color="primary" className={styles.button}>
                 Enroll in course
               </Button>
             ) : (
               <>
-              {isAuthor ? (
-                <>
-                    <Button variant="contained" color="primary" className={styles.button}>
-                        Publish
-                    </Button>
-                    <Button variant="contained" color="primary" className={styles.button}>
-                        Change course
-                    </Button>
-                    <Button variant="contained" color="primary" className={styles.button}>
-                        Delete course
-                    </Button>
-                    <Button variant="contained" color="primary" className={styles.button}>
-                        Open first task
-                    </Button>
-                    <Button variant="contained" color="primary" className={styles.button} onClick={handleOpenMenu}>
-                        Add task to course
-                    </Button>
-                    <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                    <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/theory`} onClick={() => handleSelectTask('Theory')}>
-                        Theory
-                    </MenuItem>
-                    <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/test`} onClick={() => handleSelectTask('Test')}>
-                        Test
-                    </MenuItem>
-                    <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/fillInGaps`} onClick={() => handleSelectTask('FillInGaps')}>
-                        Fill in Gaps
-                    </MenuItem>
-                    </Menu>
-                </>
-            ) : (
+                {isAuthor ? (
+                  <>
+                      <Button variant="contained" color="primary" className={styles.button} onClick={handlePublishCourse}>
+                          Publish
+                      </Button>
+                      <Button variant="contained" color="primary" className={styles.button} onClick={handleChangeCourse}>
+                          Change course
+                      </Button>
+                      <Button variant="contained" color="primary" className={styles.button} onClick={handleDeleteCourse}>
+                          Delete course
+                      </Button>
+                      <Button variant="contained" color="primary" className={styles.button} onClick={handleOpenFirstTask}>
+                          Open first task
+                      </Button>
+                      <Button variant="contained" color="primary" className={styles.button} onClick={handleOpenMenu}>
+                          Add task to course
+                      </Button>
+                      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                      <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/theory`} onClick={() => handleSelectTask('Theory')}>
+                          Theory
+                      </MenuItem>
+                      <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/test`} onClick={() => handleSelectTask('Test')}>
+                          Test
+                      </MenuItem>
+                      <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/fillInGaps`} onClick={() => handleSelectTask('FillInGaps')}>
+                          Fill in Gaps
+                      </MenuItem>
+                      </Menu>
+                  </>
+              ) : (
                 <>
 
                 </>
+              )}
+              </>
             )}
-          </>
-        )}
         </> : <>
-            {!isStarted ? (
+            {(courseEnrollment && !courseEnrollment.isStarted) ? (
                 <Button variant="contained" color="primary" className={styles.button}>
                     Start course
                 </Button> ) : (
@@ -119,7 +180,7 @@ const Course = ({courseType, courseId}) => {
                     <Button variant="contained" color="primary" className={styles.button}>
                       Go to tasks
                     </Button>
-                    {!isCompleted ? 
+                    {(courseEnrollment && !courseEnrollment.isCompleted) ? 
                       <Button variant="contained" color="primary" className={styles.button}>
                         Complete course
                     </Button> : <> </>}
@@ -129,15 +190,16 @@ const Course = ({courseType, courseId}) => {
             <Button variant="contained" color="primary" className={styles.button}>
                 UnEnroll from course
             </Button>
-            {(isCompleted) ? 
+            {(courseEnrollment && courseEnrollment.isCompleted) ? 
               <Button variant="contained" color="primary" className={styles.button}>
                 Rate this course
               </Button> : <> </>}
-            {(isStarted) ? <h4>started at: {startedDate}</h4> : <> </>}
-            {(isCompleted) ? <h4>completed at: {completedDate}</h4> : <> </>}
-            <h4> max experience for course: {maxPossibleExpAmount}</h4>
-            {(isCompleted) ? <h4>gained experience for course: {gainedExp}</h4> : <> </>}
+            {((courseEnrollment) && courseEnrollment.isStarted) ? <h4>started at: {(courseEnrollment) && courseEnrollment.startedAt}</h4> : <> </>}
+            {((courseEnrollment) && courseEnrollment.isCompleted) ? <h4>completed at: {(courseEnrollment) && courseEnrollment.completedAt}</h4> : <> </>}
+            <h4> max available experience for course: {(courseEnrollment) && courseEnrollment.maxPossibleExpAmount}</h4>
+            {((courseEnrollment) && courseEnrollment.isCompleted) ? <h4>gained experience for course: {(courseEnrollment) && courseEnrollment.statistics.resultExp}</h4> : <> </>}
         </>}
+        <PopUpWindow error={error} handleCloseError={handleCloseError} />
       </div>
     );
 };
