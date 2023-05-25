@@ -196,8 +196,9 @@ export const CourseCatalog = () => {
   
   const renderCoursePreviews = (courses, visibleCourseCount, renderCourseTypes, courseEnrollments = null) => {
     return courses.slice(0, visibleCourseCount).map((course) => {
-      let currentCourseEnrollment = null; 
+      let currentCourseEnrollment = null;
       // if currentCoursePreview is courseEnrollment then need to get current courseEnrollment, so as to use correct id for enrollment in site url
+      // if courseTemplate - then courseTemplateId, if courseEnrollment - then courseEnrollmentId
       if (renderCourseTypes === 'courseEnrollment' && courseEnrollments !== null) {
         for (const courseEnrollment of courseEnrollments) {
           if (courseEnrollment.coursePresentationId === course._id) {

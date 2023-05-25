@@ -1,5 +1,5 @@
 import ReactMarkdown from 'react-markdown';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
@@ -8,6 +8,7 @@ import PopUpWindow from '../../components/PopUpWindow';
 import styles from './Course.module.scss';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
+import { Context } from '../../index';
 
 const Course = ({courseType, courseId}) => {
     const [anchorEl, setAnchorEl] = useState(null);
@@ -16,18 +17,23 @@ const Course = ({courseType, courseId}) => {
     const [courseEnrollment, setCourseEnrollment] = useState(null);
     const [error, setError] = useState(null);
     const [isDataLoaded, setDataLoaded] = useState(true);
-    const [isAuthor, isAuthorSet] = useState(false);
+    const [isAuthor, setIsAuthor] = useState(false);
+    const { store } = useContext(Context);
 
-    useEffect(() => { 
+    useEffect(() => {
+      setDataLoaded(false); 
       fetchCourse();
     }, []);
 
-    const checkIsAuthor = async () => {
-
+    const checkIsAuthor = async (courseTemplateAuthorId) => {
+      if (store.user._id === courseTemplateAuthorId) {
+        setIsAuthor(true);
+      } else {
+        setIsAuthor(false);
+      }
     }
 
     const fetchCourse = async () => {
-      setDataLoaded(false);
       try {
         let response;
         if (courseType === 'courseTemplate') {
@@ -35,6 +41,7 @@ const Course = ({courseType, courseId}) => {
 
           if (response.status === 200) {
             setCourseTemplate(response.data[0]);
+            await checkIsAuthor(response.data[0].authorId);
             setDataLoaded(true);
           } else {
             setDataLoaded(true);
@@ -52,6 +59,7 @@ const Course = ({courseType, courseId}) => {
 
             if (response.status === 200) {
                 setCourseTemplate(response.data[0]);
+                await checkIsAuthor(response.data[0].authorId);
                 setDataLoaded(true);
             } else {
               setDataLoaded(true);
