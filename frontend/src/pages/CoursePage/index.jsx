@@ -2,12 +2,12 @@ import Paper from '@mui/material/Paper';
 import Course from '../../components/Course';
 import { useParams } from 'react-router-dom';
 
-export const CoursePage = ({courseType}) => {
+export const CoursePage = ({courseType, handleError}) => {
     const { courseId } = useParams();
 
     return (
         <Paper style={{ padding: 30 }}>
-            {(courseType === 'courseTemplate' || courseType === 'courseEnrollment') ? <Course courseType={courseType} courseId={courseId}/> : <> </>}
+            {(courseType === 'courseTemplate' || courseType === 'courseEnrollment') ? <Course courseType={courseType} courseId={courseId} handleError={handleError} /> : <> </>}
         </Paper>
     );
 }

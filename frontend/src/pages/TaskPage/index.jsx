@@ -4,7 +4,7 @@ import TestTask from '../../components/TestTask';
 import FillInGapsTask from '../../components/FillInGapsTask';
 import TheoryTask from '../../components/TheoryTask';
 
-export const TaskPage = ({courseType}) => {
+export const TaskPage = ({courseType, handleError}) => {
   const { taskType } = useParams();
   const [taskIds, setTaskIds] = useState([]);
   const [singleTask, setSingleTask] = useState(null);

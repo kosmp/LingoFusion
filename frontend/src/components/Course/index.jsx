@@ -1,24 +1,23 @@
 import ReactMarkdown from 'react-markdown';
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import PopUpWindow from '../../components/PopUpWindow';
 import styles from './Course.module.scss';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
 import { Context } from '../../index';
 
-const Course = ({courseType, courseId}) => {
+const Course = ({courseType, courseId, handleError}) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedTask, setSelectedTask] = useState('');
     const [courseTemplate, setCourseTemplate] = useState(null);
     const [courseEnrollment, setCourseEnrollment] = useState(null);
-    const [error, setError] = useState(null);
     const [isDataLoaded, setDataLoaded] = useState(true);
     const [isAuthor, setIsAuthor] = useState(false);
     const { store } = useContext(Context);
+    const navigate = useNavigate();
 
     useEffect(() => {
       setDataLoaded(false); 
@@ -45,6 +44,7 @@ const Course = ({courseType, courseId}) => {
             setDataLoaded(true);
           } else {
             setDataLoaded(true);
+            navigate('/');
             handleError(response?.data?.message);
           }
         } else if (courseType === 'courseEnrollment') {
@@ -63,28 +63,24 @@ const Course = ({courseType, courseId}) => {
                 setDataLoaded(true);
             } else {
               setDataLoaded(true);
+              navigate('/');
               handleError(response?.data?.message);
             }
           } else {
             setDataLoaded(true);
+            navigate('/');
             handleError(response?.data?.message);
           }
         } else {
           setDataLoaded(true);
+          navigate('/');
           handleError('Incorrect courseType.');
         }
       } catch (error) {
         setDataLoaded(true);
+        navigate('/');
         handleError(`Error fetching ${courseType} with id ${courseId}.`);
       }
-    };
-
-    const handleError = (errorMessage) => {
-      setError(errorMessage);
-    };
-  
-    const handleCloseError = () => {
-      setError(null);
     };
 
     const handleOpenMenu = (event) => {
@@ -207,7 +203,6 @@ const Course = ({courseType, courseId}) => {
             <h4> max available experience for course: {(courseEnrollment) && courseEnrollment.maxPossibleExpAmount}</h4>
             {((courseEnrollment) && courseEnrollment.isCompleted) ? <h4>gained experience for course: {(courseEnrollment) && courseEnrollment.statistics.resultExp}</h4> : <> </>}
         </>}
-        <PopUpWindow error={error} handleCloseError={handleCloseError} />
       </div>
     );
 };

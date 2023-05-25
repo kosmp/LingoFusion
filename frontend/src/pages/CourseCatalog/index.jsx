@@ -4,9 +4,8 @@ import CoursePreview from '../../components/CoursePreview';
 import Spinner from '../../components/Spinner';
 import $api from "../../http/index";
 import styles from './CourseCatalog.module.scss';
-import PopUpWindow from '../../components/PopUpWindow';
 
-export const CourseCatalog = () => {
+export const CourseCatalog = ({handleError}) => {
   const [ratingFilter, setRatingFilter] = useState('');
   const [englishLvlFilter, setEnglishLvlFilter] = useState('');
   const [tagFilter, setTagFilter] = useState('');
@@ -19,19 +18,10 @@ export const CourseCatalog = () => {
   const [createdCourses, setCreatedCourses] = useState([]);
   const [lastFilter, setLastFilter] = useState(null);
   const [isDataLoaded, setDataLoaded] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => { 
     fetchData();
   }, []);
-
-  const handleError = (errorMessage) => {
-    setError(errorMessage);
-  };
-
-  const handleCloseError = () => {
-    setError(null);
-  };
 
   const fetchPublicCourses = async () => {
     try {
@@ -304,7 +294,6 @@ export const CourseCatalog = () => {
           </Button>
         )}
       </Container>
-      <PopUpWindow error={error} handleCloseError={handleCloseError} />
     </>
   );
 };

@@ -13,9 +13,8 @@ import 'easymde/dist/easymde.min.css';
 import styles from './CreateUpdateCourse.module.scss';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
-import PopUpWindow from '../../components/PopUpWindow';
 
-const CreateUpdateCourse = (props) => {
+const CreateUpdateCourse = ({action, handleError}) => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [title, setTitle] = useState('');
@@ -27,7 +26,6 @@ const CreateUpdateCourse = (props) => {
   const [showTags, setShowTags] = useState(false);
   const [validTags, setValidTags] = useState([]);
   const [isDataLoaded, setDataLoaded] = useState(true);
-  const [error, setError] = useState(null);
   const { courseId } = useParams();
   const fileInputRef = useRef(null);
 
@@ -47,14 +45,6 @@ const CreateUpdateCourse = (props) => {
   useEffect(() => {
     fetchTags();
   }, []);
-
-  const handleError = (errorMessage) => {
-    setError(errorMessage);
-  };
-
-  const handleCloseError = () => {
-    setError(null);
-  };
 
   const handleOpenFilePicker = () => {
     fileInputRef.current.click();
@@ -98,7 +88,7 @@ const CreateUpdateCourse = (props) => {
       return;
     }
 
-    if (props.action === 'create') {
+    if (action === 'create') {
       let response;
       try {
         setDataLoaded(false);
@@ -115,7 +105,7 @@ const CreateUpdateCourse = (props) => {
         setDataLoaded(true);
         navigate(`/courseTemplate/create`);
       }
-    } else if (props.action === 'update') {
+    } else if (action === 'update') {
       try {
         setDataLoaded(false);
         const rating = 0;
@@ -178,7 +168,6 @@ const CreateUpdateCourse = (props) => {
   };
 
   return (
-    <>
       <Paper style={{ padding: 30 }}>
         {imageUrl ? (
           <div className={styles.imageContainer}>
@@ -300,8 +289,6 @@ const CreateUpdateCourse = (props) => {
           </a>
         </div>
       </Paper>
-      <PopUpWindow error={error} handleCloseError={handleCloseError} />
-    </>
   );
 };
 

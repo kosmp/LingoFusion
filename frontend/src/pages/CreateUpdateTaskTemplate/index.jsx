@@ -5,7 +5,7 @@ import CreateUpdateTheoryTask from '../../components/CreateUpdateTheoryTask';
 import CreateUpdateFillInGapsTask from '../../components/CreateUpdateFillInGapsTask';
 import Paper from '@mui/material/Paper';
 
-export const CreateUpdateTaskTemplate = ({action}) => {
+export const CreateUpdateTaskTemplate = ({action, handleError}) => {
   const { taskType } = useParams();
 
   let selectedComponent;

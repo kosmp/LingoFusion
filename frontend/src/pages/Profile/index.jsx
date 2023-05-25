@@ -4,9 +4,8 @@ import Paper from '@mui/material/Paper';
 import { Context } from '../../index';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
-import PopUpWindow from '../../components/PopUpWindow';
 
-export const Profile = () => {
+export const Profile = ({handleError}) => {
   const {store} = useContext(Context);
   const [username, setUsername] = useState('');
   const [englishLvl, setEnglishLvl] = useState('');
@@ -19,20 +18,11 @@ export const Profile = () => {
   const [inProgressCoursesCount, setInProgressCoursesCount] = useState(0);
   const [createdCoursesCount, setCreatedCoursesCount] = useState(0);
 
-  const [error, setError] = useState(null);
   const [isDataLoaded, setDataLoaded] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, []);
-
-  const handleError = (errorMessage) => {
-    setError(errorMessage);
-  };
-
-  const handleCloseError = () => {
-    setError(null);
-  };
 
   const fetchData = async () => {
     try {
@@ -116,7 +106,6 @@ export const Profile = () => {
   }
 
   return (
-    <>
       <Paper style={{ padding: 30 }}>
         <Container>
           <Typography variant="h4" component="h1" align="center">
@@ -205,7 +194,5 @@ export const Profile = () => {
 
         </Container>
       </Paper>
-      <PopUpWindow error={error} handleCloseError={handleCloseError} />
-    </>
   );
 };
