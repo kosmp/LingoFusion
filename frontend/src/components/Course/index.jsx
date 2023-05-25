@@ -101,7 +101,11 @@ const Course = ({courseType, courseId, handleError}) => {
     }
 
     const handleChangeCourse = () => {
-      
+      if (courseType === 'courseTemplate') {
+        navigate(`/courseTemplate/${courseId}/update`);
+      } else {
+        handleError('You can update only courseTemplates.');
+      }
     }
 
     const handleDeleteCourse = () => {

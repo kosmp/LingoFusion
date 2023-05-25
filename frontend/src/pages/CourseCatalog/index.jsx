@@ -213,7 +213,6 @@ export const CourseCatalog = ({handleError}) => {
   }
 
   return (
-    <>
       <Container className={styles.root}>
         <Typography variant="h4" component="h1" align="center">
           Catalog of courses
@@ -294,6 +293,5 @@ export const CourseCatalog = ({handleError}) => {
           </Button>
         )}
       </Container>
-    </>
   );
 };

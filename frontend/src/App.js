@@ -61,7 +61,7 @@ function App() {
             <Route path="/catalog" element={<CourseCatalog handleError={handleError} />} />
             <Route path={`/profile/${store.user._id}`} element={<Profile handleError={handleError} />} />
             <Route path="/courseTemplate/create" element={<CreateUpdateCourseTemplate action='create' handleError={handleError} />} />
-            <Route path="/courseTemplate/update" element={<CreateUpdateCourseTemplate action='update' handleError={handleError} />} />
+            <Route path="/courseTemplate/:courseId/update" element={<CreateUpdateCourseTemplate action='update' handleError={handleError} />} />
             <Route path="/courseTemplate/:courseId/:action" element={<CreateUpdateCourseTemplate handleError={handleError} />} />
             <Route path="/courseTemplate/:courseId/taskTemplate/create/:taskType" element={<CreateUpdateTaskTemplate action='create' handleError={handleError} />} />
             <Route path="/courseTemplate/:courseId/taskTemplate/:taskId/update/:taskType" element={<CreateUpdateTaskTemplate action='update' handleError={handleError} />} />
