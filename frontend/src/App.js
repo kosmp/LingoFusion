@@ -22,6 +22,7 @@ function App() {
   const {store} = useContext(Context);
   const [checkAuthStatus, setCheckAuthStatus] = useState(null);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -34,12 +35,20 @@ function App() {
     checkAuth();
   }, []);
 
+  const handleSuccessfulOperation = () => {
+    setSuccess("Operation successful!");
+  };
+
   const handleError = (errorMessage) => {
     setError(errorMessage);
   };
 
   const handleCloseError = () => {
     setError(null);
+  };
+
+  const handleCloseSuccess = () => {
+    setSuccess(null);
   };
   
   if (store.isLoading || !checkAuthStatus) {
@@ -58,23 +67,23 @@ function App() {
           <Route path="/login" element={<Login />} />     
 
           <Route element={<PrivateRoute />}>
-            <Route path="/catalog" element={<CourseCatalog handleError={handleError} />} />
-            <Route path={`/profile/${store.user._id}`} element={<Profile handleError={handleError} />} />
-            <Route path="/courseTemplate/create" element={<CreateUpdateCourseTemplate action='create' handleError={handleError} />} />
-            <Route path="/courseTemplate/:courseId/update" element={<CreateUpdateCourseTemplate action='update' handleError={handleError} />} />
-            <Route path="/courseTemplate/:courseId/:action" element={<CreateUpdateCourseTemplate handleError={handleError} />} />
-            <Route path="/courseTemplate/:courseId/taskTemplate/create/:taskType" element={<CreateUpdateTaskTemplate action='create' handleError={handleError} />} />
-            <Route path="/courseTemplate/:courseId/taskTemplate/:taskId/update/:taskType" element={<CreateUpdateTaskTemplate action='update' handleError={handleError} />} />
-            <Route path="/courseTemplate/:courseId" element={<CoursePage courseType='courseTemplate' handleError={handleError} />} />
-            <Route path="/courseEnrollment/:courseId" element={<CoursePage courseType='courseEnrollment' handleError={handleError} />} />
-            <Route path="/courseTemplate/:courseId/:taskType/:taskId" element={<TaskPage courseType='courseTemplate' handleError={handleError} />} />
-            <Route path="/courseEnrollment/:courseId/:taskType/:taskId" element={<TaskPage courseType='courseEnrollment' handleError={handleError} />} />
+            <Route path="/catalog" element={<CourseCatalog handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path={`/profile/${store.user._id}`} element={<Profile handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseTemplate/create" element={<CreateUpdateCourseTemplate action='create' handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseTemplate/:courseId/update" element={<CreateUpdateCourseTemplate action='update' handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseTemplate/:courseId/:action" element={<CreateUpdateCourseTemplate handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseTemplate/:courseId/taskTemplate/create/:taskType" element={<CreateUpdateTaskTemplate action='create' handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseTemplate/:courseId/taskTemplate/:taskId/update/:taskType" element={<CreateUpdateTaskTemplate action='update' handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseTemplate/:courseId" element={<CoursePage courseType='courseTemplate' handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseEnrollment/:courseId" element={<CoursePage courseType='courseEnrollment' handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseTemplate/:courseId/:taskType/:taskId" element={<TaskPage courseType='courseTemplate' handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+            <Route path="/courseEnrollment/:courseId/:taskType/:taskId" element={<TaskPage courseType='courseEnrollment' handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
           </Route>
 
         </Routes>
       </Container>
 
-      <PopUpWindow error={error} handleCloseError={handleCloseError} />
+      <PopUpWindow error={error} handleCloseError={handleCloseError} success={success} handleCloseSuccess={handleCloseSuccess}/>
     </div>
   );
 }
