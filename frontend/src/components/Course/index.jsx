@@ -9,12 +9,20 @@ import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
 import { Context } from '../../index';
 
-const Course = ({courseType, courseId, handleError}) => {
+const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) => {
     const [anchorEl, setAnchorEl] = useState(null);
-    const [selectedTask, setSelectedTask] = useState('');
     const [courseTemplate, setCourseTemplate] = useState(null);
     const [courseEnrollment, setCourseEnrollment] = useState(null);
+    const [maxPossibleExpAmount, setMaxPossibleExpAmount] = useState(null);
+    const [resultExp, setResultExp] = useState(null);
+    const [title, setTitle] = useState(null);
+    const [englishLvl, setEnglishLvl] = useState(null);
+    const [tags, setTags] = useState(null);
+    const [description, setDescription] = useState(null);
     const [isDataLoaded, setDataLoaded] = useState(true);
+    const [startedAt, setStartedAt] = useState(false);
+    const [completedAt, setCompletedAt] = useState(false);
+    const [isPublic, setIsPublic] = useState(false);
     const [isAuthor, setIsAuthor] = useState(false);
     const { store } = useContext(Context);
     const navigate = useNavigate();
@@ -22,7 +30,7 @@ const Course = ({courseType, courseId, handleError}) => {
     useEffect(() => {
       setDataLoaded(false); 
       fetchCourse();
-    }, []);
+    }, [courseId, courseType]);
 
     const checkIsAuthor = async (courseTemplateAuthorId) => {
       if (store.user._id === courseTemplateAuthorId) {
@@ -40,6 +48,11 @@ const Course = ({courseType, courseId, handleError}) => {
 
           if (response.status === 200) {
             setCourseTemplate(response.data[0]);
+            setTitle(response.data[0].title);
+            setEnglishLvl(response.data[0].englishLvl);
+            setTags(response.data[0].tags);
+            setDescription(response.data[0].description);
+            setIsPublic(Boolean(response.data[0].public));
             await checkIsAuthor(response.data[0].authorId);
             setDataLoaded(true);
           } else {
@@ -51,6 +64,10 @@ const Course = ({courseType, courseId, handleError}) => {
           response = await $api.get(`/courses/${courseId}/enrollment`);
 
           setCourseEnrollment(response.data[0]);
+          setMaxPossibleExpAmount(response.data[0].maxPossibleExpAmount);
+          setResultExp(response.data[0].statistics.resultExp);
+          setStartedAt(response.data[0].startedAt);
+          setCompletedAt(response.data[0].completedAt);
 
           if (response.status === 200) {
             const coursePresentationId = response.data[0].coursePresentationId;
@@ -59,6 +76,11 @@ const Course = ({courseType, courseId, handleError}) => {
 
             if (response.status === 200) {
                 setCourseTemplate(response.data[0]);
+                setTitle(response.data[0].title);
+                setEnglishLvl(response.data[0].englishLvl);
+                setTags(response.data[0].tags);
+                setDescription(response.data[0].description);
+                setIsPublic(Boolean(response.data[0].public));
                 await checkIsAuthor(response.data[0].authorId);
                 setDataLoaded(true);
             } else {
@@ -90,32 +112,152 @@ const Course = ({courseType, courseId, handleError}) => {
     const handleCloseMenu = () => {
       setAnchorEl(null);
     };
-  
-    const handleSelectTask = (task) => {
-      setSelectedTask(task);
-      setAnchorEl(null);
-    };
 
-    const handlePublishCourse = () => {
-      
+    const handlePublishCourse = async () => {
+      try {
+        if (courseTemplate.taskTemplates && courseTemplate.taskTemplates.length > 1) {
+          handleError('You can publish course only with count of taskTemplates > 1');
+          return; 
+        }
+
+        const response = await $api.post(`/courses/${courseId}/publish`);
+
+        if (response.status === 200) {
+          navigate('/');
+          setIsPublic(true);
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError(`Error with publishing courseTemplate. ${error?.response?.data?.message}`);
+      }
     }
 
     const handleChangeCourse = () => {
       if (courseType === 'courseTemplate') {
         navigate(`/courseTemplate/${courseId}/update`);
       } else {
-        handleError('You can update only courseTemplates.');
+        handleError('You can update only courseTemplate.');
       }
     }
 
-    const handleDeleteCourse = () => {
+    const handleDeleteCourse = async () => {
+      try {
+        const response = await $api.delete(`/courses/${courseId}`);
 
+        if (response.status === 200) {
+          navigate('/');
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError(`Error with deleting courseTemplate. ${error?.response?.data?.message}`)
+      }
     }
 
-    const handleOpenFirstTask = () => {
+    const handleOpenFirstTaskTemplate = () => {
+      try {
+        const taskTemplates = courseTemplate.taskTemplates;
 
+        if (taskTemplates && taskTemplates.length !== 0) {
+          navigate(`/courseTemplate/${courseId}/${taskTemplates[0].taskType}/${taskTemplates[0]._id}`);          
+        } else {
+          handleError(`No taskTemplates in this course. No first task.`);
+        }
+      } catch (error) {
+        handleError(`Error with opening first TaskTemplate. ${error?.response?.data?.message}`)
+      }
     }
 
+    const handleEnrollInCourse = async () => {
+      try {
+        const response = await $api.post(`/courses/${courseId}/enroll`);
+
+        if (response.status === 200) {
+          navigate(`/courseEnrollment/${response.data.result._id}`);
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError(`Error with enrolling in courseTemplate. ${error?.response?.data?.message}`)
+      }
+    }
+
+    const handleStartCourse = async () => {
+      try {
+        const response = await $api.post(`/courses/${courseId}/start`);
+
+        if (response.status === 200) {
+          setStartedAt(response.data.result[0].startedAt);
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError(`Error with starting courseTemplate. ${error?.response?.data?.message}`);
+      }
+    }
+
+    const handleGoToTasks = () => {
+      try {
+        navigate(`/courseEnrollment/${courseId}/${courseEnrollment.currentTaskType}/${courseEnrollment.currentTaskId}`);
+      } catch (error) {
+        handleError(`Error with opening current taskEnrollment. ${error?.response?.data?.message}`);
+      }
+    }
+
+    const handleCompleteCourse = async () => {
+      try {
+        const response = await $api.post(`/courses/${courseId}/complete`);
+
+        if (response.status === 200) {
+          setCompletedAt(response.data.completedAt);
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError(`Error with completing courseTemplate. ${error?.response?.data?.message}`);
+      }
+    }
+
+    const handleUnEnrollFromCourse = async () => {
+      try {
+        const response = await $api.post(`/courses/${courseId}/unenroll`);
+
+        if (response.status === 200) {
+          navigate(`/courseTemplate/${courseEnrollment.coursePresentationId}`);
+          setCourseEnrollment(null);
+          setMaxPossibleExpAmount(null);
+          setResultExp(null);
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError(`Error with unenrolling from courseEnrollment. ${error?.response?.data?.message}`);
+      } 
+    }
+
+    const handleRateThisCourse = async (rating) => {
+      try {
+        const response = await $api.put(`/courses/${courseId}/rating`, {rating});
+
+        if (response.status === 200) {
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError(`Error with unenrolling from courseEnrollment. ${error?.response?.data?.message}`);
+      } finally {
+        setAnchorEl(null);
+      }
+    }
+    
     if (!isDataLoaded) {
       return (
         <Spinner />
@@ -124,21 +266,21 @@ const Course = ({courseType, courseId, handleError}) => {
   
     return (
       <div className={styles.container}>
-        <h1 className={styles.title}>{(courseTemplate) && courseTemplate.title}</h1>
-        {courseTemplate && <p className={styles.englishLevel}>English Level: {(courseTemplate) && courseTemplate.englishLvl}</p>}
+        <h1 className={styles.title}>{title}</h1>
+        {courseTemplate && <p className={styles.englishLevel}>English Level: {englishLvl}</p>}
         {courseTemplate && (
           <div className={styles.tags}>
             {"Tags: "}
-            {courseTemplate.tags.map((tag) => (
+            {tags.map((tag) => (
               <span key={tag}>{`#${tag} `}</span>
             ))}
           </div>
         )}
-        <ReactMarkdown>{(courseTemplate) && courseTemplate.description}</ReactMarkdown>
+        <ReactMarkdown>{description}</ReactMarkdown>
 
-        {(courseType === 'courseTemplate') ? <>
-            {(courseTemplate && courseTemplate.public) ? (
-              <Button variant="contained" color="primary" className={styles.button}>
+        {(!courseEnrollment) ? <>
+            {(isPublic) ? (
+              <Button variant="contained" color="primary" className={styles.button} onClick={handleEnrollInCourse}>
                 Enroll in course
               </Button>
             ) : (
@@ -154,20 +296,20 @@ const Course = ({courseType, courseId, handleError}) => {
                       <Button variant="contained" color="primary" className={styles.button} onClick={handleDeleteCourse}>
                           Delete course
                       </Button>
-                      <Button variant="contained" color="primary" className={styles.button} onClick={handleOpenFirstTask}>
+                      <Button variant="contained" color="primary" className={styles.button} onClick={handleOpenFirstTaskTemplate}>
                           Open first task
                       </Button>
                       <Button variant="contained" color="primary" className={styles.button} onClick={handleOpenMenu}>
                           Add task to course
                       </Button>
                       <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
-                      <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/theory`} onClick={() => handleSelectTask('Theory')}>
+                      <MenuItem component={Link} to={`/courseTemplate/${courseId}/taskTemplate/create/theory`} onClick={() => setAnchorEl(null)}>
                           Theory
                       </MenuItem>
-                      <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/test`} onClick={() => handleSelectTask('Test')}>
+                      <MenuItem component={Link} to={`/courseTemplate/${courseId}/taskTemplate/create/test`} onClick={() => setAnchorEl(null)}>
                           Test
                       </MenuItem>
-                      <MenuItem component={Link} to={`/courseTemplate/:courseId/taskTemplate/create/fillInGaps`} onClick={() => handleSelectTask('FillInGaps')}>
+                      <MenuItem component={Link} to={`/courseTemplate/${courseId}/taskTemplate/create/fillInGaps`} onClick={() => setAnchorEl(null)}>
                           Fill in Gaps
                       </MenuItem>
                       </Menu>
@@ -180,32 +322,41 @@ const Course = ({courseType, courseId, handleError}) => {
               </>
             )}
         </> : <>
-            {(courseEnrollment && !courseEnrollment.isStarted) ? (
-                <Button variant="contained" color="primary" className={styles.button}>
+            {(!startedAt) ? (
+                <Button variant="contained" color="primary" className={styles.button} onClick={handleStartCourse}>
                     Start course
                 </Button> ) : (
                 <>
-                    <Button variant="contained" color="primary" className={styles.button}>
+                    <Button variant="contained" color="primary" className={styles.button} onClick={handleGoToTasks}>
                       Go to tasks
                     </Button>
-                    {(courseEnrollment && !courseEnrollment.isCompleted) ? 
-                      <Button variant="contained" color="primary" className={styles.button}>
+                    {(completedAt) ? 
+                      <Button variant="contained" color="primary" className={styles.button} onClick={handleCompleteCourse}>
                         Complete course
                     </Button> : <> </>}
                 </>
             )}
 
-            <Button variant="contained" color="primary" className={styles.button}>
+            <Button variant="contained" color="primary" className={styles.button} onClick={handleUnEnrollFromCourse}>
                 UnEnroll from course
             </Button>
-            {(courseEnrollment && courseEnrollment.isCompleted) ? 
-              <Button variant="contained" color="primary" className={styles.button}>
-                Rate this course
-              </Button> : <> </>}
-            {((courseEnrollment) && courseEnrollment.isStarted) ? <h4>started at: {(courseEnrollment) && courseEnrollment.startedAt}</h4> : <> </>}
-            {((courseEnrollment) && courseEnrollment.isCompleted) ? <h4>completed at: {(courseEnrollment) && courseEnrollment.completedAt}</h4> : <> </>}
-            <h4> max available experience for course: {(courseEnrollment) && courseEnrollment.maxPossibleExpAmount}</h4>
-            {((courseEnrollment) && courseEnrollment.isCompleted) ? <h4>gained experience for course: {(courseEnrollment) && courseEnrollment.statistics.resultExp}</h4> : <> </>}
+            {(completedAt) ? 
+              <>
+                <Button variant="contained" color="primary" className={styles.button} >
+                  Rate this course
+                </Button>
+                <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
+                  {[1, 2, 3, 4, 5].map((rating) => (
+                    <MenuItem key={rating} onClick={() => handleRateThisCourse(rating)}>
+                      {rating}
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </> : <> </>}
+            {(startedAt) ? <h4>started at: {startedAt}</h4> : <> </>}
+            {(completedAt) ? <h4>completed at: {completedAt}</h4> : <> </>}
+            <h4> max available experience for course: {maxPossibleExpAmount}</h4>
+            {(completedAt) ? <h4>gained experience for course: {resultExp}</h4> : <> </>}
         </>}
       </div>
     );

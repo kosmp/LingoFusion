@@ -3,7 +3,7 @@ import MuiAlert from '@material-ui/lab/Alert';
 
 const PopUpWindow = ({error, handleCloseError, success, handleCloseSuccess}) => {
     return(
-<Snackbar open={!!error || !!success} autoHideDuration={6000} onClose={handleCloseError}>
+<Snackbar open={!!error || !!success} autoHideDuration={6000} onClose={(!!error) ? handleCloseError : handleCloseSuccess}>
   {error ? (
     <MuiAlert onClose={handleCloseError} severity="error">
       {error}

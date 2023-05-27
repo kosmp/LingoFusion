@@ -5,7 +5,7 @@ import Spinner from '../../components/Spinner';
 import $api from "../../http/index";
 import styles from './CourseCatalog.module.scss';
 
-export const CourseCatalog = ({handleError}) => {
+export const CourseCatalog = ({handleError, handleSuccessfulOperation}) => {
   const [ratingFilter, setRatingFilter] = useState('');
   const [englishLvlFilter, setEnglishLvlFilter] = useState('');
   const [tagFilter, setTagFilter] = useState('');

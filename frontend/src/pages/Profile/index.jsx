@@ -5,7 +5,7 @@ import { Context } from '../../index';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
 
-export const Profile = ({handleError}) => {
+export const Profile = ({handleError, handleSuccessfulOperation}) => {
   const {store} = useContext(Context);
   const [username, setUsername] = useState('');
   const [englishLvl, setEnglishLvl] = useState('');

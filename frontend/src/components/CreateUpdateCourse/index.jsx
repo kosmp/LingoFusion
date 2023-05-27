@@ -14,7 +14,7 @@ import styles from './CreateUpdateCourse.module.scss';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
 
-const CreateUpdateCourse = ({action, handleError}) => {
+const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) => {
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [title, setTitle] = useState('');

@@ -5,7 +5,7 @@ import CreateUpdateTheoryTask from '../../components/CreateUpdateTheoryTask';
 import CreateUpdateFillInGapsTask from '../../components/CreateUpdateFillInGapsTask';
 import Paper from '@mui/material/Paper';
 
-export const CreateUpdateTaskTemplate = ({action, handleError}) => {
+export const CreateUpdateTaskTemplate = ({action, handleError, handleSuccessfulOperation}) => {
   const { taskType } = useParams();
 
   let selectedComponent;
@@ -14,7 +14,7 @@ export const CreateUpdateTaskTemplate = ({action, handleError}) => {
     <div>
         <h2>{action.charAt(0).toUpperCase() + action.slice(1)} test task</h2>
         <Paper style={{ padding: 30 }}>
-            <CreateUpdateTestTask action={action} />
+            <CreateUpdateTestTask action={action} handleSuccessfulOperation={handleSuccessfulOperation} />
         </Paper>
     </div>);
   } else if (taskType === 'theory' && (action === 'create' || action === 'update')) {
@@ -22,7 +22,7 @@ export const CreateUpdateTaskTemplate = ({action, handleError}) => {
         <div>
             <h2>{action.charAt(0).toUpperCase() + action.slice(1)} theory task</h2>
             <Paper style={{ padding: 30 }}>
-                <CreateUpdateTheoryTask action={action} />
+                <CreateUpdateTheoryTask action={action} handleSuccessfulOperation={handleSuccessfulOperation} />
             </Paper>
         </div>);
   } else if (taskType === 'fillInGaps' && (action === 'create' || action === 'update')) {
@@ -30,7 +30,7 @@ export const CreateUpdateTaskTemplate = ({action, handleError}) => {
         <div>
             <h2>{action.charAt(0).toUpperCase() + action.slice(1)} fill in gaps task</h2>
             <Paper style={{ padding: 30 }}>
-                <CreateUpdateFillInGapsTask action={action} />
+                <CreateUpdateFillInGapsTask action={action} handleSuccessfulOperation={handleSuccessfulOperation} />
             </Paper>
         </div>);
   }
