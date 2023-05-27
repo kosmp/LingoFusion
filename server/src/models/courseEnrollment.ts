@@ -11,6 +11,7 @@ export class CourseEnrollment {
             title: model.title,
             status: model.status,
             currentTaskId: model.currentTaskId,
+            currentTaskType: model.currentTaskType,
             startedAt: model.startedAt,
             completedAt: model.completedAt,
             tasks: model.tasks,

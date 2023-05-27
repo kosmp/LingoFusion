@@ -154,7 +154,8 @@ class TaskController {
 
             await CourseEnrollment.updateCourse({
                 _id: new ObjectId(courseId),
-                currentTaskId: new ObjectId(taskId)
+                currentTaskId: new ObjectId(taskId),
+                currentTaskType: new ObjectId(task.taskType)
             });
             
             return res.status(200).json(await taskService.getTaskEnrollment(taskId));

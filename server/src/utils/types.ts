@@ -100,6 +100,7 @@ export interface CourseEnrollmentModelType {
     title?: string;
     status?: CourseStatusType;
     currentTaskId?: ObjectId | null;
+    currentTaskType?: ObjectId | null;
     startedAt?: Date | null;
     completedAt?: Date | null;
     tasks?: Array<ObjectId>;

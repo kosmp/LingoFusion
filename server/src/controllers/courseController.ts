@@ -278,6 +278,7 @@ class CourseController {
                 title: course.title,
                 status: CourseStatusType.InProgress,
                 currentTaskId: null,
+                currentTaskType: null,
                 startedAt: null,
                 completedAt: null,
                 tasks: tasks,
@@ -309,12 +310,8 @@ class CourseController {
             const courseId = req.params.courseEnrollmentId;
             const course = await courseService.getCourseEnrollment(courseId, userId.toString());
 
-            if (!course.startedAt) {
-                return next(ApiError.AccessForbidden(`User with id: ${userId} has not started this courseEnrollment`));
-            }
-
-            if (!course.completedAt) {
-                return next(ApiError.AccessForbidden(`CourseEnrollment hasn't completed`));
+            if (course.startedAt && !course.completedAt) {
+                return next(ApiError.AccessForbidden(`CourseEnrollment has started, but hasn't completed`));
             }
     
             const tasks: Array<ObjectId> = course.tasks;
@@ -353,10 +350,12 @@ class CourseController {
             }
     
             const firstTaskId: ObjectId = course.tasks[0];
+            const taskType = (await taskService.getTaskEnrollment(course.tasks[0]))?.taskType;
 
             await CourseEnrollment.updateCourse({
                 _id: new ObjectId(courseId),
                 currentTaskId: firstTaskId,
+                currentTaskType: taskType,
                 startedAt: new Date()
             })
             
@@ -424,10 +423,11 @@ class CourseController {
     
             const statistics = await courseService.calculateCourseStatistics(courseId, userId.toString());
     
+            const completedAtDate = new Date();
             await CourseEnrollment.updateCourse({
                 _id: course._id,
                 status: CourseStatusType.Completed,
-                completedAt: new Date(),
+                completedAt: completedAtDate,
                 statistics: statistics
             });
 
@@ -438,6 +438,7 @@ class CourseController {
     
             return res.status(200).json({
                 success: true,
+                completedAt: completedAtDate,
                 statistics: statistics
             });
         } catch(e) {
