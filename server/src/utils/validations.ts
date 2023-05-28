@@ -97,7 +97,7 @@ export const taskCreateUpdateValidation = [
     body('expForTrueTask', 'Enter expForTrueTask. Int type.')
     .notEmpty()
     .isInt(),
-    body('question', 'Enter correct qustion text. Min 10 symbols.')
+    body('question', 'Enter correct question text. Min 10 symbols.')
     .optional()
     .isLength({min: 10})
     .isString(),
@@ -131,7 +131,7 @@ export const taskCreateUpdateValidation = [
     .withMessage('Images must have between 1 and 10 items.')
     .custom((value) => value.every((item: any) => isString(item)))
     .withMessage('Each item in images must be a string.'),
-    body('blanks').isArray().withMessage('The "blanks" field must be an array.'),
+    body('blanks').optional().isArray().withMessage('The "blanks" field must be an array.'),
     body('blanks.*').isObject().withMessage('Each element in the "blanks" array must be an object.'),
     body('blanks.*.answer').isString().withMessage('Each object in the "blanks" array must have a "answer" property of type string.'),
     body('blanks.*.options').optional().isArray().withMessage('If provided, the "options" property in each object of the "blanks" array must be an array.'),

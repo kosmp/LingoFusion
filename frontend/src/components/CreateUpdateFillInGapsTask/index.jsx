@@ -1,12 +1,17 @@
 import React, { useState } from 'react';
 import Button from '@mui/material/Button';
 import { useNavigate } from 'react-router-dom';
+import InputMask from 'react-input-mask';
+import TextField from '@mui/material/TextField';
+import $api from '../../http';
 
 const CreateUpdateFillInGapsTask = (props) => {
   const navigate = useNavigate();
   const [content, setContent] = useState('');
   const gapMarker = '{{gap}}';
   const [answers, setAnswers] = useState([]);
+  const [title, setTitle] = useState('');
+  const [expForTrueTask, setExpForTrueTask] = useState('');
   const gaps = content.match(new RegExp(gapMarker, 'g')) || [];
 
   const handleContentChange = (event) => {
@@ -23,45 +28,74 @@ const CreateUpdateFillInGapsTask = (props) => {
     event.preventDefault();
 
     if (gaps.length === 0) {
-      console.log('Add at least 1 gap!');
+      props.handleError('Add at least 1 gap!');
       return;
     }
 
     if (answers.length === gaps.length && answers.every(answer => answer.trim() !== '')) {
       if (props.action === 'create') {
 
-
+        
       } else if (props.action === 'update') {
   
   
       }
 
-      navigate(`/courseTemplate/:courseId`);
-      console.log('Savevd:', content, answers);
+      navigate(`/courseTemplate/${props.courseId}`);
     } else {
-      console.log('Fill in all gaps!');
+      props.handleError('Fill in all gaps!');
     }
   };
 
   return (
     <div>
-      <h3>Fill in Gaps Task Form</h3>
       <form onSubmit={handleSubmit}>
-        <div>
-          <textarea value={content} onChange={handleContentChange} placeholder="Enter task content..." />
-        </div>
+      <h3>Theory Task Editor</h3>
+        <InputMask mask={"*".repeat(50)} maskChar="" value={title} onChange={(e) => setTitle(e.target.value)}>
+          {(inputProps) => (
+            <TextField
+              label="Title"
+              fullWidth
+              {...inputProps}
+            />
+          )}
+        </InputMask>
 
-        <div>Gap Marker: {gapMarker}</div>
+        <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)}>
+          {(inputProps) => (
+            <TextField
+              label="Experience for submitting task"
+              fullWidth
+              required
+              value={expForTrueTask}
+              {...inputProps}
+            />
+          )}
+        </InputMask>
+
+        <TextField
+            multiline
+            rows={4}
+            value={content}
+            onChange={handleContentChange}
+            placeholder={`Enter task content with markers ${gapMarker} as a gaps...`}
+            required
+            fullWidth
+        />
 
         {gaps.map((gap, index) => (
           <div key={index}>
-            <input
-              type="text"
-              value={answers[index] || ''}
-              onChange={(event) => handleAnswerChange(index, event)}
-              placeholder={`Enter answer for gap ${index + 1}`}
-              required
-            />
+            <InputMask mask={"*".repeat(25)} maskChar="" value={answers[index] || ''} onChange={(event) => handleAnswerChange(index, event)}>
+              {(inputProps) => (
+                <TextField
+                  label={`Enter answer for gap ${index + 1}`}
+                  fullWidth
+                  required
+                  value={answers[index] || ''}
+                  {...inputProps}
+                />
+              )}
+            </InputMask>
           </div>
         ))}
 

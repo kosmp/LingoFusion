@@ -115,11 +115,6 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
     const handlePublishCourse = async () => {
       try {
-        if (courseTemplate.taskTemplates && courseTemplate.taskTemplates.length > 1) {
-          handleError('You can publish course only with count of taskTemplates > 1');
-          return; 
-        }
-
         const response = await $api.post(`/courses/${courseId}/publish`);
 
         if (response.status === 200) {

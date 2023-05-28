@@ -13,7 +13,7 @@ export class Theory extends TaskTemplate {
                 taskType: TaskType.Theory,
                 content: model.content,
                 references: model.references,
-                imagesUrl: model.images
+                images: model.images
             }
         )
 

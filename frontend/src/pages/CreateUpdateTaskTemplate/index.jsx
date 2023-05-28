@@ -6,7 +6,7 @@ import CreateUpdateFillInGapsTask from '../../components/CreateUpdateFillInGapsT
 import Paper from '@mui/material/Paper';
 
 export const CreateUpdateTaskTemplate = ({action, handleError, handleSuccessfulOperation}) => {
-  const { taskType } = useParams();
+  const { taskType, courseId, taskId } = useParams();
 
   let selectedComponent;
   if (taskType === 'test' && (action === 'create' || action === 'update')) {
@@ -14,7 +14,7 @@ export const CreateUpdateTaskTemplate = ({action, handleError, handleSuccessfulO
     <div>
         <h2>{action.charAt(0).toUpperCase() + action.slice(1)} test task</h2>
         <Paper style={{ padding: 30 }}>
-            <CreateUpdateTestTask action={action} handleSuccessfulOperation={handleSuccessfulOperation} />
+            <CreateUpdateTestTask action={action} courseId={courseId} taskId={taskId} handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />
         </Paper>
     </div>);
   } else if (taskType === 'theory' && (action === 'create' || action === 'update')) {
@@ -22,7 +22,7 @@ export const CreateUpdateTaskTemplate = ({action, handleError, handleSuccessfulO
         <div>
             <h2>{action.charAt(0).toUpperCase() + action.slice(1)} theory task</h2>
             <Paper style={{ padding: 30 }}>
-                <CreateUpdateTheoryTask action={action} handleSuccessfulOperation={handleSuccessfulOperation} />
+                <CreateUpdateTheoryTask action={action} courseId={courseId} taskId={taskId} handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />
             </Paper>
         </div>);
   } else if (taskType === 'fillInGaps' && (action === 'create' || action === 'update')) {
@@ -30,7 +30,7 @@ export const CreateUpdateTaskTemplate = ({action, handleError, handleSuccessfulO
         <div>
             <h2>{action.charAt(0).toUpperCase() + action.slice(1)} fill in gaps task</h2>
             <Paper style={{ padding: 30 }}>
-                <CreateUpdateFillInGapsTask action={action} handleSuccessfulOperation={handleSuccessfulOperation} />
+                <CreateUpdateFillInGapsTask action={action} courseId={courseId} taskId={taskId} handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />
             </Paper>
         </div>);
   }
