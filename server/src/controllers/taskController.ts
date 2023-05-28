@@ -53,7 +53,7 @@ class TaskController {
                     content: req.body.content,
                     references: req.body.references,
                     images: req.body.images,
-                    expForTrueTask: 0
+                    expForTrueTask: req.body.expForTrueTask
                 });
             } else {
                 return next(ApiError.BadRequest(`Invalid task type: ${req.body.taskType}`));

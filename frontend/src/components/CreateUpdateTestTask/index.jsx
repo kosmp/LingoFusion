@@ -59,7 +59,7 @@ const CreateUpdateTestTask = (props) => {
           description: 'No description',
           expForTrueTask: expForTrueTask,
           question: question,
-          trueAnswers: correctAnswers,
+          trueAnswers: correctAnswers.map((answer) => String(answer)),
           options: options
         });
       } else if (props.action === 'update') {
@@ -70,7 +70,7 @@ const CreateUpdateTestTask = (props) => {
           description: 'No description',
           expForTrueTask: expForTrueTask,
           question: question,
-          trueAnswers: correctAnswers,
+          trueAnswers: correctAnswers.map((answer) => String(answer)),
           options: options
         });
       }
@@ -89,15 +89,14 @@ const CreateUpdateTestTask = (props) => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <InputMask mask={"*".repeat(50)} maskChar="" value={title} onChange={(e) => setTitle(e.target.value)}>
-        {(inputProps) => (
-          <TextField
-            label="Title"
-            fullWidth
-            {...inputProps}
-          />
-        )}
-      </InputMask>
+      <TextField
+        label="Title"
+        fullWidth
+        required
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        inputProps={{ maxLength: 50 }}
+      />
 
       <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)}>
         {(inputProps) => (
@@ -111,31 +110,25 @@ const CreateUpdateTestTask = (props) => {
         )}
       </InputMask>
       
-      <InputMask mask={"*".repeat(200)} maskChar=""
-       value={question} onChange={(e) => setQuestion(e.target.value)}>
-        {(inputProps) => (
-          <TextField
-            label="Question"
-            fullWidth
-            required
-            {...inputProps}
-          />
-        )}
-      </InputMask>
+      <TextField
+        label="Question"
+        fullWidth
+        required
+        value={question}
+        onChange={(e) => setQuestion(e.target.value)}
+        inputProps={{ maxLength: 120 }}
+      />
 
       {options.map((option, index) => (
         <div key={index}>
-
-          <InputMask InputMask mask={"*".repeat(80)} maskChar="" value={option} onChange={(e) => handleOptionChange(index, e.target.value)}>
-            {(inputProps) => (
-              <TextField
-                label={`Option ${index + 1}`}
-                fullWidth
-                required
-                {...inputProps}
-              />
-            )}
-          </InputMask>
+          <TextField
+            label={`Option ${index + 1}`}
+            fullWidth
+            required
+            value={option}
+            onChange={(e) => handleOptionChange(index, e.target.value)}
+            inputProps={{ maxLength: 50 }}
+          />
           <FormControlLabel
             control={
               <Checkbox

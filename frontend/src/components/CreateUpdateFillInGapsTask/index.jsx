@@ -74,15 +74,14 @@ const CreateUpdateFillInGapsTask = (props) => {
     <div>
       <form onSubmit={handleSubmit}>
       <h3>Theory Task Editor</h3>
-        <InputMask mask={"*".repeat(50)} maskChar="" value={title} onChange={(e) => setTitle(e.target.value)}>
-          {(inputProps) => (
-            <TextField
-              label="Title"
-              fullWidth
-              {...inputProps}
-            />
-          )}
-        </InputMask>
+        <TextField
+          label="Title"
+          fullWidth
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          inputProps={{ maxLength: 50 }}
+        />
 
         <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)}>
           {(inputProps) => (
@@ -108,17 +107,14 @@ const CreateUpdateFillInGapsTask = (props) => {
 
         {gaps.map((gap, index) => (
           <div key={index}>
-            <InputMask mask={"*".repeat(25)} maskChar="" value={answers[index] || ''} onChange={(event) => handleAnswerChange(index, event)}>
-              {(inputProps) => (
-                <TextField
-                  label={`Enter answer for gap ${index + 1}`}
-                  fullWidth
-                  required
-                  value={answers[index] || ''}
-                  {...inputProps}
-                />
-              )}
-            </InputMask>
+            <TextField
+              label={`Enter answer for gap ${index + 1}`}
+              fullWidth
+              required
+              value={answers[index] || ''}
+              onChange={(event) => handleAnswerChange(index, event)}
+              inputProps={{ maxLength: 50 }}
+            />
           </div>
         ))}
 

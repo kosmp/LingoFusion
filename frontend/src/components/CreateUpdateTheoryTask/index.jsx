@@ -25,7 +25,7 @@ const CreateUpdateTheoryTask = (props) => {
       let response;
       if (props.action === 'create') {
         response = await $api.post(`/courses/${props.courseId}/tasks`, {
-          taskType: 'test',
+          taskType: 'theory',
           title: (title) ? title : 'Theory task :)',
           description: 'No description',
           expForTrueTask: expForTrueTask,
@@ -36,7 +36,7 @@ const CreateUpdateTheoryTask = (props) => {
       } else if (props.action === 'update') {
         response = await $api.put(`/courses/${props.courseId}/tasks/${props.taskId}/edit`, {
           _id: props.taskId,
-          taskType: 'test',
+          taskType: 'theory',
           title: (title) ? title : 'Theory task :)',
           description: 'No description',
           expForTrueTask: expForTrueTask,
@@ -61,15 +61,14 @@ const CreateUpdateTheoryTask = (props) => {
   return (
     <form onSubmit={handleSubmit}>
       <h3>Theory Task Editor</h3>
-      <InputMask mask={"*".repeat(50)} maskChar="" value={title} onChange={(e) => setTitle(e.target.value)}>
-        {(inputProps) => (
-          <TextField
-            label="Title"
-            fullWidth
-            {...inputProps}
-          />
-        )}
-      </InputMask>
+      <TextField
+          label="Title"
+          fullWidth
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          inputProps={{ maxLength: 50 }}
+        />
 
       <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)}>
         {(inputProps) => (
