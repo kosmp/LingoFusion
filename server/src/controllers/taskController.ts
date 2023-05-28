@@ -144,7 +144,6 @@ class TaskController {
 
             const taskId = req.params.taskEnrollmentId;
             const task = await taskService.getTaskEnrollment(taskId);
-
             await taskService.isTaskEnrollmentFromCourseEnrollment(course, taskId);
 
             if (!task.startedAt) {
@@ -157,7 +156,7 @@ class TaskController {
             await CourseEnrollment.updateCourse({
                 _id: new ObjectId(courseId),
                 currentTaskId: new ObjectId(taskId),
-                currentTaskType: new ObjectId(task.taskType)
+                currentTaskType: task.taskType
             });
             
             return res.status(200).json(await taskService.getTaskEnrollment(taskId));
@@ -276,7 +275,7 @@ class TaskController {
                 isCorrect = await TestQuestion.check(taskTemplateId, taskEnrollment.userAnswers);
 
                 trueAnswers = taskTemplate.trueAnswers;
-            } else if (taskType === 'fillgaps') {
+            } else if (taskType === 'fillInGaps') {
                 isCorrect = await FillInGaps.check(taskTemplateId, taskEnrollment.userAnswers);
 
                 trueAnswers = taskTemplate.blanks;

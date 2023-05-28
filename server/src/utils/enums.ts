@@ -11,7 +11,7 @@ export enum EnglishLvl {
 export enum TaskType {
     Theory = 'theory',
     Test = 'test',
-    FillGaps = 'fillgaps'
+    FillGaps = 'fillInGaps'
 }
 
 export enum CourseStatusType {
