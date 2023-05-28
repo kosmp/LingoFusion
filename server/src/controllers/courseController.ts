@@ -256,7 +256,7 @@ class CourseController {
             for (const taskTemplateId of taskTemplates) {
                 const taskTemplate = await taskService.getTaskTemplate(taskTemplateId.toString());
 
-                maxExpForTrueTasks += taskTemplate.expForTrueTask
+                maxExpForTrueTasks += Number(taskTemplate.expForTrueTask)
 
                 const task = await TaskEnrollment.initialize({
                     taskTemplateId: taskTemplate._id,

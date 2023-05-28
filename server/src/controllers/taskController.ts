@@ -405,7 +405,6 @@ class TaskController {
             const userId = req.user._id;
             const courseId = req.params.courseId;
             await courseService.getCourseTemplate(courseId, userId.toString());
-            await courseService.checkPublicFalseInCourseTemplate(courseId);
 
             const taskId = req.params.taskId;
             const task = await taskService.getTaskTemplate(taskId);

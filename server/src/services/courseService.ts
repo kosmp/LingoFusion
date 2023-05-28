@@ -64,7 +64,7 @@ class CourseService {
                 ++counterOfTrueTasks;
             }
             
-            resultExp += taskEnrollment?.expForTask;
+            resultExp += Number(taskEnrollment?.expForTask);
         }
 
         return {
