@@ -22,7 +22,7 @@ class TaskController {
             if (!errors.isEmpty()) {
                 return next(ApiError.BadRequest("Validation error", errors.array()));
             }
-
+            
             const userId = req.user._id;
             const courseId = req.params.courseId;
             await courseService.getCourseTemplate(courseId, userId.toString());
@@ -43,7 +43,8 @@ class TaskController {
                     description: req.body.description,
                     question: req.body.question,
                     trueAnswers: req.body.trueAnswers,
-                    expForTrueTask: req.body.expForTrueTask 
+                    options: req.body.options,
+                    expForTrueTask: req.body.expForTrueTask
                 });
             } else if (req.body.taskType === TaskType.Theory) {
                 taskTemplateId = await Theory.initialize({
@@ -108,7 +109,8 @@ class TaskController {
                     description: req.body.description,
                     question: req.body.question,
                     trueAnswers: req.body.trueAnswers,
-                    expForTrueTask: req.body.expForTrueTask 
+                    options: req.body.options,
+                    expForTrueTask: req.body.expForTrueTask
                 });
                 return res.status(200).json({sucess: true});
             } else if (req.body.taskType === TaskType.Theory) {

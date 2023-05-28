@@ -112,9 +112,15 @@ export const taskCreateUpdateValidation = [
     body('trueAnswers', "Enter answers. List of strings.")
     .optional()
     .custom((value) => isArray(value))
-    .withMessage('UserAnswers must be an array')
+    .withMessage('TrueAnswers must be an array')
     .custom((value) => value.every((item: any) => isString(item)))
-    .withMessage('Each item in userAnswers must be a string.'),
+    .withMessage('Each item of trueAnswers must be a string.'),
+    body('options', "Enter options. List of strings.")
+    .optional()
+    .custom((value) => isArray(value))
+    .withMessage('Options must be an array')
+    .custom((value) => value.every((item: any) => isString(item)))
+    .withMessage('Each item of options must be a string.'),
     body('references')
     .optional()
     .custom((value) => isArray(value))

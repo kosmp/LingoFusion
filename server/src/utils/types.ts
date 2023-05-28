@@ -42,6 +42,7 @@ export interface TaskTemplateModelType {
 export interface TestModelType extends TaskTemplateModelType {
     question: string;
     trueAnswers: Array<string>;
+    options: Array<string>;
 }
 
 export interface TheoryModelType extends TaskTemplateModelType {

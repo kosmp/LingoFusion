@@ -12,7 +12,8 @@ export class TestQuestion extends TaskTemplate {
             {
                 taskType: TaskType.Test,
                 question: model.question,
-                trueAnswers: model.trueAnswers
+                trueAnswers: model.trueAnswers,
+                options: model.options
             }
         )
 
@@ -27,7 +28,8 @@ export class TestQuestion extends TaskTemplate {
             {
                 taskType: TaskType.Test,
                 question: model.question,
-                trueAnswers: model.trueAnswers
+                trueAnswers: model.trueAnswers,
+                options: model.options
             }
         )
     }
