@@ -9,8 +9,8 @@ import Spinner from '../../components/Spinner';
 export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) => {
   const { taskType, taskId, courseId } = useParams();
   const [taskIds, setTaskIds] = useState([]);
-  const [singleTask, setSingleTask] = useState(null);
-  const [taskStatus, setTaskStatus] = useState(null);
+  const [taskTemplate, setTaskTemplate] = useState(null);
+  const [taskEnrollment, setTaskEnrollment] = useState(null);
   const [isDataLoaded, setDataLoaded] = useState(true);
   const navigate = useNavigate();
 
@@ -25,22 +25,27 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
     );
   }
 
+  const fetchTaskTemplate = async (courseTemplateId, taskTemplateId) => {
+    try {
+      // get single task Template
+      const response = await $api.get(`/courses/${courseTemplateId}/tasks/${taskTemplateId}/taskTemplate`);
+      if (response.status === 200) {
+        const data = await response.data;
+        setTaskTemplate(data);
+      } else {
+        navigate(`/${courseType}/${courseId}`);
+        handleError(response?.data?.message);
+      }
+    } catch (error) {
+      navigate(`/${courseType}/${courseId}`);
+      handleError(`Error with fetching of taskTemplate. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+    }
+  }
+
   const fetchTask = async () => {
       let response;
       if (courseType === 'courseTemplate') {
-        try {
-          // get single task Template
-          response = await $api.get(`/courses/${courseId}/tasks/${taskId}/taskTemplate`);
-          if (response.status === 200) {
-            const data = await response.data;
-            setSingleTask(data);
-          } else {
-            handleError(response?.data?.message);
-          }
-        } catch (error) {
-          navigate('/');
-          handleError(`Error with fetching of taskTemplate. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
-        }
+        await fetchTaskTemplate(courseId, taskId);
 
         try {
           // get course Template
@@ -51,27 +56,29 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
             const ids = tasks.map((task) => task._id);
             setTaskIds(ids);
           } else {
+            navigate(`/`);
             handleError(response?.data?.message);
           }
         } catch (error) {
-          navigate('/');
+          navigate(`/`);
           handleError(`Error with fetching of courseTemplate. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
         }
 
         setDataLoaded(true);
       } else if (courseType === 'courseEnrollment') {
+        let taskEnrollmentFromResponse;
         try {
-          //get single task Enrollment
+          // get single task Enrollment
           response = await $api.get(`/courses/${courseId}/tasks/${taskId}/taskEnrollment`);
           if (response.status === 200) {
-            const data = await response.data;
-            setSingleTask(data);
-            setTaskStatus(data.status);
+            taskEnrollmentFromResponse = await response.data;
+            setTaskEnrollment(taskEnrollmentFromResponse);
           } else {
+            navigate(`/${courseType}/${courseId}`);
             handleError(response?.data?.message);
           }
         } catch (error) {
-          navigate('/');
+          navigate(`/${courseType}/${courseId}`);
           handleError(`Error with fetching of taskEnrollment. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
         }
 
@@ -84,12 +91,16 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
             const ids = tasks.map((task) => task._id);
             setTaskIds(ids);
           } else {
+            navigate(`/`);
             handleError(response?.data?.message);
           }
         } catch (error) {
-          navigate('/');
+          navigate(`/`);
           handleError(`Error with fetching of courseEnrollment. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
         }
+
+        //get single task Template
+        await fetchTaskTemplate(response.data[0].coursePresentationId, taskEnrollmentFromResponse.taskTemplateId);
 
         setDataLoaded(true);
       }
@@ -98,11 +109,17 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
   let selectedComponent;
   if (courseType === 'courseTemplate' || courseType === 'courseEnrollment') {
     if (taskType === 'test') {
-      selectedComponent = <TestTask singleTask={singleTask} taskStatus={taskStatus} taskIds={taskIds} courseType={courseType} />;
+      selectedComponent = <TestTask taskTemplate={taskTemplate}
+       taskEnrollment={taskEnrollment} taskIds={taskIds} courseType={courseType}
+        handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />;
     } else if (taskType === 'fillInGaps') {
-      selectedComponent = <FillInGapsTask singleTask={singleTask} taskStatus={taskStatus} taskIds={taskIds} courseType={courseType} />;
+      selectedComponent = <FillInGapsTask taskTemplate={taskTemplate}
+       taskEnrollment={taskEnrollment} taskIds={taskIds} courseType={courseType}
+        handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />;
     } else if (taskType === 'theory') {
-      selectedComponent = <TheoryTask singleTask={singleTask} taskStatus={taskStatus} taskIds={taskIds} courseType={courseType} />;
+      selectedComponent = <TheoryTask taskTemplate={taskTemplate}
+       taskEnrollment={taskEnrollment} taskIds={taskIds} courseType={courseType}
+        handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />;
     }
   }
 

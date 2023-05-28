@@ -271,6 +271,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
             ))}
           </div>
         )}
+        <h3>Description:</h3>
         <ReactMarkdown>{description}</ReactMarkdown>
 
         {(!courseEnrollment) ? <>

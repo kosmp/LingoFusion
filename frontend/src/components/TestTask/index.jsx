@@ -75,7 +75,7 @@ const TestTask = (props) => {
 
   return (
     <Paper style={{ padding: 30 }}>
-      <h2>Test Task {taskId}</h2>
+      <h2>Test Task</h2>
       <p>Question?</p>
 
       {data.map((option) => (

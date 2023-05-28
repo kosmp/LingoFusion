@@ -37,7 +37,7 @@ const CreateUpdateFillInGapsTask = (props) => {
         let response;
         if (props.action === 'create') {
           response = await $api.post(`/courses/${props.courseId}/tasks`, {
-            taskType: 'fillgaps',
+            taskType: 'fillInGaps',
             title: (title) ? title : 'Fill in gaps task :)',
             description: 'No description',
             expForTrueTask: expForTrueTask,
@@ -46,7 +46,7 @@ const CreateUpdateFillInGapsTask = (props) => {
           });
         } else if (props.action === 'update') {
           response = await $api.put(`/courses/${props.courseId}/tasks/${props.taskId}/edit`, {
-            taskType: 'fillgaps',
+            taskType: 'fillInGaps',
             title: (title) ? title : 'Fill in gaps task :)',
             description: 'No description',
             expForTrueTask: expForTrueTask,
@@ -73,7 +73,7 @@ const CreateUpdateFillInGapsTask = (props) => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
-      <h3>Theory Task Editor</h3>
+      <h3>Fill in gaps Task Editor</h3>
         <TextField
           label="Title"
           fullWidth
