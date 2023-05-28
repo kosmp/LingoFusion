@@ -24,7 +24,7 @@ const CreateUpdateFillInGapsTask = (props) => {
     setAnswers(newAnswers);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     if (gaps.length === 0) {
@@ -32,18 +32,41 @@ const CreateUpdateFillInGapsTask = (props) => {
       return;
     }
 
-    if (answers.length === gaps.length && answers.every(answer => answer.trim() !== '')) {
-      if (props.action === 'create') {
-
-        
-      } else if (props.action === 'update') {
+    try {
+      if (answers.length === gaps.length && answers.every(answer => answer.trim() !== '')) {
+        let response;
+        if (props.action === 'create') {
+          response = await $api.post(`/courses/${props.courseId}/tasks`, {
+            taskType: 'fillgaps',
+            title: (title) ? title : 'Fill in gaps task :)',
+            description: 'No description',
+            expForTrueTask: expForTrueTask,
+            text: content,
+            blanks: answers.map((answer) => ({ answer: answer}))
+          });
+        } else if (props.action === 'update') {
+          response = await $api.put(`/courses/${props.courseId}/tasks/${props.taskId}/edit`, {
+            taskType: 'fillgaps',
+            title: (title) ? title : 'Fill in gaps task :)',
+            description: 'No description',
+            expForTrueTask: expForTrueTask,
+            text: content,
+            blanks: answers.map((answer) => ({ answer: answer}))
+          });
+        }
   
+        if (response.status === 200) {
+          props.handleSuccessfulOperation();
+        } else {
+          props.handleError(response?.data?.message);
+        }
   
+        navigate(`/courseTemplate/${props.courseId}`);
+      } else {
+        props.handleError('Fill in all gaps!');
       }
-
-      navigate(`/courseTemplate/${props.courseId}`);
-    } else {
-      props.handleError('Fill in all gaps!');
+    } catch (error) {
+      props.handleError(`Error with submitting taskTemplate. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
     }
   };
 

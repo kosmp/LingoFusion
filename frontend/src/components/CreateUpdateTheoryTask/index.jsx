@@ -26,7 +26,7 @@ const CreateUpdateTheoryTask = (props) => {
       if (props.action === 'create') {
         response = await $api.post(`/courses/${props.courseId}/tasks`, {
           taskType: 'test',
-          title: (title) ? title : 'Test task :)',
+          title: (title) ? title : 'Theory task :)',
           description: 'No description',
           expForTrueTask: expForTrueTask,
           content: content,
@@ -37,7 +37,7 @@ const CreateUpdateTheoryTask = (props) => {
         response = await $api.put(`/courses/${props.courseId}/tasks/${props.taskId}/edit`, {
           _id: props.taskId,
           taskType: 'test',
-          title: (title) ? title : 'Test task :)',
+          title: (title) ? title : 'Theory task :)',
           description: 'No description',
           expForTrueTask: expForTrueTask,
           content: content,
