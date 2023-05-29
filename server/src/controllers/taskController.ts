@@ -340,16 +340,19 @@ class TaskController {
             const indexOfCurr = taskEnrollmentIds.findIndex(id => id.equals(currentTaskId));
             if (indexOfCurr + 1 != taskEnrollmentIds.length) {
                 const nextTaskId: ObjectId = taskEnrollmentIds[indexOfCurr + 1];
-                
+
                 const nextTaskEnrollment = await taskService.getTaskEnrollment(nextTaskId.toString());
+                
+                await CourseEnrollment.updateCourse({
+                    _id: new ObjectId(courseId),
+                    currentTaskId: nextTaskId,
+                    currentTaskType: nextTaskEnrollment.taskType
+                });
 
                 return res.status(200).json({
                     courseStatus: course.status,
                     courseTitle: course.title,
-                    taskEnrollmentId: nextTaskEnrollment._id,
-                    taskEnrollmentTitle: nextTaskEnrollment.title,
-                    taskEnrollmentType: nextTaskEnrollment.taskType,
-                    taskEnrollmentStatus: nextTaskEnrollment.status
+                    taskEnrollment: nextTaskEnrollment,
                 });   
             } else {
                 return next(ApiError.AccessForbidden(`Next taskEnrollment doesn't exist`));
@@ -385,12 +388,16 @@ class TaskController {
 
                 const prevTaskEnrollment = await taskService.getTaskEnrollment(prevTaskId.toString());
 
+                await CourseEnrollment.updateCourse({
+                    _id: new ObjectId(courseId),
+                    currentTaskId: prevTaskId,
+                    currentTaskType: prevTaskEnrollment.taskType
+                });
+
                 return res.status(200).json({
+                    courseStatus: course.status,
                     courseTitle: course.title,
-                    taskEnrollmentId: prevTaskEnrollment._id,
-                    taskEnrollmentTitle: prevTaskEnrollment.title,
-                    taskEnrollmentType: prevTaskEnrollment.taskType,
-                    taskEnrollmentStatus: prevTaskEnrollment.status
+                    taskEnrollment: prevTaskEnrollment,
                 });
             } else {
                 return next(ApiError.AccessForbidden(`Prev taskEnrollment doesn't exist`));
