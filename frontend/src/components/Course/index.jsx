@@ -120,7 +120,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         const response = await $api.post(`/courses/${courseId}/publish`);
 
         if (response.status === 200) {
-          navigate('/');
+          navigate(`/courseTemplate/${courseId}`);
           setIsPublic(true);
           handleSuccessfulOperation();
         } else {
