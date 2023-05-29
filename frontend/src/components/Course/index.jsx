@@ -22,6 +22,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
     const [isDataLoaded, setDataLoaded] = useState(true);
     const [startedAt, setStartedAt] = useState(false);
     const [completedAt, setCompletedAt] = useState(false);
+    const [ratingForCourse, setRatingForCourse] = useState(null);
     const [isPublic, setIsPublic] = useState(false);
     const [isAuthor, setIsAuthor] = useState(false);
     const { store } = useContext(Context);
@@ -68,6 +69,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
           setResultExp(response.data[0].statistics.resultExp);
           setStartedAt(response.data[0].startedAt);
           setCompletedAt(response.data[0].completedAt);
+          setRatingForCourse(response.data[0].ratingForCourse);
 
           if (response.status === 200) {
             const coursePresentationId = response.data[0].coursePresentationId;
@@ -242,6 +244,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         const response = await $api.put(`/courses/${courseId}/rating`, {rating});
 
         if (response.status === 200) {
+          setRatingForCourse(rating);
           handleSuccessfulOperation();
         } else {
           handleError(response?.data?.message);
@@ -326,7 +329,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
                     <Button variant="contained" color="primary" className={styles.button} onClick={handleGoToTasks}>
                       Go to tasks
                     </Button>
-                    {(completedAt) ? 
+                    {(!completedAt) ? 
                       <Button variant="contained" color="primary" className={styles.button} onClick={handleCompleteCourse}>
                         Complete course
                     </Button> : <> </>}
@@ -338,7 +341,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
             </Button>
             {(completedAt) ? 
               <>
-                <Button variant="contained" color="primary" className={styles.button} >
+                <Button variant="contained" color="primary" className={styles.button} onClick={handleOpenMenu} >
                   Rate this course
                 </Button>
                 <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleCloseMenu}>
@@ -353,6 +356,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
             {(completedAt) ? <h4>completed at: {completedAt}</h4> : <> </>}
             <h4> max available experience for course: {maxPossibleExpAmount}</h4>
             {(completedAt) ? <h4>gained experience for course: {resultExp}</h4> : <> </>}
+            {(ratingForCourse) ? <h4>Your rating for this course: {ratingForCourse}</h4> : <> </>}
         </>}
       </div>
     );
