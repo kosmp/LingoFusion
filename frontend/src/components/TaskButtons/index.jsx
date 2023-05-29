@@ -5,9 +5,11 @@ const TaskButtons = (props) => {
   const {
     isFirstTask,
     isLastTask,
+    isCompleted,
     handlePrevTask,
     handleNextTask,
     handleSubmit,
+    handleComplete,
     handleChangeTask,
     handleDeleteTask,
     taskStatus,
@@ -45,8 +47,8 @@ const TaskButtons = (props) => {
         </Button>
       )}
 
-      {courseType === 'courseEnrollment' && isLastTask && (
-        <Button variant="contained" color="primary">
+      {courseType === 'courseEnrollment' && isLastTask && !isCompleted && (
+        <Button variant="contained" color="primary" onClick={handleComplete}>
           Complete
         </Button>
       )}

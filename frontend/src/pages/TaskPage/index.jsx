@@ -9,6 +9,7 @@ import Spinner from '../../components/Spinner';
 export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) => {
   const { taskType, taskId, courseId } = useParams();
   const [taskIds, setTaskIds] = useState([]);
+  const [taskTypes, setTaskTypes] = useState([]);
   const [taskTemplate, setTaskTemplate] = useState(null);
   const [taskEnrollment, setTaskEnrollment] = useState(null);
   const [isDataLoaded, setDataLoaded] = useState(true);
@@ -17,7 +18,7 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
   useEffect(() => {
     setDataLoaded(false);
     fetchTask();
-  }, []);
+  }, [taskId]);
 
   if (!isDataLoaded) {
     return (
@@ -54,7 +55,9 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
             const data = await response.data[0];
             const tasks = data.taskTemplates || [];
             const ids = tasks.map((task) => task._id);
+            const taskTypes = tasks.map((task) => task.taskType);
             setTaskIds(ids);
+            setTaskTypes(taskTypes);
           } else {
             navigate(`/`);
             handleError(response?.data?.message);
@@ -89,7 +92,9 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
             const data = await response.data[0];
             const tasks = data.tasks || [];
             const ids = tasks.map((task) => task._id);
+            const taskTypes = tasks.map((task) => task.taskType);
             setTaskIds(ids);
+            setTaskTypes(taskTypes);
           } else {
             navigate(`/`);
             handleError(response?.data?.message);
@@ -110,15 +115,15 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
   if (courseType === 'courseTemplate' || courseType === 'courseEnrollment') {
     if (taskType === 'test') {
       selectedComponent = <TestTask taskTemplate={taskTemplate}
-       taskEnrollment={taskEnrollment} taskIds={taskIds} courseType={courseType}
+       taskEnrollment={taskEnrollment} taskIds={taskIds} taskTypes={taskTypes} courseType={courseType}
         handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />;
     } else if (taskType === 'fillInGaps') {
       selectedComponent = <FillInGapsTask taskTemplate={taskTemplate}
-       taskEnrollment={taskEnrollment} taskIds={taskIds} courseType={courseType}
+       taskEnrollment={taskEnrollment} taskIds={taskIds} taskTypes={taskTypes} courseType={courseType}
         handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />;
     } else if (taskType === 'theory') {
       selectedComponent = <TheoryTask taskTemplate={taskTemplate}
-       taskEnrollment={taskEnrollment} taskIds={taskIds} courseType={courseType}
+       taskEnrollment={taskEnrollment} taskIds={taskIds} taskTypes={taskTypes} courseType={courseType}
         handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />;
     }
   }

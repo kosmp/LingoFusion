@@ -4,7 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import TaskButtons from '../TaskButtons';
 import $api from "../../http/index";
 
-const FillInGapsTask = ({taskTemplate, taskEnrollment, taskIds, courseType, handleError, handleSuccessfulOperation}) => {
+const FillInGapsTask = ({taskTemplate, taskEnrollment, taskIds, courseType, handleError, handleSuccessfulOperation, taskTypes}) => {
   const { taskType, taskId, courseId } = useParams();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
@@ -19,7 +19,7 @@ const FillInGapsTask = ({taskTemplate, taskEnrollment, taskIds, courseType, hand
     setExpForTrueTask(taskTemplate?.expForTrueTask);
 
     setTaskEnrollmentStatus(taskEnrollment?.status);
-  }, []);
+  }, [taskId]);
 
 
   const handleSubmit = async (event) => {
@@ -44,19 +44,85 @@ const FillInGapsTask = ({taskTemplate, taskEnrollment, taskIds, courseType, hand
     }
   };
 
-  const handlePrevTask = () => {
+  const handleComplete = async () => {
     try {
+      const response = await $api.post(`/courses/${courseId}/complete`);
 
+      if (response.status === 200) {
+        navigate(`/courseEnrollment/${courseId}`);
+        handleSuccessfulOperation();
+      } else {
+        handleError(response?.data?.message);
+      }
     } catch (error) {
+      handleError(`Error with completing courseEnrollment. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+    }
+  }
 
+  const handlePrevTask = async () => {
+    if (courseType === 'courseTemplate') {
+      // just go to the prev taskId from taskIds
+      try {
+        const currentIndex = taskIds.indexOf(taskId);
+        if (currentIndex !== -1 && currentIndex > 0) {
+          const prevTaskId = taskIds[currentIndex - 1];
+          const prevTaskType = taskTypes[currentIndex - 1];
+
+          navigate(`/${courseType}/${courseId}/${prevTaskType}/${prevTaskId}`);
+          handleSuccessfulOperation();
+        }
+      } catch (error) {
+        handleError('Error related to moving to prev task template.')
+      }
+    } else if (courseType === 'courseEnrollment') {
+      // need to make a request for the prev task
+      try {
+        const response = await $api.get(`/courses/${courseId}/prevTask`);
+
+        if (response.status === 200) {
+          const data = await response.data;
+          navigate(`/courseEnrollment/${courseId}/${data.taskEnrollment.taskType}/${data.taskEnrollment._id}`);
+
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError('Error related to request get prev task enrollment of course.');
+      }
     }
   };
 
-  const handleNextTask = () => {
-    try {
+  const handleNextTask = async () => {
+    if (courseType === 'courseTemplate') {
+      try {
+        const currentIndex = taskIds.indexOf(taskId);
+        if (currentIndex !== -1 && currentIndex < taskIds.length - 1) {
+          const nextTaskId = taskIds[currentIndex + 1];
+          const nextTaskType = taskTypes[currentIndex + 1];
 
-    } catch (error) {
-      
+          navigate(`/${courseType}/${courseId}/${nextTaskType}/${nextTaskId}`);
+          handleSuccessfulOperation();
+        }
+      } catch (error) {
+        handleError('Error related to moving to next task template.')
+      }
+    } else if (courseType === 'courseEnrollment') {
+      // need to make a request for the next task
+      try {
+        const response = await $api.get(`/courses/${courseId}/nextTask`);
+
+        if (response.status === 200) {
+          const data = await response.data;
+          navigate(`/courseEnrollment/${courseId}/${data.taskEnrollment.taskType}/${data.taskEnrollment._id}`);
+
+          handleSuccessfulOperation();
+        } else {
+          handleError(response?.data?.message);
+        }
+      } catch (error) {
+        handleError('Error related to request get next task enrollment of course.');
+      }
     }
   };
 
@@ -150,11 +216,13 @@ const FillInGapsTask = ({taskTemplate, taskEnrollment, taskIds, courseType, hand
           <TaskButtons
             isFirstTask={taskIds[0] === taskId}
             isLastTask={taskIds[taskIds.length - 1] === taskId}
+            isCompleted={taskEnrollment?.completedAt}
             handleSubmit={handleSubmit}
             handleChangeTask={handleChangeTask}
             handleDeleteTask={handleDeleteTask}
             handleNextTask={handleNextTask}
             handlePrevTask={handlePrevTask}
+            handleComplete={handleComplete}
             taskStatus={taskEnrollmentStatus}
             courseType={courseType}
           />
