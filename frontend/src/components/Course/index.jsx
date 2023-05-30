@@ -10,22 +10,16 @@ import Spinner from '../../components/Spinner';
 import { Context } from '../../index';
 
 const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) => {
+  const { store } = useContext(Context);
     const [anchorEl, setAnchorEl] = useState(null);
+    const [isDataLoaded, setDataLoaded] = useState(true);
     const [courseTemplate, setCourseTemplate] = useState(null);
     const [courseEnrollment, setCourseEnrollment] = useState(null);
-    const [maxPossibleExpAmount, setMaxPossibleExpAmount] = useState(null);
-    const [resultExp, setResultExp] = useState(null);
-    const [title, setTitle] = useState(null);
-    const [englishLvl, setEnglishLvl] = useState(null);
-    const [tags, setTags] = useState(null);
-    const [description, setDescription] = useState(null);
-    const [isDataLoaded, setDataLoaded] = useState(true);
     const [startedAt, setStartedAt] = useState(false);
     const [completedAt, setCompletedAt] = useState(false);
     const [ratingForCourse, setRatingForCourse] = useState(null);
     const [isPublic, setIsPublic] = useState(false);
     const [isAuthor, setIsAuthor] = useState(false);
-    const { store } = useContext(Context);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -39,10 +33,6 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
       fetchData();
     }, [courseId]);
-
-    useEffect(() => {
-      
-    }, [courseEnrollment])
     
     const checkIsAuthor = (courseTemplateAuthorId) => {
       if (store.user._id === courseTemplateAuthorId) {
@@ -60,10 +50,6 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
           if (response.status === 200) {
             setCourseTemplate(response.data[0]);
-            setTitle(response.data[0].title);
-            setEnglishLvl(response.data[0].englishLvl);
-            setTags(response.data[0].tags);
-            setDescription(response.data[0].description);
             setIsPublic(Boolean(response.data[0].public));
             checkIsAuthor(response.data[0].authorId);
           } else {
@@ -73,9 +59,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         } else if (courseType === 'courseEnrollment') {
           response = await $api.get(`/courses/${courseId}/enrollment`);
 
-          setCourseEnrollment({...response.data[0]});
-          setMaxPossibleExpAmount(response.data[0].maxPossibleExpAmount);
-          setResultExp(response.data[0].statistics.resultExp);
+          setCourseEnrollment(response.data[0]);
           setStartedAt(response.data[0].startedAt);
           setCompletedAt(response.data[0].completedAt);
           setRatingForCourse(response.data[0].ratingForCourse);
@@ -87,10 +71,6 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
             if (response.status === 200) {
                 setCourseTemplate(response.data[0]);
-                setTitle(response.data[0].title);
-                setEnglishLvl(response.data[0].englishLvl);
-                setTags(response.data[0].tags);
-                setDescription(response.data[0].description);
                 setIsPublic(Boolean(response.data[0].public));
                 checkIsAuthor(response.data[0].authorId);
             } else {
@@ -248,10 +228,8 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         const response = await $api.post(`/courses/${courseId}/unenroll`);
 
         if (response.status === 200) {
-          navigate(`/courseTemplate/${courseEnrollment.coursePresentationId}`);
           setCourseEnrollment(null);
-          setMaxPossibleExpAmount(null);
-          setResultExp(null);
+          navigate(`/courseTemplate/${courseEnrollment.coursePresentationId}`);
           handleSuccessfulOperation();
         } else {
           handleError(response?.data?.message);
@@ -290,18 +268,18 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
   
     return (
       <div className={styles.container}>
-        <h1 className={styles.title}>{title}</h1>
-        {courseTemplate && <p className={styles.englishLevel}>English Level: {englishLvl}</p>}
+        <h1 className={styles.title}>{courseTemplate?.title}</h1>
+        {courseTemplate && <p className={styles.englishLevel}>English Level: {courseTemplate?.englishLvl}</p>}
         {courseTemplate && (
           <div className={styles.tags}>
             {"Tags: "}
-            {tags.map((tag) => (
+            {courseTemplate?.tags?.map((tag) => (
               <span key={tag}>{`#${tag} `}</span>
             ))}
           </div>
         )}
         <h3>Description:</h3>
-        <ReactMarkdown>{description}</ReactMarkdown>
+        <ReactMarkdown>{courseTemplate?.description}</ReactMarkdown>
 
         {(!courseEnrollment) ? <>
             {(isPublic) ? (
@@ -380,8 +358,8 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
               </> : <> </>}
             {(startedAt) ? <h4>started at: {startedAt}</h4> : <> </>}
             {(completedAt) ? <h4>completed at: {completedAt}</h4> : <> </>}
-            <h4> max available experience for course: {maxPossibleExpAmount}</h4>
-            {(completedAt) ? <h4>gained experience for course: {resultExp}</h4> : <> </>}
+            <h4> max available experience for course: {courseEnrollment?.maxPossibleExpAmount}</h4>
+            {(completedAt) ? <h4>gained experience for course: {courseEnrollment?.statistics?.resultExp}</h4> : <> </>}
             {(ratingForCourse) ? <h4>Your rating for this course: {ratingForCourse}</h4> : <> </>}
         </>}
       </div>
