@@ -15,6 +15,7 @@ import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
 
 const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) => {
+  const { courseId } = useParams();
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [title, setTitle] = useState('');
@@ -26,7 +27,6 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
   const [showTags, setShowTags] = useState(false);
   const [validTags, setValidTags] = useState([]);
   const [isDataLoaded, setDataLoaded] = useState(true);
-  const { courseId } = useParams();
   const fileInputRef = useRef(null);
 
   const fetchTags = async () => {
@@ -48,11 +48,34 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
     const fetchData = async () => {
       await fetchTags();
 
+      if (action === 'update') {
+        await fetchCourseTemplate();
+      }
+
       setDataLoaded(true);
     }
 
     fetchData();
   }, []);
+
+  const fetchCourseTemplate = async () => {
+    try {
+      const response = await $api.get(`/courses/${courseId}`);
+
+        if (response.status === 200) {
+          setTitle(response.data[0].title);
+          setTags((prevTags) => [...prevTags, ...response.data[0].tags]);
+          setDescription(response.data[0].description);
+          setEnglishLvl(response.data[0].englishLvl);
+        } else {
+          navigate('/');
+          handleError(response?.data?.message);
+        }
+    } catch (error) {
+      navigate('/');
+      handleError(`Error fetching courseTemplate with id ${courseId}.`);
+    }
+  };
 
   const handleOpenFilePicker = () => {
     fileInputRef.current.click();
@@ -214,6 +237,7 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
             placeholder="Course title..."
             onChange={handleChangeTitle}
             fullWidth
+            defaultValue={title}
           />
           {errors.title && <FormHelperText>{errors.title}</FormHelperText>}
         </FormControl>
