@@ -7,34 +7,31 @@ import Button from '@mui/material/Button';
 import styles from './Registration.module.scss';
 import { Context } from '../../index';
 import { useNavigate } from 'react-router-dom';
-import PopUpWindow from '../../components/PopUpWindow';
 import Spinner from '../../components/Spinner';
 
-const Registration = () => {
+const Registration = ({handleError, handleSuccessfulOperation}) => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
   const {store} = useContext(Context);
   const [isDataLoaded, setDataLoaded] = useState(true);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setDataLoaded(false);
-    const isSuccess = await store.registration(login, password);
-    setDataLoaded(true);
-    if (isSuccess) {
-      navigate('/');
+    
+    try {
+      setDataLoaded(false);
+
+      if (await store.login(login, password)) {
+        navigate('/');
+        handleSuccessfulOperation();
+      }
+    } catch (error) {
+      handleError(`Login error. ${error?.response?.data?.message}`)
+    } finally {
+      setDataLoaded(true);
     }
   }
-
-  const handleError = (errorMessage) => {
-    setError(errorMessage);
-  };
-
-  const handleCloseError = () => {
-    setError(null);
-  };
 
   React.useEffect(() => {
     store.setErrorCallback(handleError);
@@ -51,21 +48,18 @@ const Registration = () => {
   }
 
   return (
-    <>
-      <Paper classes={{ root: styles.root }}>
-        <Typography classes={{ root: styles.title }} variant="h5">
-          Registration
-        </Typography>
-        <TextField className={styles.field} value={login} onChange={e => setLogin(e.target.value)} label="Login" fullWidth />
-        <TextField className={styles.field} value={password} onChange={e => setPassword(e.target.value)} type = 'password' label="Password" fullWidth />
-        <div className={styles.buttons}>
-          <Button className={styles.button} onClick={handleSubmit} size="large" variant="contained" fullWidth>
-            Register
-          </Button>
-        </div>
-      </Paper>
-      <PopUpWindow error={error} handleCloseError={handleCloseError} />
-    </>
+    <Paper classes={{ root: styles.root }}>
+      <Typography classes={{ root: styles.title }} variant="h5">
+        Registration
+      </Typography>
+      <TextField className={styles.field} value={login} onChange={e => setLogin(e.target.value)} label="Login" fullWidth />
+      <TextField className={styles.field} value={password} onChange={e => setPassword(e.target.value)} type = 'password' label="Password" fullWidth />
+      <div className={styles.buttons}>
+        <Button className={styles.button} onClick={handleSubmit} size="large" variant="contained" fullWidth>
+          Register
+        </Button>
+      </div>
+    </Paper>
   );
 };
 

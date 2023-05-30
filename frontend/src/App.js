@@ -63,8 +63,8 @@ function App() {
       <Container>
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/register" element={<Registration />} />
-          <Route path="/login" element={<Login />} />     
+          <Route path="/register" element={<Registration handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />
+          <Route path="/login" element={<Login handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />     
 
           <Route element={<PrivateRoute />}>
             <Route path="/catalog" element={<CourseCatalog handleError={handleError} handleSuccessfulOperation={handleSuccessfulOperation} />} />

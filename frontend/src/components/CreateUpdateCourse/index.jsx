@@ -31,19 +31,27 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
 
   const fetchTags = async () => {
     try {
-      setDataLoaded(false);
       const response = await $api.get(`/courses/templates/tags`); 
       if (response.status === 200) {
         setValidTags(response.data);
-        setDataLoaded(true);
+      } else {
+        handleError(response?.data?.message);
       }
     } catch (error) {
-      setDataLoaded(true);
+      handleError(`Error related to fetching tags. ${error?.response?.data?.message}`);
     }
   }
 
   useEffect(() => {
-    fetchTags();
+    setDataLoaded(false); 
+      
+    const fetchData = async () => {
+      await fetchTags();
+
+      setDataLoaded(true);
+    }
+
+    fetchData();
   }, []);
 
   const handleOpenFilePicker = () => {
@@ -88,39 +96,42 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
       return;
     }
 
+    setDataLoaded(false);
+
     if (action === 'create') {
-      let response;
       try {
-        setDataLoaded(false);
-        response = await $api.post(`/courses`, {title, description, englishLvl, imageUrl, tags});
-        setDataLoaded(true);
+        const response = await $api.post(`/courses`, {title, description, englishLvl, imageUrl, tags});
+
         if (response.status !== 200) {
-          handleError(response.response?.data?.message);
-          setDataLoaded(true);
           navigate(`/courseTemplate/create`);
+          handleError(response.response?.data?.message);
+        } else {
+          navigate(`/courseTemplate/${response.data._id}`);
+          handleSuccessfulOperation();
         }
-        navigate(`/courseTemplate/${response.data._id}`);
       } catch (error) {
-        handleError(error.response.data.message + ". " + error.response.data.errors.map((error) => error.msg).join(" "));
-        setDataLoaded(true);
         navigate(`/courseTemplate/create`);
+        handleError(`${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+      } finally {
+        setDataLoaded(true);
       }
     } else if (action === 'update') {
       try {
-        setDataLoaded(false);
         const rating = 0;
         const response = await $api.put(`/courses/${courseId}`, {title, description, englishLvl, imageUrl, tags, rating});
-        setDataLoaded(true);
+
         if (response.status !== 200) {
-          handleError(response.response?.data?.message);
-          setDataLoaded(true);
           navigate(`/courseTemplate/${courseId}`);
+          handleError(response.response?.data?.message);
+        } else {
+          navigate(`/courseTemplate/${courseId}`);
+          handleSuccessfulOperation();
         }
-        navigate(`/courseTemplate/${courseId}`);
       } catch (error) {
-        handleError(error.response.data.message + ". " + error.response.data.errors.map((error) => error.msg).join(" "));
-        setDataLoaded(true);
         navigate(`/courseTemplate/${courseId}`);
+        handleError(`${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+      } finally {
+        setDataLoaded(true);
       }
     }
   };
@@ -157,15 +168,15 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
     setTags(updatedTags);
   };
 
+  const toggleTags = () => {
+    setShowTags(!showTags);
+  };
+
   if (!isDataLoaded) {
     return (
       <Spinner />
     );
   }
-
-  const toggleTags = () => {
-    setShowTags(!showTags);
-  };
 
   return (
       <Paper style={{ padding: 30 }}>

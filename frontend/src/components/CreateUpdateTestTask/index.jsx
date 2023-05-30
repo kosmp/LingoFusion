@@ -6,12 +6,14 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { useNavigate } from 'react-router-dom';
 import $api from '../../http';
 import InputMask from 'react-input-mask';
+import Spinner from '../../components/Spinner';
 
 const CreateUpdateTestTask = (props) => {
   const navigate = useNavigate();
-  const [question, setQuestion] = useState('');
+  const [isDataLoaded, setDataLoaded] = useState(true);
   const [title, setTitle] = useState('');
   const [expForTrueTask, setExpForTrueTask] = useState('');
+  const [question, setQuestion] = useState('');
   const [options, setOptions] = useState(['', '']);
   const [correctAnswers, setCorrectAnswers] = useState([]);
 
@@ -51,6 +53,8 @@ const CreateUpdateTestTask = (props) => {
     }
 
     try {
+      setDataLoaded(false);
+
       let response;
       if (props.action === 'create') {
         response = await $api.post(`/courses/${props.courseId}/tasks`, {
@@ -84,8 +88,16 @@ const CreateUpdateTestTask = (props) => {
       navigate(`/courseTemplate/${props.courseId}`);
     } catch (error) {
       props.handleError(`Error with submitting taskTemplate. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+    } finally {
+      setDataLoaded(true);
     }
   };
+
+  if (!isDataLoaded) {
+    return (
+      <Spinner />
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit}>

@@ -7,34 +7,31 @@ import Button from "@mui/material/Button";
 import styles from "./Login.module.scss";
 import { Context } from '../../index';
 import { useNavigate } from 'react-router-dom';
-import PopUpWindow from '../../components/PopUpWindow';
 import Spinner from '../../components/Spinner';
 
-const Login = () => {
+const Login = ({handleError, handleSuccessfulOperation}) => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
   const {store} = useContext(Context);
   const [isDataLoaded, setDataLoaded] = useState(true);
   const navigate = useNavigate();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setDataLoaded(false);
-    const isSuccess = await store.login(login, password);
-    setDataLoaded(true);
-    if (isSuccess) {
-      navigate('/');
+    
+    try {
+      setDataLoaded(false);
+
+      if (await store.login(login, password)) {
+        navigate('/');
+        handleSuccessfulOperation();
+      }
+    } catch (error) {
+      handleError(`Login error. ${error?.response?.data?.message}`)
+    } finally {
+      setDataLoaded(true);
     }
   }
-
-  const handleError = (errorMessage) => {
-    setError(errorMessage);
-  };
-
-  const handleCloseError = () => {
-    setError(null);
-  };
 
   React.useEffect(() => {
     store.setErrorCallback(handleError);
@@ -64,7 +61,6 @@ const Login = () => {
           </Button>
         </div>
       </Paper>
-      <PopUpWindow error={error} handleCloseError={handleCloseError} />
     </div>
   );
 };

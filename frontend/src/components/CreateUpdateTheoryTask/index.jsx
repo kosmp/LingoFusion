@@ -7,9 +7,11 @@ import { useNavigate } from 'react-router-dom';
 import InputMask from 'react-input-mask';
 import TextField from '@mui/material/TextField';
 import $api from '../../http';
+import Spinner from '../../components/Spinner';
 
 const CreateUpdateTheoryTask = (props) => {
   const navigate = useNavigate();
+  const [isDataLoaded, setDataLoaded] = useState(true);
   const [title, setTitle] = useState('');
   const [expForTrueTask, setExpForTrueTask] = useState('');
   const [content, setContent] = useState('');
@@ -22,6 +24,8 @@ const CreateUpdateTheoryTask = (props) => {
     e.preventDefault();
 
     try {
+      setDataLoaded(false);
+
       let response;
       if (props.action === 'create') {
         response = await $api.post(`/courses/${props.courseId}/tasks`, {
@@ -55,8 +59,16 @@ const CreateUpdateTheoryTask = (props) => {
       navigate(`/courseTemplate/${props.courseId}`);
     } catch (error) {
       props.handleError(`Error with submitting taskTemplate. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+    } finally {
+      setDataLoaded(true);
     }
   };
+
+  if (!isDataLoaded) {
+    return (
+      <Spinner />
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit}>

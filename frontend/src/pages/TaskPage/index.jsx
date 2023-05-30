@@ -32,9 +32,11 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
   const handleSubmit = async (event, userAnswers) => {
     event.preventDefault();
 
-    // if it's taskEnrollment then courseId is courseEnrollmentId
-    if (taskEnrollment?.status === 'InProgress') {
-      try {
+    try {
+      setDataLoaded(false);
+
+      // if it's taskEnrollment then courseId is courseEnrollmentId
+      if (taskEnrollment?.status === 'InProgress') {
         const response = await $api.post(`/courses/${courseId}/tasks/${taskId}/submit`, {
           userAnswers: userAnswers
         });
@@ -45,14 +47,17 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
         } else {
           handleError(response?.data?.message);
         }
-      } catch (error) {
-        handleError(`Error with submitting taskEnrollment. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
       }
+    } catch (error) {
+      handleError(`Error with submitting taskEnrollment. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+    } finally {
+      setDataLoaded(true);
     }
   };
 
   const handleComplete = async () => {
     try {
+      setDataLoaded(false);
       const response = await $api.post(`/courses/${courseId}/complete`);
 
       if (response.status === 200) {
@@ -63,6 +68,8 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
       }
     } catch (error) {
       handleError(`Error with completing courseEnrollment. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+    } finally {
+      setDataLoaded(true);
     }
   }
 
@@ -74,6 +81,7 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
 
   const handleDeleteTask = async () => {
     try {
+      setDataLoaded(false);
       const response = await $api.delete(`/courses/${courseId}/tasks/${taskTemplate._id}`);
 
       if (response.status === 200) {
@@ -84,73 +92,75 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
       }
     } catch (error) {
       handleError(`Error with deleting taskTemplate. ${error?.response?.data?.message}`)
+    } finally {
+      setDataLoaded(true);
     }
   };
 
   const handlePrevTask = async () => {
-    if (courseType === 'courseTemplate') {
-      // just go to the prev taskId from taskIds
-      try {
+    try {
+      setDataLoaded(false);
+
+      if (courseType === 'courseTemplate') {
+        // just go to the prev taskId from taskIds
         const currentIndex = taskIds.indexOf(taskId);
         if (currentIndex !== -1 && currentIndex > 0) {
           const prevTaskId = taskIds[currentIndex - 1];
           const prevTaskType = taskTypes[currentIndex - 1];
-
+  
           navigate(`/${courseType}/${courseId}/${prevTaskType}/${prevTaskId}`);
           handleSuccessfulOperation();
         }
-      } catch (error) {
-        handleError('Error related to moving to prev task template.')
-      }
-    } else if (courseType === 'courseEnrollment') {
-      // need to make a request for the prev task
-      try {
+      } else if (courseType === 'courseEnrollment') {
+        // need to make a request for the prev task
         const response = await $api.get(`/courses/${courseId}/prevTask`);
-
+  
         if (response.status === 200) {
           const data = await response.data;
           navigate(`/courseEnrollment/${courseId}/${data.taskEnrollment.taskType}/${data.taskEnrollment._id}`);
-
+  
           handleSuccessfulOperation();
         } else {
           handleError(response?.data?.message);
         }
-      } catch (error) {
-        handleError('Error related to request get prev task enrollment of course.');
       }
+    } catch (error) {
+      handleError('Error associated with the transition to another task.')
+    } finally {
+      setDataLoaded(true);
     }
   };
 
   const handleNextTask = async () => {
-    if (courseType === 'courseTemplate') {
-      try {
+    try {
+      setDataLoaded(false);
+
+      if (courseType === 'courseTemplate') {
         const currentIndex = taskIds.indexOf(taskId);
         if (currentIndex !== -1 && currentIndex < taskIds.length - 1) {
           const nextTaskId = taskIds[currentIndex + 1];
           const nextTaskType = taskTypes[currentIndex + 1];
-
+  
           navigate(`/${courseType}/${courseId}/${nextTaskType}/${nextTaskId}`);
           handleSuccessfulOperation();
         }
-      } catch (error) {
-        handleError('Error related to moving to next task template.')
-      }
-    } else if (courseType === 'courseEnrollment') {
-      // need to make a request for the next task
-      try {
+      } else if (courseType === 'courseEnrollment') {
+        // need to make a request for the next task
         const response = await $api.get(`/courses/${courseId}/nextTask`);
-
+  
         if (response.status === 200) {
           const data = await response.data;
           navigate(`/courseEnrollment/${courseId}/${data.taskEnrollment.taskType}/${data.taskEnrollment._id}`);
-
+  
           handleSuccessfulOperation();
         } else {
           handleError(response?.data?.message);
         }
-      } catch (error) {
-        handleError('Error related to request get next task enrollment of course.');
       }
+    } catch (error) {
+      handleError('Error associated with the transition to another task.')
+    } finally {
+      setDataLoaded(true);
     }
   };
 

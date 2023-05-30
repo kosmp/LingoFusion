@@ -98,7 +98,6 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
               handleError(response?.data?.message);
             }
           } else {
-            setDataLoaded(true);
             navigate('/');
             handleError(response?.data?.message);
           }
@@ -122,6 +121,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
     const handlePublishCourse = async () => {
       try {
+        setDataLoaded(false);
         const response = await $api.post(`/courses/${courseId}/publish`);
 
         if (response.status === 200) {
@@ -133,6 +133,8 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         }
       } catch (error) {
         handleError(`Error with publishing courseTemplate. ${error?.response?.data?.message}`);
+      } finally {
+        setDataLoaded(true);
       }
     }
 
@@ -146,6 +148,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
     const handleDeleteCourse = async () => {
       try {
+        setDataLoaded(false);
         const response = await $api.delete(`/courses/${courseId}`);
 
         if (response.status === 200) {
@@ -156,6 +159,8 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         }
       } catch (error) {
         handleError(`Error with deleting courseTemplate. ${error?.response?.data?.message}`)
+      } finally {
+        setDataLoaded(true);
       }
     }
 
@@ -175,6 +180,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
     const handleEnrollInCourse = async () => {
       try {
+        setDataLoaded(false);
         const response = await $api.post(`/courses/${courseId}/enroll`);
 
         if (response.status === 200) {
@@ -185,12 +191,14 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         }
       } catch (error) {
         handleError(`Error with enrolling in courseTemplate. ${error?.response?.data?.message}`)
+      } finally {
+        setDataLoaded(true);
       }
     }
 
     const handleStartCourse = async () => {
-      setDataLoaded(false);
       try {
+        setDataLoaded(false);
         const response = await $api.post(`/courses/${courseId}/start`);
         await fetchCourse();
         if (response.status === 200) {
@@ -202,6 +210,8 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         }
       } catch (error) {
         handleError(`Error with starting courseTemplate. ${error?.response?.data?.message}`);
+      } finally {
+        setDataLoaded(true);
       }
     }
 
@@ -215,6 +225,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
     const handleCompleteCourse = async () => {
       try {
+        setDataLoaded(false);
         const response = await $api.post(`/courses/${courseId}/complete`);
 
         if (response.status === 200) {
@@ -226,11 +237,14 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         }
       } catch (error) {
         handleError(`Error with completing courseTemplate. ${error?.response?.data?.message}`);
+      } finally {
+        setDataLoaded(true);
       }
     }
 
     const handleUnEnrollFromCourse = async () => {
       try {
+        setDataLoaded(false);
         const response = await $api.post(`/courses/${courseId}/unenroll`);
 
         if (response.status === 200) {
@@ -244,11 +258,14 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         }
       } catch (error) {
         handleError(`Error with unenrolling from courseEnrollment. ${error?.response?.data?.message}`);
-      } 
+      } finally {
+        setDataLoaded(true);
+      }
     }
 
     const handleRateThisCourse = async (rating) => {
       try {
+        setDataLoaded(false);
         const response = await $api.put(`/courses/${courseId}/rating`, {rating});
 
         if (response.status === 200) {
@@ -260,6 +277,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
       } catch (error) {
         handleError(`Error with unenrolling from courseEnrollment. ${error?.response?.data?.message}`);
       } finally {
+        setDataLoaded(true);
         setAnchorEl(null);
       }
     }

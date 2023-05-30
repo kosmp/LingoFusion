@@ -4,14 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import InputMask from 'react-input-mask';
 import TextField from '@mui/material/TextField';
 import $api from '../../http';
+import Spinner from '../../components/Spinner';
 
 const CreateUpdateFillInGapsTask = (props) => {
   const navigate = useNavigate();
-  const [content, setContent] = useState('');
-  const gapMarker = '{{gap}}';
-  const [answers, setAnswers] = useState([]);
+  const [isDataLoaded, setDataLoaded] = useState(true);
   const [title, setTitle] = useState('');
   const [expForTrueTask, setExpForTrueTask] = useState('');
+  const [content, setContent] = useState('');
+  const [answers, setAnswers] = useState([]);
+  const gapMarker = '{{gap}}';
   const gaps = content.match(new RegExp(gapMarker, 'g')) || [];
 
   const handleContentChange = (event) => {
@@ -33,6 +35,8 @@ const CreateUpdateFillInGapsTask = (props) => {
     }
 
     try {
+      setDataLoaded(false);
+
       if (answers.length === gaps.length && answers.every(answer => answer.trim() !== '')) {
         let response;
         if (props.action === 'create') {
@@ -67,8 +71,16 @@ const CreateUpdateFillInGapsTask = (props) => {
       }
     } catch (error) {
       props.handleError(`Error with submitting taskTemplate. ${error?.response?.data?.message + ((error?.response?.data?.message) ? ". " : "") + error?.response?.data?.errors?.map((error) => error.msg).join(" ")}`);
+    } finally {
+      setDataLoaded(true);
     }
   };
+
+  if (!isDataLoaded) {
+    return (
+      <Spinner />
+    );
+  }
 
   return (
     <div>
