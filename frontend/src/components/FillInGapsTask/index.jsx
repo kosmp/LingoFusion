@@ -86,7 +86,9 @@ const FillInGapsTask = ({taskTemplate, taskEnrollment, courseType, taskEnrollmen
             isFirstTask={isFirstTask}
             isLastTask={isLastTask}
             isCompleted={taskEnrollment?.completedAt}
-            handleSubmit={(event) => handleSubmit(event, userAnswers)}
+            handleSubmit={async (event) => { handleSubmit(event, userAnswers)
+              await handleSubmit(event, userAnswers);
+            }}
             handleChangeTask={handleChangeTask}
             handleDeleteTask={handleDeleteTask}
             handleNextTask={handleNextTask}

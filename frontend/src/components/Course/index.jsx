@@ -30,10 +30,21 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
 
     useEffect(() => {
       setDataLoaded(false); 
-      fetchCourse();
-    }, [courseId, courseType]);
+      
+      const fetchData = async () => {
+        await fetchCourse();
 
-    const checkIsAuthor = async (courseTemplateAuthorId) => {
+        setDataLoaded(true);
+      }
+
+      fetchData();
+    }, [courseId]);
+
+    useEffect(() => {
+      
+    }, [courseEnrollment])
+    
+    const checkIsAuthor = (courseTemplateAuthorId) => {
       if (store.user._id === courseTemplateAuthorId) {
         setIsAuthor(true);
       } else {
@@ -54,17 +65,15 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
             setTags(response.data[0].tags);
             setDescription(response.data[0].description);
             setIsPublic(Boolean(response.data[0].public));
-            await checkIsAuthor(response.data[0].authorId);
-            setDataLoaded(true);
+            checkIsAuthor(response.data[0].authorId);
           } else {
-            setDataLoaded(true);
             navigate('/');
             handleError(response?.data?.message);
           }
         } else if (courseType === 'courseEnrollment') {
           response = await $api.get(`/courses/${courseId}/enrollment`);
 
-          setCourseEnrollment(response.data[0]);
+          setCourseEnrollment({...response.data[0]});
           setMaxPossibleExpAmount(response.data[0].maxPossibleExpAmount);
           setResultExp(response.data[0].statistics.resultExp);
           setStartedAt(response.data[0].startedAt);
@@ -83,10 +92,8 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
                 setTags(response.data[0].tags);
                 setDescription(response.data[0].description);
                 setIsPublic(Boolean(response.data[0].public));
-                await checkIsAuthor(response.data[0].authorId);
-                setDataLoaded(true);
+                checkIsAuthor(response.data[0].authorId);
             } else {
-              setDataLoaded(true);
               navigate('/');
               handleError(response?.data?.message);
             }
@@ -96,12 +103,10 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
             handleError(response?.data?.message);
           }
         } else {
-          setDataLoaded(true);
           navigate('/');
           handleError('Incorrect courseType.');
         }
       } catch (error) {
-        setDataLoaded(true);
         navigate('/');
         handleError(`Error fetching ${courseType} with id ${courseId}.`);
       }
@@ -184,11 +189,13 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
     }
 
     const handleStartCourse = async () => {
+      setDataLoaded(false);
       try {
         const response = await $api.post(`/courses/${courseId}/start`);
-
+        await fetchCourse();
         if (response.status === 200) {
           setStartedAt(response.data.result[0].startedAt);
+          setDataLoaded(true);
           handleSuccessfulOperation();
         } else {
           handleError(response?.data?.message);
@@ -211,6 +218,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
         const response = await $api.post(`/courses/${courseId}/complete`);
 
         if (response.status === 200) {
+          await fetchCourse();
           setCompletedAt(response.data.completedAt);
           handleSuccessfulOperation();
         } else {

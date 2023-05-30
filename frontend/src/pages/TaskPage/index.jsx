@@ -20,7 +20,13 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
 
   useEffect(() => {
     setDataLoaded(false);
-    fetchTask();
+    const fetchData = async () => {
+      await fetchTask();
+
+      setDataLoaded(true);
+    }
+
+    fetchData();
   }, [taskId]);
 
   const handleSubmit = async (event, userAnswers) => {
@@ -32,9 +38,9 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
         const response = await $api.post(`/courses/${courseId}/tasks/${taskId}/submit`, {
           userAnswers: userAnswers
         });
-
         if (response.status === 200) {
           setTaskEnrollmentStatus('Completed');
+          await fetchTask();
           handleSuccessfulOperation();
         } else {
           handleError(response?.data?.message);
@@ -196,15 +202,13 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
           navigate(`/`);
           handleError(`Error with fetching of courseTemplate. ${error?.response?.data?.message}`);
         }
-
-        setDataLoaded(true);
       } else if (courseType === 'courseEnrollment') {
         let taskEnrollmentFromResponse;
         try {
           // get single task Enrollment
           response = await $api.get(`/courses/${courseId}/tasks/${taskId}/taskEnrollment`);
           if (response.status === 200) {
-            taskEnrollmentFromResponse = await response.data;
+            taskEnrollmentFromResponse = response.data;
             setTaskEnrollment(taskEnrollmentFromResponse);
           } else {
             navigate(`/${courseType}/${courseId}`);
@@ -235,12 +239,11 @@ export const TaskPage = ({courseType, handleError, handleSuccessfulOperation}) =
           navigate(`/`);
           handleError(`Error with fetching of courseEnrollment. ${error?.response?.data?.message} `);
         }
-
+        
         //get single task Template
         await fetchTaskTemplate(response.data[0].coursePresentationId, taskEnrollmentFromResponse.taskTemplateId);
 
         setTaskEnrollmentStatus(taskEnrollmentFromResponse?.status);
-        setDataLoaded(true);
       }
   }
 
