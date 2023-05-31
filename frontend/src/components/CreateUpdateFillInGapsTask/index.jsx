@@ -10,12 +10,12 @@ import styles from './CreateUpdateFillInGaps.module.scss';
 const CreateUpdateFillInGapsTask = (props) => {
   const navigate = useNavigate();
   const [isDataLoaded, setDataLoaded] = useState(true);
-  const [title, setTitle] = useState('');
-  const [expForTrueTask, setExpForTrueTask] = useState('');
-  const [content, setContent] = useState('');
-  const [answers, setAnswers] = useState([]);
+  const [title, setTitle] = useState(props.taskTemplate?.title ?? '');
+  const [expForTrueTask, setExpForTrueTask] = useState(props.taskTemplate?.expForTrueTask ?? '');
+  const [content, setContent] = useState(props.taskTemplate?.text ?? '');
+  const [answers, setAnswers] = useState(props.taskTemplate?.blanks?.map((blank) => blank.answer) ?? []);
   const gapMarker = '{{gap}}';
-  const gaps = content.match(new RegExp(gapMarker, 'g')) || [];
+  const gaps = content?.match(new RegExp(gapMarker, 'g')) || [];
 
   const handleContentChange = (event) => {
     setContent(event.target.value);

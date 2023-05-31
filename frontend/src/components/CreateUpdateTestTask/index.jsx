@@ -12,10 +12,10 @@ import styles from './CreateUpdateTest.module.scss';
 const CreateUpdateTestTask = (props) => {
   const navigate = useNavigate();
   const [isDataLoaded, setDataLoaded] = useState(true);
-  const [title, setTitle] = useState('');
-  const [expForTrueTask, setExpForTrueTask] = useState('');
-  const [question, setQuestion] = useState('');
-  const [options, setOptions] = useState(['', '']);
+  const [title, setTitle] = useState(props.taskTemplate?.title ?? '');
+  const [expForTrueTask, setExpForTrueTask] = useState(props.taskTemplate?.expForTrueTask ?? '');
+  const [question, setQuestion] = useState(props.taskTemplate?.question ?? '');
+  const [options, setOptions] = useState(props.taskTemplate?.options ?? ['', '']);
   const [correctAnswers, setCorrectAnswers] = useState([]);
 
   const handleOptionChange = (index, value) => {
