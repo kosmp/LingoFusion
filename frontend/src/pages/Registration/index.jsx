@@ -22,7 +22,7 @@ const Registration = ({handleError, handleSuccessfulOperation}) => {
     try {
       setDataLoaded(false);
 
-      if (await store.login(login, password)) {
+      if (await store.registration(login, password)) {
         navigate('/');
         handleSuccessfulOperation();
       }
