@@ -14,15 +14,15 @@ import styles from './CreateUpdateCourse.module.scss';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
 
-const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) => {
+const CreateUpdateCourse = ({ action, handleError, handleSuccessfulOperation, courseTemplate }) => {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
-  const [title, setTitle] = useState('');
+  const [title, setTitle] = useState(courseTemplate?.title ?? '');
   const [imageUrl, setImageUrl] = useState('');
-  const [description, setDescription] = useState('');
-  const [englishLvl, setEnglishLvl] = useState('');
-  const [tags, setTags] = useState([]);
+  const [description, setDescription] = useState(courseTemplate?.description ?? '');
+  const [englishLvl, setEnglishLvl] = useState(courseTemplate?.englishLvl ?? '');
+  const [tags, setTags] = useState(courseTemplate?.tags ?? []);
   const [tagInput, setTagInput] = useState('');
   const [showTags, setShowTags] = useState(false);
   const [validTags, setValidTags] = useState([]);
@@ -31,7 +31,7 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
 
   const fetchTags = async () => {
     try {
-      const response = await $api.get(`/courses/templates/tags`); 
+      const response = await $api.get(`/courses/templates/tags`);
       if (response.status === 200) {
         setValidTags(response.data);
       } else {
@@ -43,39 +43,16 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
   }
 
   useEffect(() => {
-    setDataLoaded(false); 
-      
+    setDataLoaded(false);
+
     const fetchData = async () => {
       await fetchTags();
-
-      if (action === 'update') {
-        await fetchCourseTemplate();
-      }
 
       setDataLoaded(true);
     }
 
     fetchData();
   }, []);
-
-  const fetchCourseTemplate = async () => {
-    try {
-      const response = await $api.get(`/courses/${courseId}`);
-
-        if (response.status === 200) {
-          setTitle(response.data[0].title);
-          setTags((prevTags) => [...prevTags, ...response.data[0].tags]);
-          setDescription(response.data[0].description);
-          setEnglishLvl(response.data[0].englishLvl);
-        } else {
-          navigate('/');
-          handleError(response?.data?.message);
-        }
-    } catch (error) {
-      navigate('/');
-      handleError(`Error fetching courseTemplate with id ${courseId}.`);
-    }
-  };
 
   const handleOpenFilePicker = () => {
     fileInputRef.current.click();
@@ -84,12 +61,20 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
   const handleChangeFile = (event) => {
     const file = event.target.files[0];
     const reader = new FileReader();
-
+  
     reader.onload = () => {
-      const imageUrl = reader.result;
-      setImageUrl(imageUrl);
+      const image = new Image();
+      image.onload = () => {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 300;
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        const resizedImage = canvas.toDataURL('image/jpeg');
+        setImageUrl(resizedImage);
+      };
+      image.src = reader.result;
     };
-
+  
     reader.readAsDataURL(file);
   };
 
@@ -123,7 +108,7 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
 
     if (action === 'create') {
       try {
-        const response = await $api.post(`/courses`, {title, description, englishLvl, imageUrl, tags});
+        const response = await $api.post(`/courses`, { title, description, englishLvl, imageUrl, tags });
 
         if (response.status !== 200) {
           navigate(`/courseTemplate/create`);
@@ -141,7 +126,7 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
     } else if (action === 'update') {
       try {
         const rating = 0;
-        const response = await $api.put(`/courses/${courseId}`, {title, description, englishLvl, imageUrl, tags, rating});
+        const response = await $api.put(`/courses/${courseId}`, { title, description, englishLvl, imageUrl, tags, rating });
 
         if (response.status !== 200) {
           navigate(`/courseTemplate/${courseId}`);
@@ -178,7 +163,7 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
   const handleAddTag = () => {
     if (tagInput.trim() !== '' && !tags.includes(tagInput.trim())) {
       if (validTags.includes(tagInput.trim())) {
-        setTags([...tags, tagInput.trim()]); 
+        setTags([...tags, tagInput.trim()]);
       } else {
         handleError('Tag is not valid.');
       }
@@ -202,128 +187,128 @@ const CreateUpdateCourse = ({action, handleError, handleSuccessfulOperation}) =>
   }
 
   return (
-      <Paper style={{ padding: 30 }}>
-        {imageUrl ? (
-          <div className={styles.imageContainer}>
-            <img className={styles.image} src={imageUrl} alt="Uploaded" />
-            <Button
-              variant="contained"
-              color="error"
-              onClick={onClickRemoveImage}
-              className={styles.buttons}
-           >
-              Remove
-            </Button>
-          </div>
-        ) : (
-          <div>
-            <Button variant="outlined" size="large" onClick={handleOpenFilePicker}>
-              Download preview
-            </Button>
-            <input
-              type="file"
-              onChange={handleChangeFile}
-              hidden
-              ref={fileInputRef}
-            />
-          </div>
-       )}
-        <br />
-        <br />
-        <FormControl error={!!errors.title} fullWidth>
-          <TextField
-            classes={{ root: styles.title }}
-            variant="standard"
-            placeholder="Course title..."
-            onChange={handleChangeTitle}
-            fullWidth
-            defaultValue={title}
-          />
-          {errors.title && <FormHelperText>{errors.title}</FormHelperText>}
-        </FormControl>
-        <FormControl error={!!errors.englishLvl} fullWidth>
-          <NativeSelect
-            classes={{ root: styles.englishLvl }}
-            variant="standard"
-            value={englishLvl}
-            onChange={handleEnglishLvlChange}
-            fullWidth
+    <Paper style={{ padding: 30 }}>
+      {imageUrl ? (
+        <div className={styles.imageContainer}>
+          <img className={styles.image} src={imageUrl} alt="Uploaded" />
+          <Button
+            variant="contained"
+            color="error"
+            onClick={onClickRemoveImage}
+            className={styles.buttons}
           >
-            <option value="" disabled>Select English Level</option>
-            <option value="A0">A0</option>
-            <option value="A1">A1</option>
-            <option value="B1">B1</option>
-            <option value="B2">B2</option>
-            <option value="C1">C1</option>
-            <option value="C2">C2</option>
-          </NativeSelect>
-          {errors.englishLvl && <FormHelperText>{errors.englishLvl}</FormHelperText>}
-        </FormControl>
-       <br />
-        <br />
-        <div className={`${styles.tagInputContainer} ${styles.buttons}`} >
-          <TextField
-            classes={{ root: styles.tagInput }}
-            variant="standard"
-            placeholder="Add tag"
-            value={tagInput}
-            onChange={handleTagInputChange}
-          />
-          <Button variant="contained" color="primary" onClick={handleAddTag}>
-            Add tag
-          </Button>
-          <Button onClick={toggleTags} variant="contained">
-            {showTags ? 'Hide Valid Tags' : 'Show Valid Tags'}
+            Remove
           </Button>
         </div>
-        {tags.length > 0 && (
-          <div className={styles.tagList}>
-            {tags.map((tag, index) => (
-              <span key={index} className={styles.tag} onClick={() => handleRemoveTag(tag)}>
-                {tag}
-                <button
-                  className={styles.removeTagButton}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleRemoveTag(tag);
-                  }}
-                >
-                  &#10005;
-                </button>
-              </span>
+      ) : (
+        <div>
+          <Button variant="outlined" size="large" onClick={handleOpenFilePicker}>
+            Download preview
+          </Button>
+          <input
+            type="file"
+            onChange={handleChangeFile}
+            hidden
+            ref={fileInputRef}
+          />
+        </div>
+      )}
+      <br />
+      <br />
+      <FormControl error={!!errors.title} fullWidth>
+        <TextField
+          classes={{ root: styles.title }}
+          variant="standard"
+          placeholder="Course title..."
+          onChange={handleChangeTitle}
+          fullWidth
+          defaultValue={title}
+        />
+        {errors.title && <FormHelperText>{errors.title}</FormHelperText>}
+      </FormControl>
+      <FormControl error={!!errors.englishLvl} fullWidth>
+        <NativeSelect
+          classes={{ root: styles.englishLvl }}
+          variant="standard"
+          value={englishLvl}
+          onChange={handleEnglishLvlChange}
+          fullWidth
+        >
+          <option value="" disabled>Select English Level</option>
+          <option value="A0">A0</option>
+          <option value="A1">A1</option>
+          <option value="B1">B1</option>
+          <option value="B2">B2</option>
+          <option value="C1">C1</option>
+          <option value="C2">C2</option>
+        </NativeSelect>
+        {errors.englishLvl && <FormHelperText>{errors.englishLvl}</FormHelperText>}
+      </FormControl>
+      <br />
+      <br />
+      <div className={`${styles.tagInputContainer} ${styles.buttons}`} >
+        <TextField
+          classes={{ root: styles.tagInput }}
+          variant="standard"
+          placeholder="Add tag"
+          value={tagInput}
+          onChange={handleTagInputChange}
+        />
+        <Button variant="contained" color="primary" onClick={handleAddTag}>
+          Add tag
+        </Button>
+        <Button onClick={toggleTags} variant="contained">
+          {showTags ? 'Hide Valid Tags' : 'Show Valid Tags'}
+        </Button>
+      </div>
+      {tags.length > 0 && (
+        <div className={styles.tagList}>
+          {tags.map((tag, index) => (
+            <span key={index} className={styles.tag} onClick={() => handleRemoveTag(tag)}>
+              {tag}
+              <button
+                className={styles.removeTagButton}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveTag(tag);
+                }}
+              >
+                &#10005;
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+      {showTags && (
+        <div className={showTags ? styles.showTags : styles.hideTagList}>
+          <List style={{ display: 'flex', flexDirection: 'column' }}>
+            {validTags.map((tag, index) => (
+              <ListItem key={index}>{tag}</ListItem>
             ))}
-          </div>
-        )}
-        {showTags && (
-          <div className={showTags ? styles.showTags : styles.hideTagList}>
-            <List style={{ display: 'flex', flexDirection: 'column' }}>
-              {validTags.map((tag, index) => (
-                <ListItem key={index}>{tag}</ListItem>
-              ))}
-            </List>
-          </div>
-        )}
-        <FormControl error={!!errors.description} fullWidth>
-          {errors.description && <FormHelperText>{errors.description}</FormHelperText>}
-          <MdEditor
-            value={description}
-            renderHTML={(text) => mdParser.render(text)}
-            onChange={handleEditorChange}
-            placeholder={description ? undefined : 'Enter description...'}
-            className={styles.editor}
-          />
-        </FormControl>
-        <div className={styles.buttons}>
-          <Button size="large" variant="contained" onClick={handleSubmit}>
-            Submit
-          </Button>
-          <a href="/">
-            <Button size="large" variant="contained">
-              Cancel
-            </Button>
-          </a>
+          </List>
         </div>
-      </Paper>
+      )}
+      <FormControl error={!!errors.description} fullWidth>
+        {errors.description && <FormHelperText>{errors.description}</FormHelperText>}
+        <MdEditor
+          value={description}
+          renderHTML={(text) => mdParser.render(text)}
+          onChange={handleEditorChange}
+          placeholder={description ? undefined : 'Enter description...'}
+          className={styles.editor}
+        />
+      </FormControl>
+      <div className={styles.buttons}>
+        <Button size="large" variant="contained" onClick={handleSubmit}>
+          Submit
+        </Button>
+        <a href="/">
+          <Button size="large" variant="contained">
+            Cancel
+          </Button>
+        </a>
+      </div>
+    </Paper>
   );
 };
 

@@ -38,7 +38,7 @@ export const courseCreateValidation = [
 
 export const courseUpdateValidation = [
     body('title', 'Enter correct course title.').isLength({min: 5}).isString(),
-    body('description', 'Enter correct course description.').isLength({min: 10, max: 230}).isString(),
+    body('description', 'Enter correct course description.').isLength({min: 10, max: 4000}).isString(),
     body('englishLvl', 'Enter correct englishLvl.')
     .notEmpty()
     .isIn(Object.values(EnglishLvl))
