@@ -4,6 +4,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import Paper from '@mui/material/Paper';
 import TaskButtons from '../TaskButtons';
+import styles from './TestTask.module.scss';
 
 const TestTask = ({taskTemplate, taskEnrollment, courseType, taskEnrollmentStatus,
     handlePrevTask, handleNextTask, handleComplete, handleChangeTask, handleDeleteTask, handleSubmit, isFirstTask, isLastTask}) => {
@@ -31,24 +32,26 @@ const TestTask = ({taskTemplate, taskEnrollment, courseType, taskEnrollmentStatu
 
   return (
     <Paper style={{ padding: 30 }}>
-      <h2>Test Task</h2>
-      <h3>Title: {title}</h3>
-      <h3>Question: {question}</h3>
+      <h2 className={styles.taskTypeTitle}>Test Task</h2>
+      <h3 className={styles.title}>Title: {title}</h3>
+      <h3 className={styles.question}>Question: {question}</h3>
       
-      {(taskTemplate) && taskTemplate?.options?.map((option, index) => (
-        <div key={index}>
-          <FormControlLabel
-            control={
-              <Checkbox
-                checked={userAnswers.includes(String(index))}
-                onChange={() => handleOptionChange(index)}
-                disabled={taskEnrollmentStatus === 'Completed'}
-              />
-            }
-            label={option}
-          />
-        </div>
-      ))}
+      <div className={styles.answersContainer}>
+        {(taskTemplate) && taskTemplate?.options?.map((option, index) => (
+          <div key={index}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={userAnswers.includes(String(index))}
+                  onChange={() => handleOptionChange(index)}
+                  disabled={taskEnrollmentStatus === 'Completed'}
+                />
+              }
+              label={option}
+            />
+          </div>
+        ))}
+      </div>
 
       <div style={{ marginTop: 20 }}>
           <h4>

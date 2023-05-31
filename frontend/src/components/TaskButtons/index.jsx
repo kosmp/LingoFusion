@@ -1,5 +1,6 @@
 import React from 'react';
 import Button from '@mui/material/Button';
+import styles from './TaskButtons.module.scss';
 
 const TaskButtons = (props) => {
   const {
@@ -17,42 +18,42 @@ const TaskButtons = (props) => {
   } = props;
 
   return (
-    <>
+    <div className={styles.buttonsContainer}>
       {!isFirstTask && (
-        <Button variant="contained" color="primary" onClick={handlePrevTask}>
+        <Button variant="contained" color="primary" onClick={handlePrevTask} className={styles.button} >
           Prev task
         </Button>
       )}
 
       {courseType === 'courseEnrollment' && (
-        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={taskStatus === 'Completed'}>
+        <Button variant="contained" color="primary" onClick={handleSubmit} disabled={taskStatus === 'Completed'} className={styles.button} >
           Submit Answer
         </Button>
       )}
 
       {courseType === 'courseTemplate' && (
         <>
-          <Button variant="contained" color="primary" onClick={handleChangeTask}>
+          <Button variant="contained" color="primary" onClick={handleChangeTask} className={styles.button} >
             Change Task
           </Button>
-          <Button variant="contained" color="primary" onClick={handleDeleteTask}>
+          <Button variant="contained" color="primary" onClick={handleDeleteTask} className={styles.button} >
             Delete Task
           </Button>
         </>
       )}
 
       {!isLastTask && (
-        <Button variant="contained" color="primary" onClick={handleNextTask}>
+        <Button variant="contained" color="primary" onClick={handleNextTask} className={styles.button} >
           Next task
         </Button>
       )}
 
       {courseType === 'courseEnrollment' && isLastTask && !isCompleted && (
-        <Button variant="contained" color="primary" onClick={handleComplete}>
+        <Button variant="contained" color="primary" onClick={handleComplete} className={styles.button} >
           Complete
         </Button>
       )}
-    </>
+    </div>
   );
 };
 

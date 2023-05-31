@@ -4,6 +4,7 @@ import Paper from '@mui/material/Paper';
 import { Context } from '../../index';
 import $api from "../../http/index";
 import Spinner from '../../components/Spinner';
+import styles from './Profile.module.scss';
 
 export const Profile = ({handleError, handleSuccessfulOperation}) => {
   const {store} = useContext(Context);
@@ -63,23 +64,22 @@ export const Profile = ({handleError, handleSuccessfulOperation}) => {
   };
 
   const handleUsernameSave = async () => {
-    let response;
     try {
       setDataLoaded(false);
-      response = await $api.put(`/users/${store.user._id}/profile/username`, {username: inputText});
+      const response = await $api.put(`/users/${store.user._id}/profile/username`, {username: inputText});
       setDataLoaded(true);
       if (response.status !== 200) {
         handleError(response.response?.data?.message);
         setDataLoaded(true);
       }
-
+      handleSuccessfulOperation();
       setUsername(inputText);
     } catch (error) {
       handleError(error.response.data.message + ". " + error.response.data.errors.map((error) => error.msg).join(" "));
       setDataLoaded(true);
-    } 
-
-    setUsernameEditMode(false);
+    } finally {
+      setUsernameEditMode(false);
+    }
   };
 
   const handleEnglishLvlSave = async () => {
@@ -91,12 +91,13 @@ export const Profile = ({handleError, handleSuccessfulOperation}) => {
         handleError(response.response?.data?.message);
         setDataLoaded(true);
       }
+      handleSuccessfulOperation();
     } catch (error) {
       handleError(error.response.data.message + ". " + error.response.data.errors.map((error) => error.msg).join(" "));
       setDataLoaded(true);
-    } 
-
-    setEnglishLvlEditMode(false);
+    } finally {
+      setEnglishLvlEditMode(false);
+    }
   };
 
   if (!isDataLoaded) {
@@ -107,13 +108,13 @@ export const Profile = ({handleError, handleSuccessfulOperation}) => {
 
   return (
       <Paper style={{ padding: 30 }}>
-        <Container>
-          <Typography variant="h4" component="h1" align="center">
+        <Container className={styles.container}>
+          <Typography variant="h4" component="h1" align="center" className={styles.title}>
             Profile
           </Typography>
 
           <div>
-            <Typography variant="h6" component="h2">
+            <Typography variant="h6" component="h2" className={styles.field}>
               Username:
             </Typography>
             {isUsernameEditMode ? (
@@ -124,14 +125,14 @@ export const Profile = ({handleError, handleSuccessfulOperation}) => {
                   label="Username"
                   variant="outlined"
                 />
-                <Button variant="contained" color="primary" onClick={handleUsernameSave}>
+                <Button variant="contained" color="primary" onClick={handleUsernameSave} className={styles.button} >
                   Save
                 </Button>
               </div>
             ) : (
               <div>
                 <Typography>{username}</Typography>
-                <Button variant="contained" color="primary" onClick={handleUsernameEdit}>
+                <Button variant="contained" color="primary" onClick={handleUsernameEdit} className={styles.button}>
                   Change
                 </Button>
               </div>
@@ -139,7 +140,7 @@ export const Profile = ({handleError, handleSuccessfulOperation}) => {
           </div>
 
           <div>
-            <Typography variant="h6" component="h2">
+            <Typography variant="h6" component="h2" className={styles.field} >
               English Level:
             </Typography>
             {isEnglishLvlEditMode ? (
@@ -154,39 +155,39 @@ export const Profile = ({handleError, handleSuccessfulOperation}) => {
                     <MenuItem value="C2">C2</MenuItem>
                   </Select>
                 </FormControl>
-                <Button variant="contained" color="primary" onClick={handleEnglishLvlSave}>
+                <Button variant="contained" color="primary" onClick={handleEnglishLvlSave} className={styles.button}>
                   Save
                 </Button>
               </div>
             ) : (
               <div>
                 <Typography>{englishLvl}</Typography>
-                <Button variant="contained" color="primary" onClick={handleEnglishLvlEdit}>
+                <Button variant="contained" color="primary" onClick={handleEnglishLvlEdit} className={styles.button}>
                   Change
                 </Button>
               </div>
             )}
           </div>
 
-          <Typography variant="h4" component="h1" align="center">
+          <Typography variant="h4" component="h1" align="center" className={styles.field}>
             Statistics:
           </Typography> 
           <div>
-            <Typography variant="h6" component="h2">
+            <Typography variant="h6" component="h2" className={styles.courseStatisticsField}>
               Completed Courses:
             </Typography>
             <Typography>{completedCoursesCount}</Typography>
           </div>
 
           <div>
-            <Typography variant="h6" component="h2">
+            <Typography variant="h6" component="h2" className={styles.courseStatisticsField}>
               In Progress Courses:
             </Typography>
             <Typography>{inProgressCoursesCount}</Typography>
           </div>
 
           <div>
-            <Typography variant="h6" component="h2">
+            <Typography variant="h6" component="h2" className={styles.courseStatisticsField}>
               Created Courses:
             </Typography>
             <Typography>{createdCoursesCount}</Typography>

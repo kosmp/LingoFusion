@@ -8,6 +8,7 @@ import InputMask from 'react-input-mask';
 import TextField from '@mui/material/TextField';
 import $api from '../../http';
 import Spinner from '../../components/Spinner';
+import styles from './CreateUpdateTheory.module.scss';
 
 const CreateUpdateTheoryTask = (props) => {
   const navigate = useNavigate();
@@ -71,8 +72,8 @@ const CreateUpdateTheoryTask = (props) => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h3>Theory Task Editor</h3>
+    <form onSubmit={handleSubmit} className={styles.container}>
+      <h3 className={styles.editorTitle}>Theory Task Editor</h3>
       <TextField
           label="Title"
           fullWidth
@@ -80,9 +81,10 @@ const CreateUpdateTheoryTask = (props) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           inputProps={{ maxLength: 50 }}
+          className={styles.field}
         />
 
-      <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)}>
+      <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)} className={styles.field} >
         {(inputProps) => (
           <TextField
             label="Experience for submitting task"
@@ -98,8 +100,9 @@ const CreateUpdateTheoryTask = (props) => {
         value={content}
         renderHTML={(text) => mdParser.render(text)}
         onChange={handleEditorChange}
+        className={styles.field}
       />
-      <Button type="submit" variant="contained" color="primary">
+      <Button type="submit" variant="contained" color="primary" className={styles.submitButton} >
         Submit
       </Button>
     </form>

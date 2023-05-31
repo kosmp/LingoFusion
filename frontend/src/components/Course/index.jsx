@@ -278,7 +278,7 @@ const Course = ({courseType, courseId, handleError, handleSuccessfulOperation}) 
             ))}
           </div>
         )}
-        <h3>Description:</h3>
+        <h2>Description:</h2>
         <ReactMarkdown>{courseTemplate?.description}</ReactMarkdown>
 
         {(!courseEnrollment) ? <>

@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import $api from '../../http';
 import InputMask from 'react-input-mask';
 import Spinner from '../../components/Spinner';
+import styles from './CreateUpdateTest.module.scss';
 
 const CreateUpdateTestTask = (props) => {
   const navigate = useNavigate();
@@ -100,7 +101,8 @@ const CreateUpdateTestTask = (props) => {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} className={styles.container}>
+      <h3 className={styles.editorTitle}>Test task editor</h3>
       <TextField
         label="Title"
         fullWidth
@@ -108,9 +110,10 @@ const CreateUpdateTestTask = (props) => {
         value={title}
         onChange={(e) => setTitle(e.target.value)}
         inputProps={{ maxLength: 50 }}
+        className={styles.field}
       />
 
-      <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)}>
+      <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)} className={styles.field} >
         {(inputProps) => (
           <TextField
             label="Experience for true task"
@@ -129,6 +132,7 @@ const CreateUpdateTestTask = (props) => {
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
         inputProps={{ maxLength: 120 }}
+        className={styles.field}
       />
 
       {options.map((option, index) => (
@@ -140,6 +144,7 @@ const CreateUpdateTestTask = (props) => {
             value={option}
             onChange={(e) => handleOptionChange(index, e.target.value)}
             inputProps={{ maxLength: 50 }}
+            className={styles.field}
           />
           <FormControlLabel
             control={
@@ -149,20 +154,21 @@ const CreateUpdateTestTask = (props) => {
               />
             }
             label={`True answer ${index + 1}`}
+            className={styles.checkBoxLine}
           />
           {options.length > 2 && (
-            <Button type="button" variant="outlined" onClick={() => handleRemoveOption(index)}>
+            <Button type="button" variant="outlined" onClick={() => handleRemoveOption(index)} className={styles.deleteButton} >
               Delete
             </Button>
           )}
         </div>
       ))}
 
-      <Button type="button" variant="contained" onClick={handleAddOption}>
+      <Button type="button" variant="contained" onClick={handleAddOption} className={styles.buttons} >
         Add option
       </Button>
 
-      <Button type="submit" variant="contained" color="primary">
+      <Button type="submit" variant="contained" color="primary" className={styles.buttons} >
         Submit
       </Button>
     </form>

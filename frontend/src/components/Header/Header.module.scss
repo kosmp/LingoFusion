@@ -1,3 +1,5 @@
+@import url('https://fonts.cdnfonts.com/css/gunny-rewritten');
+
 .root {
     background-color: #fff;
     padding: 10px 0;
@@ -13,8 +15,10 @@
   
 .logo {
     color: rgb(54, 216, 228);
-    font-weight: 1000;
-    font-size: 25px;
+    font-weight: 900;
+    font-family: 'Gunny Rewritten', sans-serif;
+    font-style: oblique;
+    font-size: 35px;
     line-height: 35px;
     letter-spacing: 0.15px;
     padding: 3px 2px;

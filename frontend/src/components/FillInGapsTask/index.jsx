@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import Paper from '@mui/material/Paper';
 import { useParams } from 'react-router-dom';
 import TaskButtons from '../TaskButtons';
+import styles from './FillInGapsTask.module.scss';
+import { Input } from '@material-ui/core';
 
 const FillInGapsTask = ({taskTemplate, taskEnrollment, courseType, taskEnrollmentStatus,
    handlePrevTask, handleNextTask, handleComplete, handleChangeTask, handleDeleteTask, handleSubmit, isFirstTask, isLastTask}) => {
@@ -34,12 +36,12 @@ const FillInGapsTask = ({taskTemplate, taskEnrollment, courseType, taskEnrollmen
     const contentParts = content.split(gapRegex);
 
     return (
-      <>
+      <div className={styles.text}>
         {contentParts.map((part, index) => (
           <React.Fragment key={index}>
             {part}
             {index !== contentParts.length - 1 && (
-              <input
+              <Input
                 type="text"
                 value={userAnswers[index] || ''}
                 onChange={(event) => handleAnswerChange(index, event)}
@@ -49,14 +51,14 @@ const FillInGapsTask = ({taskTemplate, taskEnrollment, courseType, taskEnrollmen
             )}
           </React.Fragment>
         ))}
-      </>
+      </div>
     );
   };
 
   return (
     <Paper style={{ padding: 30 }}>
-      <h3>Fill in Gaps Task</h3>
-      <h3>Title: {title}</h3>
+      <h2 className={styles.taskTypeTitle} >Fill in Gaps Task</h2>
+      <h3 className={styles.title} >Title: {title}</h3>
         {renderContentWithGaps()}
         <div style={{ marginTop: 20 }}>
           <h4>

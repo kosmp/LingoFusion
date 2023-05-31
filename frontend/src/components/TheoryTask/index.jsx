@@ -3,23 +3,30 @@ import ReactMarkdown from 'react-markdown';
 import { useParams } from 'react-router-dom';
 import Paper from '@mui/material/Paper';
 import TaskButtons from '../TaskButtons';
+import styles from './TheoryTask.module.scss';
 
 const TheoryTask = ({taskTemplate, taskEnrollment, courseType, taskEnrollmentStatus,
   handlePrevTask, handleNextTask, handleComplete, handleChangeTask, handleDeleteTask, handleSubmit, isFirstTask, isLastTask}) => {
   const { taskId } = useParams();
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
+  const [expForTrueTask, setExpForTrueTask] = useState('');
 
   useEffect(() => {
     setTitle(taskTemplate?.title);
     setContent(taskTemplate?.content);
+    setExpForTrueTask(taskTemplate?.expForTrueTask);
   }, [taskId]);
 
   return (
     <Paper style={{ padding: 30 }}>
-      <h3>Theory Task</h3>
-      <h3>Title: {title}</h3>
-      <ReactMarkdown>{content}</ReactMarkdown>
+      <h3 className={styles.taskTypeTitle}>Theory task</h3>
+      <h3 className={styles.title}>Title: {title}</h3>
+      <ReactMarkdown className={styles.content}>{content}</ReactMarkdown>
+
+      <h4>
+        Max experience you can get for task: {expForTrueTask}
+      </h4>
 
       {taskEnrollmentStatus === 'Completed' && (
         <h4>

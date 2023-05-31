@@ -1,0 +1,34 @@
+.container {
+    .editorTitle {
+        color: rgb(54, 216, 228);
+        margin-top: 5px;
+    }
+    
+    .buttons {
+        background-color: rgb(54, 216, 228);
+        color:rgb(255, 255, 255);
+        margin: 15px 5px 5px 5px;
+        font-weight: 1000;
+    
+        &:hover {
+          transform: scale(1.05);
+          background-color: rgb(0, 0, 0);
+          color: rgb(255, 255, 255);
+        }
+    }
+    
+    .deleteButton {
+        &:hover {
+          transform: scale(1.05);
+        }
+    }
+    
+    .field {
+        margin-top: 10px;
+    }
+    
+    .checkBoxLine {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+}

@@ -5,6 +5,7 @@ import InputMask from 'react-input-mask';
 import TextField from '@mui/material/TextField';
 import $api from '../../http';
 import Spinner from '../../components/Spinner';
+import styles from './CreateUpdateFillInGaps.module.scss';
 
 const CreateUpdateFillInGapsTask = (props) => {
   const navigate = useNavigate();
@@ -84,8 +85,8 @@ const CreateUpdateFillInGapsTask = (props) => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
-      <h3>Fill in gaps Task Editor</h3>
+      <form onSubmit={handleSubmit} className={styles.container}>
+        <h3 className={styles.editorTitle}>Fill in gaps task editor</h3>
         <TextField
           label="Title"
           fullWidth
@@ -93,9 +94,10 @@ const CreateUpdateFillInGapsTask = (props) => {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           inputProps={{ maxLength: 50 }}
+          className={styles.field}
         />
 
-        <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)}>
+        <InputMask mask="99" maskChar="" value={expForTrueTask} onChange={(e) => setExpForTrueTask(e.target.value)} className={styles.field} >
           {(inputProps) => (
             <TextField
               label="Experience for submitting task"
@@ -115,6 +117,7 @@ const CreateUpdateFillInGapsTask = (props) => {
             placeholder={`Enter task content with markers ${gapMarker} as a gaps...`}
             required
             fullWidth
+            className={styles.field}
         />
 
         {gaps.map((gap, index) => (
@@ -126,11 +129,12 @@ const CreateUpdateFillInGapsTask = (props) => {
               value={answers[index] || ''}
               onChange={(event) => handleAnswerChange(index, event)}
               inputProps={{ maxLength: 50 }}
+              className={styles.field}
             />
           </div>
         ))}
 
-        <Button variant="contained" color="primary" type="submit" disabled={gaps.length === 0}>
+        <Button variant="contained" color="primary" type="submit" disabled={gaps.length === 0} className={styles.submitButton}>
           Submit
         </Button>
       </form>
