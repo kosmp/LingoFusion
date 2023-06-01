@@ -188,7 +188,7 @@ export const Profile = ({handleError, handleSuccessfulOperation}) => {
 
           <div>
             <Typography variant="h6" component="h2" className={styles.courseStatisticsField}>
-              Created Courses:
+              Total Created Courses:
             </Typography>
             <Typography>{createdCoursesCount}</Typography>
           </div>

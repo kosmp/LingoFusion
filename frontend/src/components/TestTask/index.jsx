@@ -69,10 +69,10 @@ const TestTask = ({taskTemplate, taskEnrollment, courseType, taskEnrollmentStatu
                 Gained experience for task: {taskEnrollment?.expForTask}
               </h4>
               <h4>
-                Your Answers: {taskEnrollment?.userAnswers?.join((', '))}
+                Your Answers: {taskEnrollment?.userAnswers?.map((answer => Number(answer) + 1))?.join((', '))}
               </h4>
               <h4>
-                Correct Answers: {taskTemplate?.trueAnswers?.join(', ')}
+                Correct Answers: {taskTemplate?.trueAnswers?.map((answer => Number(answer) + 1))?.join(', ')}
               </h4>
             </div>
           )}

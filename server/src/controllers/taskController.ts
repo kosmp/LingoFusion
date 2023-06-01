@@ -27,7 +27,6 @@ class TaskController {
             const courseId = req.params.courseId;
             await courseService.getCourseTemplate(courseId, userId.toString());
             await courseService.checkPublicFalseInCourseTemplate(courseId);
-            console.log(req.body.expForTrueTask)
             let taskTemplateId: ObjectId;
             if (req.body.taskType === TaskType.FillGaps) {
                 taskTemplateId = await FillInGaps.initialize({

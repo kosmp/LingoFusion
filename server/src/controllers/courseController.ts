@@ -328,17 +328,6 @@ class CourseController {
             }
     
             await User.removeCourseFromUserById(userId, new ObjectId(courseId), UserCourseProperty.CourseEnrollments);
-            
-            const profile = await profileService.getUserProfile(userId.toString());
-
-            await Profile.updateProfile({
-                _id: profile._id,
-                statistics: {
-                    totalUserCountOfCompletedCourses: profile.statistics.totalUserCountOfCompletedCourses,
-                    totalUserCountInProgressCourses: profile.statistics.totalUserCountInProgressCourses - 1,
-                    totalUserCountOfCreatedCourses: profile.statistics.totalUserCountOfCreatedCourses
-                }
-            });
 
             return res.status(200).json({success: true});
         } catch (e) {

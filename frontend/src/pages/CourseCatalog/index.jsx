@@ -241,7 +241,7 @@ export const CourseCatalog = ({handleError, handleSuccessfulOperation}) => {
             <FormControl className={styles.filterSelect}>
               <NativeSelect value={ratingFilter} onChange={handleRatingChange}>
                 <option value="" disabled>
-                  Rating
+                  Rating up
                 </option>
                 <option value="0">0</option>
                 <option value="1">1</option>
