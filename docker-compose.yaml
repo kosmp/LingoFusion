@@ -1,0 +1,68 @@
+#version: '3'
+#services:
+#  app:
+#    build: ./server
+#    ports:
+#      - "3000:3000"
+#    env_file:
+#      - server/.env
+#    volumes:
+#      - ./server:/app/server
+#    depends_on:
+#      - mongo
+#
+#  mongo:
+#    image: mongo:5.0
+#    container_name: mongodb_container
+#    ports:
+#      - "27017:27017"
+#    environment:
+#      MONGO_INITDB_ROOT_USERNAME: admin
+#      MONGO_INITDB_ROOT_PASSWORD: password
+#      MONGO_INITDB_DATABASE: mydatabase
+#    volumes:
+#      - mongo_data:/data/db
+#
+#volumes:
+#  mongo_data:
+
+
+version: '3'
+services:
+  app:
+    build: ./server
+    ports:
+      - "8000:8000"
+    env_file:
+      - server/.env
+    volumes:
+      - ./server:/app/server
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:5.0
+    container_name: mongodb_container
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: mydatabase
+    volumes:
+      - mongo_data:/data/db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app/frontend
+      - /app/frontend/node_modules
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - app
+
+volumes:
+  mongo_data:
